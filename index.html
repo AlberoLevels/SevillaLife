@@ -111,8 +111,8 @@
 </head>
 <body>
     <div id="game-container">
-        <!-- Input de archivo oculto para la carga -->
-        <input type="file" id="file-selector" accept=".json" style="display: none;" onchange="handleFileLoad(event)">
+        <!-- Input de archivo abierto a JSON y texto plano para evitar bloqueos en Android -->
+        <input type="file" id="file-selector" accept=".json,application/json,text/plain" style="display: none;" onchange="handleFileLoad(event)">
 
         <div id="start-screen">
             <div class="form-card">
@@ -207,12 +207,11 @@
 
             document.getElementById('modal-close-mgr').onclick = () => { modal.style.display = 'none'; };
 
-            // GUARDAR / DESCARGAR ARCHIVO JSON
             document.getElementById('modal-go-save').onclick = () => {
                 if (player.name === "") { showModalAlert("Aviso", "No hay partida activa."); return; }
                 modal.style.display = 'none';
                 
-                let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(player, null, 2));
+                let dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(player, null, 2));
                 let downloadAnchor = document.createElement('a');
                 downloadAnchor.setAttribute("href", dataStr);
                 downloadAnchor.setAttribute("download", `sevillalife_${player.name.replace(/\s+/g, '_')}.json`);
@@ -221,10 +220,8 @@
                 downloadAnchor.remove();
             };
 
-            // CARGAR DESDE ARCHIVO
             document.getElementById('modal-go-load').onclick = () => {
                 modal.style.display = 'none';
-                // Dispara el selector de archivos nativo del dispositivo
                 document.getElementById('file-selector').click();
             };
         }
@@ -249,7 +246,6 @@
                 } catch (err) {
                     showModalAlert("Error", "El archivo está corrupto o no tiene el formato correcto.");
                 }
-                // Limpiar el input para permitir cargar el mismo archivo otra vez si hace falta
                 event.target.value = "";
             };
             reader.readAsText(file);
