@@ -2,271 +2,534 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SevillaLife</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sevillalife</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #2c3e50; display: flex; justify-content: center; align-items: center; min-height: 100dvh; margin: 0; overflow: hidden; }
+        
+        #game-container { 
+            width: 100%; max-width: 440px; background-color: #FDFBF7; 
+            display: flex; flex-direction: column; height: 100dvh; position: relative; overflow: hidden;
         }
-        h1 { color: #d9534f; }
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            background: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            font-size: 0.9em;
+        
+        /* PANTALLA DE REGISTRO */
+        #start-screen { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #FDFBF7; z-index: 100; padding: 16px;
+            display: flex; flex-direction: column; justify-content: center;
         }
-        .actions {
-            margin-bottom: 20px;
+        .form-card { 
+            background: white; padding: 16px; border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 5px solid #E5A54A; 
         }
-        button {
-            padding: 10px 15px;
-            margin-right: 5px;
-            margin-bottom: 5px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+        h1 { color: #C0392B; font-family: 'Montserrat', sans-serif; font-size: 1.6em; font-weight: 800; margin-bottom: 2px; text-align: center; letter-spacing: -0.5px; }
+        .subtitle { color: #7f8c8d; font-size: 0.75em; margin-bottom: 2px; text-align: center; }
+        
+        .disclaimer { color: #95a5a6; font-size: 0.7em; text-align: center; margin-bottom: 8px; font-style: italic; }
+        
+        label { display: block; margin-top: 8px; font-weight: 600; font-size: 0.75em; color: #2c3e50; }
+        
+        input { 
+            width: 100%; padding: 8px; margin-top: 3px; 
+            border: 2px solid #ecf0f1; border-radius: 8px; font-size: 0.9em; 
+            outline: none; background: #fff; color: #2c3e50;
         }
-        button:hover {
-            background-color: #0056b3;
+        input:focus { border-color: #E5A54A; }
+
+        .start-btn { width: 100%; margin-top: 14px; padding: 10px; background: #C0392B; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 0.95em; cursor: pointer; }
+        
+        .reset-btn { 
+            background: #fff; color: #c0392b; border: 2px solid #e74c3c; 
+            padding: 5px; border-radius: 6px; font-size: 0.7em; font-weight: 700; 
+            cursor: pointer; transition: background 0.2s, color 0.2s; text-align: center; width: 100%;
         }
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
+        .reset-btn:hover { background: #e74c3c; color: white; }
+
+        /* PANTALLA DE JUEGO */
+        header { 
+            background: #ffffff; padding: 8px 12px; text-align: center; 
+            border-top: 5px solid #E5A54A; box-shadow: 0 2px 6px rgba(0,0,0,0.04); 
+            flex-shrink: 0;
         }
-        #log {
-            background: #212529;
-            color: #00ff00;
-            padding: 15px;
-            height: 180px;
-            overflow-y: auto;
-            font-family: monospace;
-            border-radius: 5px;
+        #player-name { font-family: 'Montserrat', sans-serif; font-size: 1.1em; font-weight: 800; margin-bottom: 1px; color: #C0392B; }
+        
+        .header-info {
+            display: flex; justify-content: center; gap: 4px; margin-bottom: 3px; flex-wrap: wrap;
+        }
+        
+        .badge { 
+            font-size: 0.65em; display: inline-block; padding: 2px 6px; border-radius: 10px; 
+            color: #555; font-family: monospace; letter-spacing: 0.5px;
+            background: #fdf8f0; border: 1px solid #f3e5d0;
+        }
+        
+        .status-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 3px;
+        }
+        
+        .status-badge {
+            background: #fdf8f0; padding: 3px 6px; border-radius: 6px; border: 1px solid #f3e5d0;
+            font-size: 0.65em; font-weight: 600; color: #555; text-align: center;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .status-badge span { font-weight: 700; color: #2c3e50; }
+        
+        .stats { 
+            margin-top: 3px; display: flex; justify-content: center; gap: 10px; font-size: 0.7em; font-weight: 600; 
+            background: #fdf8f0; padding: 3px; border-radius: 6px; border: 1px solid #f3e5d0;
+        }
+        .stats div { color: #555; }
+        .stats span { font-weight: 700; color: #2c3e50; }
+        
+        #event-log { flex-grow: 1; padding: 10px 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background: #FDFBF7; }
+        .log-entry { 
+            background: white; padding: 8px 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); 
+            font-size: 0.8em; color: #333333; border-left: 3px solid #E5A54A; border-top: 1px solid #f1f1f1; 
+        }
+        
+        /* PANEL DE ACCIONES */
+        #actions-panel { 
+            padding: 8px 12px 8px 12px; 
+            background: white; 
+            border-top: 1px solid #eee; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 5px; 
+            flex-shrink: 0;
+        }
+        .action-row { display: flex; gap: 6px; }
+        .action-btn { 
+            flex: 1; padding: 8px; background: #C0392B; color: white; border: none; 
+            border-radius: 8px; font-weight: bold; font-size: 0.8em; cursor: pointer; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: opacity 0.2s ease, transform 0.1s ease;
+        }
+        .action-btn:active { transform: scale(0.98); opacity: 0.9; }
+
+        /* MODAL PERSONALIZADO UNIFICADO */
+        #custom-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 62, 80, 0.7); z-index: 200;
+            display: none; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-card {
+            background: white; width: 100%; max-width: 360px; padding: 18px;
+            border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-top: 5px solid #E5A54A; display: flex; flex-direction: column; gap: 10px;
+        }
+        .modal-title { font-family: 'Montserrat', sans-serif; font-size: 1.1em; font-weight: 800; color: #C0392B; text-align: center; }
+        .modal-message { font-size: 0.8em; color: #2c3e50; text-align: center; line-height: 1.4; }
+        .modal-input { 
+            width: 100%; padding: 8px; border: 2px solid #ecf0f1; border-radius: 8px; 
+            font-size: 0.8em; outline: none; background: #fff; color: #2c3e50; resize: none;
+        }
+        .modal-input:focus { border-color: #E5A54A; }
+        .modal-buttons { display: flex; gap: 6px; margin-top: 4px; }
+        .modal-btn { 
+            flex: 1; padding: 8px; border: none; border-radius: 8px; 
+            font-weight: bold; font-size: 0.8em; cursor: pointer; text-align: center; 
+        }
+        .modal-btn-confirm { background: #C0392B; color: white; }
+        .modal-btn-cancel { background: #ecf0f1; color: #555; }
+
+        /* COPYRIGHT */
+        .footer-copyright {
+            text-align: center; 
+            font-size: 0.55em; 
+            color: #7f8c8d; 
+            margin-top: 1px;
+        }
+        .start-copyright {
+            text-align: center; 
+            font-size: 0.6em; 
+            color: #7f8c8d; 
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
+    <div id="game-container">
+        <!-- PANTALLA DE REGISTRO CON 3 CAMPOS -->
+        <div id="start-screen">
+            <div class="form-card">
+                <h1>Sevillalife</h1>
+                <p class="subtitle">Registro oficial de identidad y alta en el padrón municipal.</p>
+                <p class="disclaimer">* Nota: No es obligatorio introducir tus datos reales.</p>
+                <label>Nombre</label><input type="text" id="name-input" maxlength="15" placeholder="Curro">
+                <label>Primer Apellido</label><input type="text" id="surname1-input" maxlength="15" placeholder="García">
+                <label>Segundo Apellido</label><input type="text" id="surname2-input" maxlength="15" placeholder="Sevillano">
+                <button class="start-btn" onclick="startGame()">Comenzar mi historia</button>
+                <button class="reset-btn" style="margin-top: 8px;" onclick="openManagerModal()">Gestión de Partida (Cargar / Copiar)</button>
+            </div>
+            <div class="start-copyright">&copy; 2026 AlberoLevels. Todos los derechos reservados.</div>
+        </div>
 
-    <h1>SevillaLife 🎮 (Saga Familiar)</h1>
+        <header>
+            <div id="player-name">---</div>
+            <div class="header-info">
+                <div class="badge" id="player-age">Edad: 0 años</div>
+                <div class="badge" id="player-dni">DNI: ---</div>
+            </div>
+            
+            <div class="status-grid">
+                <div class="status-badge">📚 <span id="player-studies">Ninguno</span></div>
+                <div class="status-badge">💼 <span id="player-job">En paro</span></div>
+            </div>
 
-    <!-- Panel de Estadísticas -->
-    <div class="stats">
-        <div>Edad: <span id="stat-age">0</span></div>
-        <div>Salud: <span id="stat-health">100</span>%</div>
-        <div>Felicidad: <span id="stat-happiness">100</span>%</div>
-        <div>Dinero: <span id="stat-money">0</span>€</div>
-        <div>Estado: <span id="stat-job">Bebé</span></div>
+            <div class="stats">
+                <div>❤️ Salud: <span id="health-val">100</span>%</div>
+                <div>😊 Felicidad: <span id="happiness-val">100</span>%</div>
+                <div>💶 Dinero: <span id="money-val">0</span>€</div>
+            </div>
+        </header>
+
+        <main id="event-log"></main>
+
+        <div id="actions-panel">
+            <div class="action-row">
+                <button class="action-btn" onclick="nextYear()">Cumplir año</button>
+                <button class="action-btn" onclick="study()">Estudiar</button>
+            </div>
+            <div class="action-row">
+                <button class="action-btn" onclick="searchJob()">Buscar trabajo</button>
+            </div>
+            <button class="reset-btn" onclick="openManagerModal()">Gestión de Partida (Cargar / Copiar)</button>
+            <button class="reset-btn" onclick="confirmResetGame()">Reiniciar partida</button>
+            <div class="footer-copyright">&copy; 2026 AlberoLevels. Todos los derechos reservados.</div>
+        </div>
+
+        <!-- VENTANA MODAL PERSONALIZADA -->
+        <div id="custom-modal">
+            <div class="modal-card">
+                <div class="modal-title" id="modal-title-text">Aviso</div>
+                <div class="modal-message" id="modal-msg-text">Mensaje aquí</div>
+                <textarea id="modal-textarea" class="modal-input" rows="3" style="display:none;"></textarea>
+                <div class="modal-buttons" id="modal-buttons-container"></div>
+            </div>
+        </div>
     </div>
-
-    <!-- Panel de Botones de Acción -->
-    <div class="actions">
-        <button onclick="nextYear()">Cumplir Año</button>
-        <button id="btn-job" onclick="buscarTrabajo()" disabled>Buscar Trabajo (Req: 16 años)</button>
-        <button id="btn-study" onclick="estudiar()">Estudiar / Colegio</button>
-    </div>
-
-    <!-- Consola de Eventos -->
-    <h3>Registro de Eventos:</h3>
-    <div id="log"></div>
     
-    <p style="margin-top: 30px; font-size: 0.8em; color: #777; text-align: center;">Desarrollado por Curro • © AlberoLevels</p>
-
     <script>
-        // 1. Objeto Jugador base
-        let player = {
-            name: "Curro",
-            age: 0,
-            health: 100,
-            happiness: 100,
-            money: 0,
-            job: "Bebé",
-            educationLevel: "Ninguna", 
-            isStudying: false,
-            partner: null,
-            children: []
-        };
+        let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, studies: "Ninguno", job: "En paro", logs: [] };
 
-        // 2. Listado de trabajos
         const trabajosSevilla = [
-            { title: "Repartidor en bicicleta", reqEducation: "ESO", salary: 12000 },
-            { title: "Reponedor en Triana", reqEducation: "ESO", salary: 14000 },
-            { title: "Camarero en la Alameda", reqEducation: "ESO", salary: 15000 },
-            { title: "Dependiente en calle Sierpes", reqEducation: "ESO", salary: 16500 },
-            { title: "Operario en Lipasam", reqEducation: "ESO", salary: 22000 },
-            { title: "Técnico de Mantenimiento", reqEducation: "FP", salary: 24000 },
-            { title: "Administrativo de Oficina", reqEducation: "FP", salary: 23000 },
-            { title: "Abogado en Nervión", reqEducation: "Universidad", salary: 45000 },
-            { title: "Médico en el Virgen del Rocío", reqEducation: "Universidad", salary: 50000 }
+            { title: "Repartidor en bicicleta", salary: 12000 },
+            { title: "Reponedor en Triana", salary: 14000 },
+            { title: "Camarero en la Alameda", salary: 15000 },
+            { title: "Dependiente en calle Sierpes", salary: 16500 },
+            { title: "Operario en Lipasam", salary: 22000 }
         ];
 
-        function addLog(text) {
-            let logDiv = document.getElementById("log");
-            logDiv.innerHTML += `> ${text}<br>`;
-            logDiv.scrollTop = logDiv.scrollHeight;
+        function generateDNI() {
+            let num = Math.floor(10000000 + Math.random() * 68999999);
+            let letters = "TRWAGMYFPDXBNJZSQVHLCKE";
+            return `${num}${letters.charAt(num % 23)}`;
+        }
+
+        function saveGame() { localStorage.setItem('sevillalife_save', JSON.stringify(player)); }
+
+        function showModalAlert(title, message, callback) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title-text').innerText = title;
+            document.getElementById('modal-msg-text').innerText = message;
+            document.getElementById('modal-textarea').style.display = 'none';
+            
+            const btnContainer = document.getElementById('modal-buttons-container');
+            btnContainer.innerHTML = `<button class="modal-btn modal-btn-confirm" id="modal-ok-btn">Aceptar</button>`;
+            
+            modal.style.display = 'flex';
+            
+            document.getElementById('modal-ok-btn').onclick = () => {
+                modal.style.display = 'none';
+                if (callback) callback();
+            };
+        }
+
+        function showModalConfirm(title, message, onConfirm, onCancelText = "Opción 2", onConfirmText = "Opción 1") {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title-text').innerText = title;
+            document.getElementById('modal-msg-text').innerText = message;
+            document.getElementById('modal-textarea').style.display = 'none';
+            
+            const btnContainer = document.getElementById('modal-buttons-container');
+            btnContainer.innerHTML = `
+                <button class="modal-btn modal-btn-cancel" id="modal-cancel-btn">${onCancelText}</button>
+                <button class="modal-btn modal-btn-confirm" id="modal-yes-btn">${onConfirmText}</button>
+            `;
+            
+            modal.style.display = 'flex';
+            
+            document.getElementById('modal-cancel-btn').onclick = () => { modal.style.display = 'none'; };
+            document.getElementById('modal-yes-btn').onclick = () => {
+                modal.style.display = 'none';
+                onConfirm();
+            };
+        }
+
+        function openManagerModal() {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title-text').innerText = "Gestión de Partida";
+            document.getElementById('modal-msg-text').innerText = "¿Qué deseas hacer con el código de tu partida?";
+            document.getElementById('modal-textarea').style.display = 'none';
+            
+            const btnContainer = document.getElementById('modal-buttons-container');
+            btnContainer.innerHTML = `
+                <button class="modal-btn modal-btn-cancel" id="modal-close-mgr">Cerrar</button>
+                <button class="modal-btn modal-btn-confirm" id="modal-go-copy">Copiar</button>
+                <button class="modal-btn modal-btn-confirm" id="modal-go-load">Cargar</button>
+            `;
+            
+            modal.style.display = 'flex';
+            
+            document.getElementById('modal-close-mgr').onclick = () => { modal.style.display = 'none'; };
+            
+            document.getElementById('modal-go-copy').onclick = () => {
+                modal.style.display = 'none';
+                if (player.name === "") {
+                    showModalAlert("Aviso", "Aún no hay ninguna partida activa para copiar.");
+                    return;
+                }
+                let exportData = [player.name, player.dni, player.age, player.health, player.happiness, player.money, player.studies, player.job];
+                let currentCode = btoa(encodeURIComponent(JSON.stringify(exportData)));
+                
+                navigator.clipboard.writeText(currentCode).then(() => {
+                    showModalAlert("¡Copiado!", "El código de tu partida se ha copiado automáticamente al portapapeles.");
+                }).catch(() => {
+                    prompt("Copia tu código de partida manualmente:", currentCode);
+                });
+            };
+
+            document.getElementById('modal-go-load').onclick = () => {
+                document.getElementById('modal-title-text').innerText = "Cargar Partida";
+                document.getElementById('modal-msg-text').innerText = "Pega aquí abajo el código de tu partida:";
+                
+                const textarea = document.getElementById('modal-textarea');
+                textarea.style.display = 'block';
+                textarea.value = "";
+                
+                btnContainer.innerHTML = `
+                    <button class="modal-btn modal-btn-cancel" id="modal-close-load">Cancelar</button>
+                    <button class="modal-btn modal-btn-confirm" id="modal-execute-load">Cargar</button>
+                `;
+                
+                setTimeout(() => textarea.focus(), 50);
+
+                document.getElementById('modal-close-load').onclick = () => { modal.style.display = 'none'; };
+                document.getElementById('modal-execute-load').onclick = () => {
+                    let code = textarea.value.trim();
+                    modal.style.display = 'none';
+                    if (code !== "") {
+                        try {
+                            let decodedData = JSON.parse(decodeURIComponent(atob(code)));
+                            if (Array.isArray(decodedData) && decodedData.length >= 8) {
+                                player = {
+                                    name: decodedData[0],
+                                    dni: decodedData[1],
+                                    age: decodedData[2],
+                                    health: decodedData[3],
+                                    happiness: decodedData[4],
+                                    money: decodedData[5],
+                                    studies: decodedData[6],
+                                    job: decodedData[7],
+                                    logs: [`Partida importada en el año ${decodedData[2]}. ¡Continuamos la historia!`]
+                                };
+                                saveGame();
+                                document.getElementById('start-screen').style.display = 'none';
+                                updateUI();
+                                renderLogs();
+                                showModalAlert("¡Todo en orden!", "Partida cargada con éxito.");
+                            } else {
+                                showModalAlert("Error", "El código no es válido.");
+                            }
+                        } catch (e) {
+                            showModalAlert("Error", "El código está corrupto o mal copiado.");
+                        }
+                    }
+                };
+            };
+        }
+
+        function startGame() {
+            let n = document.getElementById('name-input').value.trim();
+            let s1 = document.getElementById('surname1-input').value.trim();
+            let s2 = document.getElementById('surname2-input').value.trim();
+            if (n === "" || s1 === "" || s2 === "") {
+                showModalAlert("Faltan datos", "¡Rellena todos los campos de nombre y apellidos!");
+                return;
+            }
+            player.name = `${n} ${s1} ${s2}`;
+            player.dni = generateDNI();
+            player.age = 0;
+            player.health = 100;
+            player.happiness = 100;
+            player.money = 0;
+            player.studies = "Ninguno (Bebé)";
+            player.job = "En paro";
+            player.logs = ["Has nacido en Sevilla. ¡Bienvenido al mundo! Tus padres te pasean en carrito por el Parque de María Luisa."];
+            saveGame();
+            document.getElementById('start-screen').style.display = 'none';
+            updateUI();
+            renderLogs();
         }
 
         function updateUI() {
-            document.getElementById("stat-age").innerText = player.age;
-            document.getElementById("stat-health").innerText = player.health;
-            document.getElementById("stat-happiness").innerText = player.happiness;
-            document.getElementById("stat-money").innerText = player.money;
-            document.getElementById("stat-job").innerText = player.job;
-
-            let btnJob = document.getElementById("btn-job");
-            let btnStudy = document.getElementById("btn-study");
-
-            if (player.age < 16) {
-                btnJob.disabled = true;
-                btnJob.innerText = `Buscar Trabajo (Req: 16 años)`;
-                if (player.age < 6) {
-                    btnStudy.disabled = true;
-                    btnStudy.innerText = `Demasiado pequeño para el cole`;
-                } else {
-                    btnStudy.disabled = false;
-                    btnStudy.innerText = player.isStudying ? "Dejar el Colegio" : "Estudiar en el Cole";
-                }
-            } else {
-                btnJob.disabled = false;
-                btnJob.innerText = `Buscar Trabajo`;
-                btnStudy.innerText = player.isStudying ? "Dejar Estudios" : "Estudiar (FP/Univ)";
-            }
+            document.getElementById('player-name').innerText = player.name;
+            document.getElementById('player-age').innerText = `Edad: ${player.age} años`;
+            document.getElementById('player-dni').innerText = `DNI: ${player.dni}`;
+            document.getElementById('player-studies').innerText = player.studies;
+            document.getElementById('player-job').innerText = player.job;
+            document.getElementById('health-val').innerText = player.health;
+            document.getElementById('happiness-val').innerText = player.happiness;
+            document.getElementById('money-val').innerText = player.money;
         }
 
-        // 3. Eventos de Decisión en la Niñez
-        function dispararEventoDecisionInfancia() {
-            let opcionesDecision = [
-                {
-                    edadCritica: 8,
-                    pregunta: "Con 8 años, tus amigos te invitan a apuntarte al equipo de fútbol del barrio o a quedarte en casa jugando a la consola. ¿Qué haces?",
-                    opcionA: "Ir a jugar al fútbol (+Salud, +Felicidad)",
-                    opcionB: "Quedarte en casa viciando (+Felicidad, -Salud)",
-                    accionA: () => { player.health += 5; player.happiness += 10; addLog("[Decisión] Te uniste al equipo del barrio. ¡Estás hecho un atleta!"); },
-                    accionB: () => { player.happiness += 15; player.health -= 5; addLog("[Decisión] Tarde entera de vicio. Te lo pasaste teta pero te moviste poco."); }
-                },
-                {
-                    edadCritica: 12,
-                    pregunta: "Con 12 años, encuentras una cartera perdida en la calle con 50€ dentro. ¿Qué haces?",
-                    opcionA: "Llevarla a la policía / buscar al dueño (+Felicidad, +Karma)",
-                    opcionB: "Quedarte con el dinero (+Dinero, -Felicidad por remordimientos)",
-                    accionA: () => { player.happiness += 10; addLog("[Decisión] Devolviste la cartera. Te sientes una bellísima persona."); },
-                    accionB: () => { player.money += 50; player.happiness -= 5; addLog("[Decisión] Te pillaste chuches y cómics con los 50€ ajenos. Mal rollo en la conciencia."); }
-                },
-                {
-                    edadCritica: 14,
-                    pregunta: "Con 14 años, se acercan los exámenes clave. ¿Te matas a estudiar o pasas olímpicamente?",
-                    opcionA: "Estudiar duro (Facilita el futuro académico)",
-                    opcionB: "Pasar y irse de botellón/parque con los colegas",
-                    accionA: () => { player.happiness -= 5; player.educationLevel = "ESO_BUENA"; addLog("[Decisión] Sacaste un curso excelente a base de codos."); },
-                    accionB: () => { player.happiness += 10; player.health -= 5; addLog("[Decisão] Pasaste de estudiar y te fuiste de risas por el barrio."); }
-                }
-            ];
-
-            // Buscar si hay un evento para la edad actual
-            let eventoActual = opcionesDecision.find(e => e.edadCritica === player.age);
-            if (eventoActual) {
-                let respuesta = confirm(eventoActual.pregunta + "\n\n[Aceptar] = Opción 1\n[Cancelar] = Opción 2");
-                if (respuesta) {
-                    eventoActual.accionA();
-                } else {
-                    eventoActual.accionB();
-                }
-            } else {
-                // Eventos aleatorios normales si no hay dilema de edad fija
-                let eventosAleatorios = [
-                    { texto: "Te caíste patinando por el Paseo de Colón.", salud: -5, felicidad: -5 },
-                    { texto: "Tus abuelos te dieron una propina sorpresa en Navidad.", dinero: 15, felicidad: 10 },
-                    { texto: "Tarde de merendola con churros en la campana.", salud: 2, felicidad: 10 }
-                ];
-                let ev = eventosAleatorios[Math.floor(Math.random() * eventosAleatorios.length)];
-                addLog(`[Infancia] ${ev.texto}`);
-                if (ev.salud) player.health += ev.salud;
-                if (ev.felicidad) player.happiness += ev.felicidad;
-                if (ev.dinero) player.money += ev.dinero;
-            }
-        }
-
-        // 4. Motor del tiempo
-        function nextYear() {
-            player.age++;
-            
-            if (player.age < 16) {
-                addLog(`Cumples ${player.age} años en Sevilla.`);
-                dispararEventoDecisionInfancia();
-            } else {
-                if (player.job !== "Desempleado") {
-                    let trabajoActual = trabajosSevilla.find(t => t.title === player.job);
-                    if (trabajoActual) {
-                        player.money += trabajoActual.salary;
-                        addLog(`Has cobrado tu nómina anual de ${trabajoActual.salary}€ currando de ${player.job}.`);
-                    }
-                }
-                
-                if (player.isStudying) {
-                    if (player.job !== "Desempleado") {
-                        player.happiness -= 10;
-                        player.health -= 5;
-                        addLog(`¡Estudiar y trabajar a la vez es durísimo! El estrés pasa factura.`);
-                    } else {
-                        player.happiness -= 3;
-                        addLog(`Has avanzado un año en tus estudios superiores.`);
-                    }
-                }
-            }
-            
-            // Comprobación de límites vitales
-            if (player.health <= 0) {
-                addLog(`Has fallecido debido a tu pésimo estado de salud.`);
-                alert("¡FIN DEL JUEGO! Tu personaje ha muerto.");
-                location.reload();
-                return;
-            }
-
-            // Normalizar barras
-            if (player.health > 100) player.health = 100;
-            if (player.happiness > 100) player.happiness = 100;
-            if (player.happiness < 0) player.happiness = 0;
-            if (player.health < 0) player.health = 0;
-            if (player.money < 0) player.money = 0;
-            
-            updateUI();
-        }
-
-        function buscarTrabajo() {
-            if (player.age < 16) return;
-            let trabajosDisponibles = trabajosSevilla.filter(t => {
-                if (player.educationLevel === "Universidad") return true;
-                if (player.educationLevel === "FP") return t.reqEducation === "ESO" || t.reqEducation === "FP";
-                return t.reqEducation === "ESO";
+        function renderLogs() {
+            const eventLog = document.getElementById('event-log');
+            eventLog.innerHTML = "";
+            player.logs.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = 'log-entry';
+                div.innerText = msg;
+                eventLog.appendChild(div);
             });
-
-            let trabajoElegido = trabajosDisponibles[Math.floor(Math.random() * trabajosDisponibles.length)];
-            player.job = trabajoElegido.title;
-            addLog(`¡Nuevo empleo! Ahora trabajas como: ${player.job}.`);
-            updateUI();
         }
 
-        function estudiar() {
-            if (player.age < 6) return;
-            player.isStudying = !player.isStudying;
-            addLog(player.isStudying ? "Te has puesto las pilas con los libros." : "Has dejado los libros a un lado.");
+        function addLog(text) {
+            player.logs.unshift(`[${player.age} años] ${text}`);
             updateUI();
+            renderLogs(); 
+            saveGame();
         }
 
-        updateUI();
-        addLog("Has nacido en Sevilla. Comienza tu aventura con 0 años.");
+        function checkChildhoodDecisions() {
+            if (player.age === 8) {
+                showModalConfirm(
+                    "Dilema infantil (8 años)", 
+                    "Tus amigos te invitan a apuntarte al equipo de fútbol del barrio o a quedarte en casa jugando a la consola.",
+                    () => {
+                        player.health += 5; player.happiness += 10;
+                        addLog("Te uniste al equipo del barrio. ¡Estás hecho un atleta!");
+                        updateUI(); saveGame();
+                    },
+                    "Quedarse viciando", "Ir a jugar al fútbol"
+                );
+            } else if (player.age === 12) {
+                showModalConfirm(
+                    "Dilema infantil (12 años)", 
+                    "Encuentras una cartera perdida en la calle con 50€ dentro. ¿Qué haces?",
+                    () => {
+                        player.money += 50; player.happiness -= 5;
+                        addLog("Te quedaste con los 50€ de la cartera ajena. Tienes un ligero remordimiento.");
+                        updateUI(); saveGame();
+                    },
+                    "Devolverla a la policía", "Quedarse el dinero"
+                );
+            } else if (player.age === 14) {
+                showModalConfirm(
+                    "Dilema adolescente (14 años)", 
+                    "Se acercan los exámenes clave de la ESO. ¿Te matas a estudiar o te vas de risas con los colegas?",
+                    () => {
+                        player.happiness -= 5; player.studies = "ESO (Sobresaliente)";
+                        addLog("Sacaste un curso excelente a base de codos.");
+                        updateUI(); saveGame();
+                    },
+                    "Pasar y ir al parque", "Estudiar duro"
+                );
+            }
+        }
+
+        function nextYear() { 
+            player.age++; 
+            let msg = `Has cumplido ${player.age} años.`;
+            
+            if (player.age === 3) {
+                player.studies = "Guardería";
+                msg += " Ya vas a la guardería y juegas en la placita del barrio.";
+            } else if (player.age === 6) {
+                player.studies = "Colegio Primaria";
+                msg += " ¡Empiezas el colegio! Toca aprender las tablas de multiplicar y coleccionar cromos.";
+            } else if (player.age === 12) {
+                player.studies = "Instituto (ESO)";
+                msg += " ¡Pasas al Instituto! La cosa se pone seria con la ESO.";
+            } else if (player.age === 18) {
+                player.studies = "Bachillerato / Universidad";
+                msg += " ¡Ya eres mayor de edad! Puedes sacarte el carné de conducir en Montequinto.";
+            }
+
+            // Cobrar nómina si trabaja
+            if (player.job !== "En paro") {
+                let trabajoActual = trabajosSevilla.find(t => t.title === player.job);
+                if (trabajoActual) {
+                    player.money += trabajoActual.salary;
+                    msg += ` Has cobrado tu nómina anual de ${trabajoActual.salary}€.`;
+                }
+            }
+
+            addLog(msg); 
+            checkChildhoodDecisions();
+
+            // Muerte por salud
+            if (player.health <= 0) {
+                addLog("Has fallecido debido a tu pésimo estado de salud.");
+                showModalAlert("Fin del juego", "Tu personaje ha muerto.", () => {
+                    localStorage.removeItem('sevillalife_save');
+                    location.reload();
+                });
+            }
+        }
+
+        function study() { 
+            if (player.age < 6) {
+                addLog(`Eres un bebé (${player.age} años), aún estás con los dibujos animados. ¡Te faltan ${6 - player.age} años para entrar al colegio!`);
+            } else if (player.age >= 6 && player.age < 12) {
+                player.studies = "Colegio Primaria";
+                addLog("Estudias Primaria en el colegio del barrio. ¡Tus mayores preocupaciones son los recreos y los deberes!");
+            } else if (player.age >= 12 && player.age < 18) {
+                player.studies = "Instituto (ESO/Bach)";
+                addLog("Estudias la ESO en el instituto. Entre examen y examen, una tostada de aceite con jamón.");
+            } else {
+                let opcionesUni = [
+                    "Grado en la Universidad de Sevilla",
+                    "Ciclo Formativo en Nervión",
+                    "Oposiciones en casa"
+                ];
+                player.studies = opcionesUni[Math.floor(Math.random() * opcionesUni.length)];
+                addLog(`Estudias ${player.studies}, aguantando los nervios de los exámenes.`);
+            }
+            updateUI();
+            saveGame();
+        }
+
+        function searchJob() { 
+            if (player.age < 16) {
+                addLog(`¡Aún eres menor (${player.age} años)! Por ley no puedes trabajar.`);
+            } else {
+                let trabajoElegido = trabajosSevilla[Math.floor(Math.random() * trabajosSevilla.length)];
+                player.job = trabajoElegido.title;
+                addLog(`Has encontrado curro y ahora trabajas como: ${player.job}.`);
+            }
+            updateUI();
+            saveGame();
+        }
+
+        function confirmResetGame() {
+            showModalConfirm("Reiniciar partida", "¿Seguro que quieres borrar todo y reiniciar la partida?", () => {
+                localStorage.removeItem('sevillalife_save'); 
+                location.reload();
+            }, "Cancelar", "Sí, borrar");
+        }
+
+        window.onload = () => {
+            let s = localStorage.getItem('sevillalife_save');
+            if (s) {
+                player = JSON.parse(s);
+                document.getElementById('start-screen').style.display = 'none';
+                updateUI();
+                renderLogs();
+            }
+        };
     </script>
 </body>
 </html>
