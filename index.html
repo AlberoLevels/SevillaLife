@@ -111,7 +111,6 @@
 </head>
 <body>
     <div id="game-container">
-        <!-- Input de archivo abierto a JSON y texto plano para evitar bloqueos en Android -->
         <input type="file" id="file-selector" accept=".json,application/json,text/plain" style="display: none;" onchange="handleFileLoad(event)">
 
         <div id="start-screen">
@@ -239,6 +238,8 @@
                         saveGame();
                         updateUI();
                         renderLogs();
+                        // Oculta la pantalla de inicio al cargar para pasar directamente al juego
+                        document.getElementById('start-screen').style.display = 'none';
                         showModalAlert("Gestión completa", "¡Papeles arreglaítos! Partida cargada.");
                     } else {
                         showModalAlert("Error", "El archivo no contiene una partida válida.");
