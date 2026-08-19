@@ -57,9 +57,9 @@
                 <div class="subtitle">Registro oficial de identidad y alta en el padrón municipal.</div>
                 <div class="note">* Nota: No es obligatorio introducir tus datos reales.</div>
 
-                <label>Nombre</label><input type="text" id="name-input" maxlength="15">
-                <label>Primer Apellido</label><input type="text" id="surname1-input" maxlength="15">
-                <label>Segundo Apellido</label><input type="text" id="surname2-input" maxlength="15">
+                <label>Nombre</label><input type="text" id="name-input" maxlength="15" placeholder="Ej: Francisco">
+                <label>Primer Apellido</label><input type="text" id="surname1-input" maxlength="15" placeholder="Ej: Pérez">
+                <label>Segundo Apellido</label><input type="text" id="surname2-input" maxlength="15" placeholder="Ej: Gómez">
                 
                 <label>Zona / Distrito de nacimiento</label>
                 <div class="select-trigger" onclick="openNeighborhoodModal()">
@@ -215,7 +215,7 @@
                 case "Los Remedios":
                     player.money = Math.max(0, player.money - 200);
                     player.happiness = Math.min(100, player.happiness + 1);
-                    player.logs.push(`${player.neighborhood}: Los costes de mantenimiento son elevados (-200€).`);
+                    player.logs.push(`${player.neighborhood}: Los costes de mantenimiento son elevados (-200€).");
                     break;
                 case "Cerro-Amate":
                     player.money += 50;
