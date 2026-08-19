@@ -258,7 +258,21 @@
 
         window.onload = () => {
             let s = localStorage.getItem('sevillalife_save');
-            if (s) { player = JSON.parse(s); document.getElementById('start-screen').style.display = 'none'; updateUI(); renderLogs(); }
+            if (s) { 
+                try {
+                    player = JSON.parse(s);
+                    // Si el nombre está vacío en los datos guardados, evitamos que salte mal y mostramos la pantalla inicial
+                    if (!player.name) {
+                        document.getElementById('start-screen').style.display = 'flex';
+                    } else {
+                        document.getElementById('start-screen').style.display = 'none'; 
+                        updateUI(); 
+                        renderLogs();
+                    }
+                } catch(e) {
+                    localStorage.removeItem('sevillalife_save');
+                }
+            }
         };
     </script>
 </body>
