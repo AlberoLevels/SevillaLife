@@ -233,12 +233,18 @@
             reader.onload = function(e) {
                 try {
                     let importedPlayer = JSON.parse(e.target.result);
+                    
+                    if (Array.isArray(importedPlayer.logs)) {
+                        importedPlayer.logs = importedPlayer.logs.map(log => 
+                            (typeof log === 'string') ? log : (log.msg || JSON.stringify(log))
+                        );
+                    }
+
                     if (importedPlayer.name !== undefined) {
                         player = importedPlayer;
                         saveGame();
                         updateUI();
                         renderLogs();
-                        // Oculta la pantalla de inicio al cargar para pasar directamente al juego
                         document.getElementById('start-screen').style.display = 'none';
                         showModalAlert("Gestión completa", "¡Papeles arreglaítos! Partida cargada.");
                     } else {
