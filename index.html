@@ -93,7 +93,7 @@
             <div class="modal-card">
                 <div id="modal-title-text" style="font-weight:800; color:#C0392B; text-align:center; margin-bottom:5px;">Aviso</div>
                 <div id="modal-msg-text" style="font-size:0.8em; text-align:center;"></div>
-                <div id="modal-buttons-container" style="display:flex; flex-direction:column; gap:6px; width:100%; align-items:center;"></div>
+                <div id="modal-buttons-container" style="display:flex; flex-direction:column; gap:6px; width:100%; align-items:center; margin-top:10px;"></div>
             </div>
         </div>
     </div>
@@ -109,9 +109,17 @@
         let selectedNeighborhoodTemp = "Casco Antiguo";
 
         const districts = [
-            "Casco Antiguo", "Macarena", "Nervión", "Triana", "Sur", 
-            "Los Remedios", "Cerro-Amate", "Este-Alcosa-Torreblanca", 
-            "San Pablo-Santa Justa", "Norte", "Bellavista-La Palmera"
+            { name: "Casco Antiguo", info: "Coste alto (-100€), +Felicidad" },
+            { name: "Macarena", info: "Barrio equilibrado" },
+            { name: "Nervión", info: "Nivel alto, mayores gastos (-200€)" },
+            { name: "Triana", info: "Ambiente tradicional, +Felicidad" },
+            { name: "Sur", info: "Cerca del parque, +Salud" },
+            { name: "Los Remedios", info: "Poder adquisitivo, mayores gastos (-200€)" },
+            { name: "Cerro-Amate", info: "Economía local, +Ahorro (+50€)" },
+            { name: "Este-Alcosa-Torreblanca", info: "Residencial tranquilo" },
+            { name: "San Pablo-Santa Justa", info: "Bien conectado" },
+            { name: "Norte", info: "Barrio obrero tradicional" },
+            { name: "Bellavista-La Palmera", info: "Zona tranquila" }
         ];
 
         function saveGame() { localStorage.setItem('sevillalife_save', JSON.stringify(player)); }
@@ -119,15 +127,19 @@
         function openNeighborhoodModal() {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title-text').innerText = "Selecciona Distrito";
-            document.getElementById('modal-msg-text').innerText = "Elige tu zona de nacimiento en Sevilla:";
+            document.getElementById('modal-msg-text').innerText = "Elige tu zona de nacimiento:";
             
             let listHTML = `<div class="modal-scrollable-content">`;
             districts.forEach(d => {
-                let isSelected = selectedNeighborhoodTemp === d;
-                let bgStyle = isSelected ? "background: #fdf8f0; border-color: #E5A54A; font-weight: bold;" : "background: #fff; border-color: #ecf0f1;";
-                listHTML += `<button class="action-btn" style="${bgStyle} color: #2c3e50; text-align: left; padding: 10px;" onclick="selectNeighborhood('${d}')">${d}</button>`;
+                let isSelected = selectedNeighborhoodTemp === d.name;
+                let bgStyle = isSelected ? "background: #fdf8f0; border: 2px solid #E5A54A;" : "background: #fff; border: 2px solid #ecf0f1;";
+                listHTML += `<button class="action-btn" style="${bgStyle} color: #2c3e50; text-align: left; padding: 8px; display:flex; flex-direction:column;" onclick="selectNeighborhood('${d.name}')">
+                    <span style="font-weight:bold;">${d.name}</span>
+                    <span style="font-size:0.7em; color:#888;">${d.info}</span>
+                </button>`;
             });
             listHTML += `</div>`;
+            listHTML += `<button class="reset-btn" style="margin-top:10px;" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`;
             
             document.getElementById('modal-buttons-container').innerHTML = listHTML;
             modal.style.display = 'flex';
@@ -144,11 +156,9 @@
             document.getElementById('modal-title-text').innerText = "Gestión de Partida";
             document.getElementById('modal-msg-text').innerText = "¿Guardar o cargar tu partida JSON?";
             document.getElementById('modal-buttons-container').innerHTML = `
-                <div style="width: 100%; display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
-                    <button class="action-btn" onclick="exportData()">Guardar archivo</button>
-                    <button class="action-btn" onclick="document.getElementById('file-selector').click(); document.getElementById('custom-modal').style.display='none'">Cargar archivo</button>
-                    <button class="reset-btn" style="margin-top:4px;" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>
-                </div>
+                <button class="action-btn" onclick="exportData()">Guardar archivo</button>
+                <button class="action-btn" onclick="document.getElementById('file-selector').click(); document.getElementById('custom-modal').style.display='none'">Cargar archivo</button>
+                <button class="reset-btn" style="margin-top:4px;" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>
             `;
             modal.style.display = 'flex';
         }
@@ -205,7 +215,7 @@
                 case "Los Remedios":
                     player.money = Math.max(0, player.money - 200);
                     player.happiness = Math.min(100, player.happiness + 1);
-                    player.logs.push(`${player.neighborhood}: Los costes de mantenimiento de la zona son elevados (-200€).`);
+                    player.logs.push(`${player.neighborhood}: Los costes de mantenimiento son elevados (-200€).`);
                     break;
                 case "Cerro-Amate":
                     player.money += 50;
