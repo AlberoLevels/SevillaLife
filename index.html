@@ -1,250 +1,426 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Modal Nombra a tu Mascota</title>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador de Vida - AlberoLevels</title>
+  
   <style>
-    /* Estilos base del juego */
-    body {
+    /* --- ESTILOS GENERALES Y LAYOUT DEL JUEGO --- */
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      height: 100vh;
-      background: #0f0f1a url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200') no-repeat center/cover;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    /* Fondo oscuro traslúcido (Overlay con blur) */
+    body {
+      background-color: #3b4a5a; /* Fondo azul grisáceo del juego */
+      color: #2c3e50;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 520px;
+      background-color: #e9ecef;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 16px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Historial / Log de la vida */
+    .history-log {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+      max-height: 60vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .log-card {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      color: #495057;
+      border-left: 4px solid #d9a05b; /* Borde izquierdo dorado/marrón */
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    }
+
+    .log-card.event {
+      border-left-color: #b83b26;
+      font-weight: 500;
+    }
+
+    /* Panel de Control / Botones Inferiores */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .row-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-main {
+      flex: 1;
+      background-color: #6d4c52; /* Color café/granate de los botones principales */
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .btn-main:hover {
+      background-color: #5a3e43;
+    }
+
+    .btn-main:active {
+      transform: scale(0.98);
+    }
+
+    .btn-outline {
+      width: 100%;
+      background-color: transparent;
+      color: #6d4c52;
+      border: 2px solid #a3727a;
+      border-radius: 12px;
+      padding: 12px 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .btn-outline:hover {
+      background-color: #f1e6e8;
+    }
+
+    .footer-text {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #868e96;
+      margin-top: 14px;
+    }
+
+    /* --- ESTILOS DE LOS MODALES / VENTANAS EMERGENTES --- */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(8, 7, 18, 0.75);
-      backdrop-filter: blur(6px);
+      background-color: rgba(0, 0, 0, 0.55);
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: fadeIn 0.3s ease-out;
+      z-index: 1000;
+      padding: 16px;
     }
 
-    /* Ventana Principal del Juego */
-    .game-modal {
-      position: relative;
-      width: 420px;
-      background: linear-gradient(145deg, #181528, #0e0c19);
-      border: 2px solid #5a4b87;
-      border-radius: 16px;
-      padding: 28px 24px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8),
-                  0 0 20px rgba(120, 80, 220, 0.25),
-                  inset 0 1px 1px rgba(255, 255, 255, 0.1);
-      text-align: center;
-      color: #e2e1f0;
-      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    .modal-overlay.hidden {
+      display: none !important;
     }
 
-    /* Bordes/Esquinas decorativas estilo interfaz de juego */
-    .game-modal::before {
-      content: '';
-      position: absolute;
-      inset: -4px;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 215, 0, 0.3);
-      pointer-events: none;
-    }
-
-    /* Cabecera / Título */
-    .modal-title {
-      margin: 0 0 16px 0;
-      font-size: 1.4rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: #f3e5ab;
-      text-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
-    }
-
-    /* Marco del Avatar de la Mascota */
-    .pet-avatar-container {
-      position: relative;
-      width: 96px;
-      height: 96px;
-      margin: 0 auto 20px auto;
-      border-radius: 50%;
-      background: radial-gradient(circle, #312658 0%, #151128 100%);
-      border: 3px solid #ffcc00;
-      box-shadow: 0 0 15px rgba(255, 204, 0, 0.4), inset 0 0 10px #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .pet-avatar-icon {
-      font-size: 48px;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
-    }
-
-    .modal-subtitle {
-      font-size: 0.9rem;
-      color: #a099c2;
-      margin-bottom: 18px;
-    }
-
-    /* Campo de Entrada de Texto */
-    .input-wrapper {
-      position: relative;
-      margin-bottom: 24px;
-    }
-
-    .game-input {
+    /* Tarjeta Blanca Idéntica para Eventos y Nombres */
+    .modal-card {
+      background-color: #ffffff;
+      border-radius: 22px;
+      padding: 28px 22px;
       width: 100%;
+      max-width: 420px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+      text-align: center;
       box-sizing: border-box;
-      padding: 12px 40px 12px 16px;
-      background: rgba(12, 10, 22, 0.85);
-      border: 1.5px solid #4a3e72;
-      border-radius: 8px;
-      color: #ffffff;
-      font-size: 1.1rem;
-      font-weight: 600;
-      outline: none;
-      transition: all 0.25s ease;
-      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
-    }
-
-    .game-input:focus {
-      border-color: #ffcc00;
-      box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 0 10px rgba(255, 204, 0, 0.3);
-    }
-
-    .game-input::placeholder {
-      color: #5c557c;
-      font-weight: 400;
-    }
-
-    /* Contador de Caracteres */
-    .char-counter {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 0.75rem;
-      color: #6d6494;
-    }
-
-    /* Botones de Acción */
-    .button-group {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-    }
-
-    .btn {
-      flex: 1;
-      padding: 12px 18px;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      cursor: pointer;
-      transition: transform 0.1s ease, box-shadow 0.2s ease, filter 0.2s ease;
-    }
-
-    .btn-secondary {
-      background: #2a2442;
-      color: #a9a2c9;
-      border: 1px solid #453c66;
-    }
-
-    .btn-secondary:hover {
-      background: #373056;
-      color: #ffffff;
-    }
-
-    .btn-primary {
-      background: linear-gradient(180deg, #ffcc00 0%, #d49b00 100%);
-      color: #1a1200;
-      border: 1px solid #ffe169;
-      box-shadow: 0 4px 12px rgba(212, 155, 0, 0.35);
-    }
-
-    .btn-primary:hover {
-      filter: brightness(1.15);
-      box-shadow: 0 6px 16px rgba(255, 204, 0, 0.5);
-    }
-
-    .btn:active {
-      transform: scale(0.96);
-    }
-
-    /* Animaciones UI */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      animation: popIn 0.2s ease-out;
     }
 
     @keyframes popIn {
-      from { opacity: 0; transform: scale(0.85) translateY(10px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .modal-icon {
+      font-size: 1.6rem;
+    }
+
+    .modal-title {
+      margin: 0;
+      color: #b83b26; /* Color rojo característico */
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .modal-description {
+      color: #4a4a4a;
+      font-size: 0.95rem;
+      margin: 0 0 20px 0;
+      line-height: 1.45;
+    }
+
+    /* Campo de Texto del Nombre */
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    #input-nombre-mascota {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-align: center;
+      color: #2c3e50;
+      background-color: #f8f9fa;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      outline: none;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    #input-nombre-mascota:focus {
+      border-color: #b83b26;
+      background-color: #ffffff;
+    }
+
+    /* Botones de Acción (Rojos) dentro de los Modales */
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-evento {
+      width: 100%;
+      background-color: #b83b26;
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+      box-shadow: 0 3px 6px rgba(184, 59, 38, 0.2);
+    }
+
+    .btn-evento:hover {
+      background-color: #a0321f;
+    }
+
+    .btn-evento:active {
+      transform: scale(0.98);
+    }
+
+    .btn-evento.btn-cancelar {
+      background-color: transparent;
+      color: #6c757d;
+      box-shadow: none;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+
+    .btn-evento.btn-cancelar:hover {
+      background-color: #f1f3f5;
+      color: #333333;
     }
   </style>
 </head>
 <body>
 
-  <!-- Modal Emergente del Juego -->
-  <div class="modal-overlay">
-    <div class="game-modal">
-      <h2 class="modal-title">Nombra a tu Compañero</h2>
+  <div class="game-container">
+    <!-- HISTORIAL DE EDAD Y EVENTOS -->
+    <div class="history-log" id="history-log">
+      <div class="log-card">Has cumplido 4 años.</div>
+      <div class="log-card event">⚡ Evento: Te has caído jugando en el parque de María Luisa y te has raspado la rodilla.</div>
+      <div class="log-card">Has cumplido 5 años.</div>
+      <div class="log-card">Has cumplido 6 años.</div>
+      <div class="log-card event">🎓 ¡Has completado con éxito: Educación Primaria!</div>
+      <div class="log-card">Has cumplido 7 años.</div>
+    </div>
 
-      <div class="pet-avatar-container">
-        <span class="pet-avatar-icon">🐱</span>
+    <!-- BOTONES DE CONTROL -->
+    <div class="controls">
+      <div class="row-buttons">
+        <button class="btn-main" onclick="cumplirAno()">Cumplir año</button>
+        <button class="btn-main">Estudiar</button>
       </div>
+      <button class="btn-main">Buscar trabajo</button>
+      <button class="btn-outline">Gestión de Partida (Guardar / Cargar)</button>
+      <button class="btn-outline" onclick="reiniciarPartida()">Reiniciar partida</button>
+      <div class="footer-text">© 2026 AlberoLevels.</div>
+    </div>
+  </div>
 
-      <div class="modal-subtitle">¿Cómo se llamará tu fiel amigo?</div>
-
-      <div class="input-wrapper">
-        <input 
-          type="text" 
-          class="game-input" 
-          id="petName" 
-          maxlength="12" 
-          placeholder="Escribe un nombre..."
-          value="Dante"
-          autocomplete="off"
-        >
-        <span class="char-counter" id="counter">5/12</span>
+  <!-- MODAL 1: EVENTO DE DECISIÓN ("PERRO CALLEJERO") -->
+  <div id="modal-evento-perro" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-icon">🐾</span>
+        <h2 class="modal-title">Perro callejero</h2>
       </div>
-
-      <div class="button-group">
-        <button class="btn btn-secondary" onclick="randomName()">Aleatorio</button>
-        <button class="btn btn-primary" onclick="confirmName()">Confirmar</button>
+      <p class="modal-description">Te encuentras a un perro pequeño abandonado cerca de Triana. ¿Qué haces?</p>
+      
+      <div class="modal-actions">
+        <button class="btn-evento" onclick="opcionAdoptarPerro()">Llevártelo a casa y ponerle un nombre</button>
+        <button class="btn-evento" onclick="cerrarModalEvento()">Dejarlo e ignorarlo</button>
       </div>
     </div>
   </div>
 
+  <!-- MODAL 2: ELEGIR NOMBRE (MISMO DISEÑO EXACTO) -->
+  <div id="modal-nombre-mascota" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-icon">🐾</span>
+        <h2 class="modal-title">Nombre de tu perro</h2>
+      </div>
+      <p class="modal-description">¿Qué nombre quieres ponerle a tu nuevo compañero?</p>
+      
+      <div class="input-group">
+        <input type="text" id="input-nombre-mascota" value="Toby" placeholder="Escribe un nombre..." maxlength="15" autocomplete="off" />
+      </div>
+
+      <div class="modal-actions">
+        <button id="btn-guardar-nombre" class="btn-evento">Aceptar</button>
+        <button id="btn-cancelar-nombre" class="btn-evento btn-cancelar">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CÓDIGO JAVASCRIPT DEL JUEGO -->
   <script>
-    const input = document.getElementById('petName');
-    const counter = document.getElementById('counter');
-    const names = ["Dante", "Sombra", "Orion", "Zeus", "Nix", "Astra"];
+    // ESTADO DEL JUEGO
+    let edad = 7;
+    let tieneMascota = false;
+    let nombreMascota = null;
+    let resolverPromesaNombre = null; // Controla la espera del nombre
 
-    input.addEventListener('input', () => {
-      counter.textContent = `${input.value.length}/12`;
-    });
+    // Avanzar un año
+    function cumplirAno() {
+      edad++;
+      agregarAlLog(`Has cumplido ${edad} años.`);
 
-    function randomName() {
-      const random = names[Math.floor(Math.random() * names.length)];
-      input.value = random;
-      counter.textContent = `${input.value.length}/12`;
+      // Ejemplo: Desencadenar el evento del perro a los 8 años
+      if (edad === 8 && !tieneMascota) {
+        abrirModalEvento();
+      }
     }
 
-    function confirmName() {
-      if(input.value.trim() !== '') {
-        alert(`¡Tu mascota ahora se llama ${input.value}!`);
+    function agregarAlLog(texto, esEvento = false) {
+      const log = document.getElementById("history-log");
+      const card = document.createElement("div");
+      card.className = esEvento ? "log-card event" : "log-card";
+      card.textContent = texto;
+      log.appendChild(card);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    // --- MANEJO DEL EVENTO DEL PERRO ---
+    function abrirModalEvento() {
+      document.getElementById("modal-evento-perro").classList.remove("hidden");
+    }
+
+    function cerrarModalEvento() {
+      document.getElementById("modal-evento-perro").classList.add("hidden");
+    }
+
+    // Al pulsar "Llevártelo a casa y ponerle un nombre"
+    async function opcionAdoptarPerro() {
+      cerrarModalEvento(); // Ocultamos el evento primero
+
+      // Pedimos el nombre usando el MODAL PERSONALIZADO (en vez de prompt)
+      const nombreElegido = await pedirNombreMascota("Toby");
+
+      if (nombreElegido) {
+        tieneMascota = true;
+        nombreMascota = nombreElegido;
+        agregarAlLog(`🐶 Has adoptado a un perro y le has puesto de nombre ${nombreMascota}.`, true);
+      } else {
+        agregarAlLog(`Decidiste no quedarte con el perro.`, true);
       }
+    }
+
+    // --- FUNCIÓN QUE SOLICITA EL NOMBRE (MODAL PERSONALIZADO) ---
+    function pedirNombreMascota(nombrePorDefecto = "Toby") {
+      return new Promise((resolve) => {
+        resolverPromesaNombre = resolve;
+
+        const modal = document.getElementById("modal-nombre-mascota");
+        const input = document.getElementById("input-nombre-mascota");
+        const btnGuardar = document.getElementById("btn-guardar-nombre");
+        const btnCancelar = document.getElementById("btn-cancelar-nombre");
+
+        input.value = nombrePorDefecto;
+        modal.classList.remove("hidden");
+        input.focus();
+        input.select();
+
+        function alConfirmar() {
+          const nombreFinal = input.value.trim() || nombrePorDefecto;
+          limpiar();
+          resolve(nombreFinal);
+        }
+
+        function alCancelar() {
+          limpiar();
+          resolve(null);
+        }
+
+        function limpiar() {
+          modal.classList.add("hidden");
+          btnGuardar.removeEventListener("click", alConfirmar);
+          btnCancelar.removeEventListener("click", alCancelar);
+          resolverPromesaNombre = null;
+        }
+
+        btnGuardar.addEventListener("click", alConfirmar);
+        btnCancelar.addEventListener("click", alCancelar);
+      });
+    }
+
+    // --- CORRECCIÓN DEL FALLO AL REINICIAR PARTIDA ---
+    function reiniciarPartida() {
+      // 1. Ocultar todos los modales inmediatamente
+      document.getElementById("modal-evento-perro").classList.add("hidden");
+      document.getElementById("modal-nombre-mascota").classList.add("hidden");
+
+      // 2. Si había una promesa de nombre esperando, se cancela para que no salte luego
+      if (resolverPromesaNombre) {
+        resolverPromesaNombre(null);
+        resolverPromesaNombre = null;
+      }
+
+      // 3. Resetear variables del juego
+      edad = 4;
+      tieneMascota = false;
+      nombreMascota = null;
+
+      // 4. Limpiar pantalla de historial
+      const log = document.getElementById("history-log");
+      log.innerHTML = `<div class="log-card">Has cumplido 4 años.</div>`;
     }
   </script>
 </body>
