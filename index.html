@@ -27,11 +27,7 @@
         }
         h1 { color: #C0392B; font-family: 'Montserrat', sans-serif; font-size: 1.6em; font-weight: 800; margin-bottom: 2px; text-align: center; letter-spacing: -0.5px; }
         .subtitle { color: #7f8c8d; font-size: 0.75em; margin-bottom: 2px; text-align: center; }
-        .privacy-warning {
-            background-color: #fdf2e9; border: 1px solid #e67e22; color: #d35400; 
-            padding: 6px 10px; border-radius: 8px; font-size: 0.7em; font-weight: 600; 
-            text-align: center; margin: 8px 0 4px 0; line-height: 1.3;
-        }
+        .warning-note { color: #7f8c8d; font-size: 0.7em; text-align: center; margin: 4px 0 2px 0; font-style: italic; }
         label { display: block; margin-top: 8px; font-weight: 600; font-size: 0.75em; color: #2c3e50; }
         input { 
             width: 100%; padding: 8px; margin-top: 3px; 
@@ -118,10 +114,7 @@
             <div class="form-card">
                 <h1>Sevillalife</h1>
                 <p class="subtitle">Registro oficial de identidad y alta en el padrón municipal.</p>
-                
-                <div class="privacy-warning">
-                    ⚠️ Por razones de privacidad, se recomienda no usar datos ni nombres reales.
-                </div>
+                <p class="warning-note">* Se recomienda no usar datos ni nombres reales.</p>
 
                 <label for="name-input">Nombre</label>
                 <input type="text" id="name-input" maxlength="15" placeholder="Curro">
