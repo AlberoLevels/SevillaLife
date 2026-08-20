@@ -1,348 +1,1014 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AlberoLevels</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sevillalife</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #2c3e50; display: flex; justify-content: center; align-items: center; min-height: 100dvh; margin: 0; overflow: hidden; }
+        
+        #game-container { 
+            width: 100%; max-width: 440px; background-color: #FDFBF7; 
+            display: flex; flex-direction: column; height: 100dvh; position: relative; overflow: hidden;
+        }
+        
+        #start-screen { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #FDFBF7; z-index: 100; padding: 16px;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        #start-screen.hidden { display: none !important; }
 
-    body {
-      background-color: #dae2ea;
-      display: flex;
-      justify-content: center;
-      min-height: 100vh;
-    }
+        .form-card { 
+            background: white; padding: 16px; border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 5px solid #E5A54A; 
+        }
+        h1 { color: #C0392B; font-family: 'Montserrat', sans-serif; font-size: 1.6em; font-weight: 800; margin-bottom: 2px; text-align: center; letter-spacing: -0.5px; }
+        .subtitle { color: #7f8c8d; font-size: 0.75em; margin-bottom: 2px; text-align: center; }
+        label { display: block; margin-top: 8px; font-weight: 600; font-size: 0.75em; color: #2c3e50; }
+        input { 
+            width: 100%; padding: 8px; margin-top: 3px; 
+            border: 2px solid #ecf0f1; border-radius: 8px; font-size: 0.9em; 
+            outline: none; background: #fff; color: #2c3e50;
+        }
+        input:focus { border-color: #E5A54A; }
+        .start-btn { width: 100%; margin-top: 14px; padding: 10px; background: #C0392B; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 0.95em; cursor: pointer; }
+        .reset-btn { 
+            background: #fff; color: #c0392b; border: 2px solid #e74c3c; 
+            padding: 6px; border-radius: 6px; font-size: 0.75em; font-weight: 700; 
+            cursor: pointer; transition: background 0.2s, color 0.2s; text-align: center; width: 100%;
+        }
+        .reset-btn:hover { background: #e74c3c; color: white; }
 
-    .game-container {
-      width: 100%;
-      max-width: 480px;
-      background-color: #dae2ea;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 16px;
-      position: relative;
-    }
+        header { 
+            background: #ffffff; padding: 8px 12px; text-align: center; 
+            border-top: 5px solid #E5A54A; box-shadow: 0 2px 6px rgba(0,0,0,0.04); 
+            flex-shrink: 0;
+        }
+        #player-name { font-family: 'Montserrat', sans-serif; font-size: 1.1em; font-weight: 800; margin-bottom: 1px; color: #C0392B; }
+        .header-info { display: flex; justify-content: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap; }
+        .badge { 
+            font-size: 0.75em; display: inline-block; padding: 3px 8px; border-radius: 10px; 
+            color: #2c3e50; font-weight: 700; font-family: monospace; letter-spacing: 0.5px;
+            background: #fdf8f0; border: 1px solid #f3e5d0;
+        }
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 4px; }
+        .status-badge {
+            background: #fdf8f0; padding: 4px 8px; border-radius: 6px; border: 1px solid #f3e5d0;
+            font-size: 0.75em; font-weight: 700; color: #2c3e50; text-align: center;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .status-badge span { font-weight: 700; color: #1a252f; }
+        .stats { 
+            margin-top: 4px; display: flex; justify-content: center; gap: 10px; font-size: 0.75em; font-weight: 600; 
+            background: #fdf8f0; padding: 4px; border-radius: 6px; border: 1px solid #f3e5d0;
+        }
+        .stats div { color: #555; }
+        .stats span { font-weight: 700; color: #2c3e50; }
+        #event-log { flex-grow: 1; padding: 10px 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background: #FDFBF7; }
+        .log-entry { 
+            background: white; padding: 8px 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); 
+            font-size: 0.8em; color: #333333; border-left: 3px solid #E5A54A; border-top: 1px solid #f1f1f1; 
+        }
+        #actions-panel { padding: 8px 12px; background: white; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+        .action-row { display: flex; gap: 6px; }
+        .action-btn { 
+            flex: 1; padding: 8px; background: #C0392B; color: white; border: none; 
+            border-radius: 8px; font-weight: bold; font-size: 0.8em; cursor: pointer; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: opacity 0.2s ease, transform 0.1s ease; text-align: center;
+        }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.6); }
+        .action-btn:not(:disabled):active { transform: scale(0.98); opacity: 0.9; }
 
-    /* Historial */
-    .history-log {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      flex: 1;
-      margin-bottom: 16px;
-      overflow-y: auto;
-    }
-
-    .log-card {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 14px 16px;
-      font-size: 0.95rem;
-      color: #333;
-      border-left: 4px solid #d99b38;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    }
-
-    .log-card.event {
-      border-left-color: #b83b26;
-    }
-
-    /* Botones de la interfaz */
-    .controls {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .row-2 {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-main {
-      flex: 1;
-      background-color: #733e46;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 14px;
-      font-weight: bold;
-      font-size: 0.95rem;
-      cursor: pointer;
-    }
-
-    .btn-main-full {
-      width: 100%;
-      background-color: #733e46;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 14px;
-      font-weight: bold;
-      font-size: 0.95rem;
-      cursor: pointer;
-    }
-
-    .btn-outline {
-      width: 100%;
-      background: transparent;
-      color: #733e46;
-      border: 2px solid #a2727a;
-      border-radius: 12px;
-      padding: 12px;
-      font-weight: bold;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    .footer-text {
-      text-align: center;
-      font-size: 0.75rem;
-      color: #777;
-      margin-top: 8px;
-    }
-
-    /* Modales de Decisión, Nombre y Muerte */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.45);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 16px;
-    }
-
-    .modal-overlay.hidden {
-      display: none !important;
-    }
-
-    .modal-card {
-      background: #ffffff;
-      border-radius: 20px;
-      padding: 24px 20px;
-      width: 100%;
-      max-width: 360px;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-    }
-
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .modal-icon {
-      font-size: 1.4rem;
-    }
-
-    .modal-title {
-      color: #b83b26;
-      font-size: 1.4rem;
-      font-weight: 800;
-      margin: 0;
-    }
-
-    .modal-description {
-      color: #4a4a4a;
-      font-size: 0.95rem;
-      margin-bottom: 16px;
-      line-height: 1.4;
-    }
-
-    .modal-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .btn-modal {
-      background-color: #b83b26;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 12px;
-      font-size: 0.95rem;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    /* Campo para el nombre de la mascota */
-    .input-modal {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px;
-      font-size: 1rem;
-      font-weight: bold;
-      text-align: center;
-      color: #333;
-      background-color: #f8f9fa;
-      border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      margin-bottom: 14px;
-      outline: none;
-    }
-
-    .input-modal:focus {
-      border-color: #b83b26;
-      background-color: #ffffff;
-    }
-  </style>
+        #custom-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 62, 80, 0.7); z-index: 200;
+            display: none; justify-content: center; align-items: center; padding: 20px;
+        }
+        #custom-modal.is-active { display: flex; }
+        .modal-card {
+            background: white; width: 100%; max-width: 360px; max-height: 85vh; padding: 18px;
+            border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-top: 5px solid #E5A54A; display: flex; flex-direction: column; gap: 10px; overflow: hidden;
+        }
+        .modal-title { font-family: 'Montserrat', sans-serif; font-size: 1.1em; font-weight: 800; color: #C0392B; text-align: center; }
+        .modal-message { font-size: 0.8em; color: #2c3e50; text-align: center; line-height: 1.4; }
+        .modal-scrollable-content { width: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; max-height: 250px; }
+        .modal-buttons { display: flex; gap: 6px; margin-top: 4px; flex-direction: column; }
+        .modal-btn { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.8em; cursor: pointer; text-align: center; }
+        .modal-btn-confirm { background: #C0392B; color: white; }
+        .modal-btn-cancel { background: #ecf0f1; color: #555; }
+        .footer-copyright { text-align: center; font-size: 0.55em; color: #7f8c8d; margin-top: 1px; }
+        .start-copyright { text-align: center; font-size: 0.6em; color: #7f8c8d; margin-top: 10px; }
+    </style>
 </head>
 <body>
+    <div id="game-container">
+        <input type="file" id="file-selector" accept=".json,application/json,text/plain" style="display: none;">
 
-  <div class="game-container">
-    <!-- HISTORIAL -->
-    <div class="history-log" id="history-log">
-      <div class="log-card">Has cumplido 4 años.</div>
-      <div class="log-card event">⚡ Evento: Te has caído jugando en el parque de María Luisa y te has raspado la rodilla.</div>
-      <div class="log-card">Has cumplido 5 años.</div>
-      <div class="log-card">Has cumplido 6 años.</div>
-      <div class="log-card event">🎓 ¡Has completado con éxito: Educación Primaria!</div>
-      <div class="log-card">Has cumplido 7 años.</div>
+        <div id="start-screen">
+            <div class="form-card">
+                <h1>Sevillalife</h1>
+                <p class="subtitle">Registro oficial de identidad y alta en el padrón municipal.</p>
+                <label for="name-input">Nombre</label>
+                <input type="text" id="name-input" maxlength="15" placeholder="Curro">
+                <label for="surname1-input">Primer Apellido</label>
+                <input type="text" id="surname1-input" maxlength="15" placeholder="García">
+                <label for="surname2-input">Segundo Apellido</label>
+                <input type="text" id="surname2-input" maxlength="15" placeholder="Sevillano">
+                <button class="start-btn" data-action="start-game">Comenzar mi historia</button>
+                <button class="reset-btn" style="margin-top: 8px;" data-action="open-manager">Gestión de Partida (Guardar / Cargar)</button>
+            </div>
+            <div class="start-copyright">&copy; 2026 AlberoLevels.</div>
+        </div>
+
+        <header>
+            <div id="player-name">---</div>
+            <div class="header-info">
+                <div class="badge" id="player-age">Edad: 0 años</div>
+                <div class="badge" id="player-dni">DNI: ---</div>
+                <div class="badge" id="player-pet">🐾 Sin mascota</div>
+            </div>
+            <div class="status-grid">
+                <div class="status-badge">📚 <span id="player-studies">Ninguno</span></div>
+                <div class="status-badge">💼 <span id="player-job">En paro</span></div>
+            </div>
+            <div class="stats">
+                <div>❤️ Salud: <span id="health-val">100</span>%</div>
+                <div>😊 Felicidad: <span id="happiness-val">100</span>%</div>
+                <div>💶 Dinero: <span id="money-val">0</span>€</div>
+            </div>
+        </header>
+
+        <main id="event-log"></main>
+
+        <div id="actions-panel">
+            <div class="action-row">
+                <button class="action-btn" data-action="next-year">Cumplir año</button>
+                <button class="action-btn" data-action="open-studies">Estudiar</button>
+            </div>
+            <div class="action-row">
+                <button class="action-btn" data-action="open-jobs">Buscar trabajo</button>
+            </div>
+            <button class="reset-btn" data-action="open-manager">Gestión de Partida (Guardar / Cargar)</button>
+            <button class="reset-btn" data-action="confirm-reset">Reiniciar partida</button>
+            <div class="footer-copyright">&copy; 2026 AlberoLevels.</div>
+        </div>
+
+        <div id="custom-modal">
+            <div class="modal-card">
+                <div class="modal-title" id="modal-title-text">Aviso</div>
+                <div class="modal-message" id="modal-msg-text">Mensaje aquí</div>
+                <div id="modal-dynamic-content"></div>
+                <div class="modal-buttons" id="modal-buttons-container"></div>
+            </div>
+        </div>
     </div>
 
-    <!-- BOTONES -->
-    <div class="controls">
-      <div class="row-2">
-        <button class="btn-main" onclick="cumplirAno()">Cumplir año</button>
-        <button class="btn-main">Estudiar</button>
-      </div>
-      <button class="btn-main-full">Buscar trabajo</button>
-      <button class="btn-outline">Gestión de Partida (Guardar / Cargar)</button>
-      <button class="btn-outline" onclick="reiniciarPartida()">Reiniciar partida</button>
-      <div class="footer-text">© 2026 AlberoLevels.</div>
-    </div>
-  </div>
+    <script>
+    (() => {
+        'use strict';
 
-  <!-- MODAL DE EVENTO DE DECISIÓN -->
-  <div id="modal-evento" class="modal-overlay hidden">
-    <div class="modal-card">
-      <div class="modal-header">
-        <span class="modal-icon">🐾</span>
-        <h2 class="modal-title">Perro callejero</h2>
-      </div>
-      <p class="modal-description">Te encuentras a un perro pequeño abandonado cerca de Triana. ¿Qué haces?</p>
-      
-      <div class="modal-buttons">
-        <button class="btn-modal" onclick="elegirAdoptar()">Llevártelo a casa y ponerle un nombre</button>
-        <button class="btn-modal" onclick="cerrarModalEvento()">Dejarlo e ignorarlo</button>
-      </div>
-    </div>
-  </div>
+        /**
+         * Global game configuration constants.
+         */
+        const CONFIG = Object.freeze({
+            STORAGE_KEY: 'sevillalife_save',
+            MIN_WORKING_AGE: 18,
+            PET_MAINTENANCE_COST: 60,
+            PET_DEATH_MIN_AGE: 12,
+            PET_DEATH_MAX_AGE: 16
+        });
 
-  <!-- MODAL PARA ELEGIR NOMBRE -->
-  <div id="modal-nombre" class="modal-overlay hidden">
-    <div class="modal-card">
-      <div class="modal-header">
-        <span class="modal-icon">🐾</span>
-        <h2 class="modal-title">Nombre de tu mascota</h2>
-      </div>
-      <p class="modal-description">¿Qué nombre quieres ponerle a tu perro?</p>
-      
-      <input type="text" id="input-nombre-perro" class="input-modal" value="Toby" maxlength="15" autocomplete="off" />
+        const HOSPITALS = [
+            "el Hospital Virgen del Rocío",
+            "el Hospital Virgen Macarena",
+            "el Hospital de Valme"
+        ];
 
-      <div class="modal-buttons">
-        <button class="btn-modal" onclick="confirmarNombre()">Aceptar</button>
-      </div>
-    </div>
-  </div>
+        const STUDIES = [
+            { id: 'primaria', title: "Educación Primaria", minAge: 6, cost: 0, reqId: null, rank: 1 },
+            { id: 'eso', title: "Educación Secundaria (ESO)", minAge: 12, cost: 0, reqId: ['primaria'], rank: 2 },
+            { id: 'bachillerato', title: "Bachillerato", minAge: 16, cost: 0, reqId: ['eso'], rank: 3 },
+            { id: 'fp_medio', title: "Grado Medio FP", minAge: 16, cost: 0, reqId: ['eso'], rank: 3 },
+            { id: 'fp_superior', title: "Grado Superior FP", minAge: 18, cost: 600, reqId: ['bachillerato', 'fp_medio'], rank: 4 },
+            { id: 'universidad', title: "Universidad de Sevilla", minAge: 18, cost: 1200, reqId: ['bachillerato', 'fp_superior'], rank: 4 },
+            { id: 'master', title: "Máster Universitario", minAge: 22, cost: 2500, reqId: ['universidad'], rank: 5 }
+        ];
 
-  <!-- MODAL DE MUERTE -->
-  <div id="modal-muerte" class="modal-overlay hidden">
-    <div class="modal-card">
-      <div class="modal-header">
-        <span class="modal-icon">💀</span>
-        <h2 class="modal-title">Has fallecido</h2>
-      </div>
-      <p class="modal-description" id="texto-muerte">Has muerto.</p>
-      
-      <div class="modal-buttons">
-        <button class="btn-modal" onclick="reiniciarPartida()">Reiniciar partida</button>
-      </div>
-    </div>
-  </div>
+        const JOBS = [
+            { title: "Repartidor / Peón", minAge: 18, reqStudyRank: 0, salary: 12000 }, 
+            { title: "Camarero / Reponedor", minAge: 18, reqStudyRank: 1, salary: 14500 }, 
+            { title: "Dependiente de Comercio", minAge: 18, reqStudyRank: 2, salary: 17000 }, 
+            { title: "Operario Lipasam", minAge: 18, reqStudyRank: 2, salary: 22500 },
+            { title: "Técnico Administrativo", minAge: 18, reqStudyRank: 3, salary: 26000 },
+            { title: "Programador / Técnico Especializado", minAge: 19, reqStudyRank: 4, salary: 36000 },
+            { title: "Abogado / Ingeniero / Médico", minAge: 22, reqStudyRank: 4, salary: 48000 },
+            { title: "Director de Proyecto / Máster Exec.", minAge: 25, reqStudyRank: 5, salary: 65000 }
+        ];
 
-  <script>
-    let edad = 7;
-    let tieneMascota = false;
-    let nombreMascota = null;
+        const RANDOM_EVENTS = [
+            { minAge: 3, maxAge: 11, msg: "Te has caído jugando en el parque de María Luisa y te has raspado la rodilla.", health: -5, happiness: -5, money: 0 },
+            { minAge: 3, maxAge: 11, msg: "Tus padres te han llevado a tomar un helado en Los Italianos.", health: 0, happiness: 15, money: 0 },
+            { minAge: 3, maxAge: 11, msg: "Te han regañado en el colegio por distraerte mirando por la ventana.", health: 0, happiness: -10, money: 0 },
+            { minAge: 3, maxAge: 11, msg: "Has hecho un castillo de arena enorme durante un fin de semana en Matalascañas.", health: 5, happiness: 15, money: 0 },
+            { minAge: 12, maxAge: 17, msg: "Has quedado con tus amigos para dar una vuelta por Nervión.", health: 0, happiness: 10, money: -5 },
+            { minAge: 12, maxAge: 17, msg: "Has suspendido un examen importante y te han castigado sin salir.", health: 0, happiness: -15, money: 0 },
+            { minAge: 12, maxAge: 17, msg: "Tus padres te han subido un poco la paga semanal.", health: 0, happiness: 10, money: 10 },
+            { minAge: 12, maxAge: 17, msg: "Has estado bailando y disfrutando en la velá de tu barrio.", health: 0, happiness: 15, money: -10 },
+            { minAge: 18, maxAge: 64, msg: "Has ido a la Feria de Abril y te has gastado un pico en la caseta.", health: 0, happiness: 15, money: -150 },
+            { minAge: 18, maxAge: 64, msg: "Un golpe de calor en pleno julio en Sevilla te ha dejado totalmente derretido.", health: -15, happiness: -10, money: 0 },
+            { minAge: 18, maxAge: 64, msg: "Fuiste al dentista a hacerte una revisión y una limpieza general.", health: 5, happiness: -5, money: -60 },
+            { minAge: 18, maxAge: 64, msg: "Te ha tocado un pequeño premio en un rasca y gana del centro.", health: 0, happiness: 15, money: 100 },
+            { minAge: 18, maxAge: 64, msg: "Comiste unos montaditos regulares y pasaste el fin de semana indispuesto.", health: -10, happiness: -10, money: 0 },
+            { minAge: 65, maxAge: 120, msg: "Te has sentado en un banco a comentar las obras del barrio con otros vecinos.", health: 5, happiness: 10, money: 0 },
+            { minAge: 65, maxAge: 120, msg: "Te duele la espalda por la humedad matutina del río Guadalquivir.", health: -10, happiness: -10, money: 0 },
+            { minAge: 65, maxAge: 120, msg: "Tus nietos te han visitado y les has dado un pequeño aguinaldo.", health: 5, happiness: 20, money: -20 },
+            { minAge: 65, maxAge: 120, msg: "Has ido al centro de salud a hacerte el chequeo anual y todo está correcto.", health: 10, happiness: 5, money: 0 },
+            { minAge: 3, maxAge: 120, msg: "Te has encontrado un billete de 10€ tirado en la Alameda.", health: 0, happiness: 10, money: 10 },
+            { minAge: 3, maxAge: 120, msg: "Paseaste tranquilamente por el Parque María Luisa y desconectaste por completo.", health: 5, happiness: 10, money: 0 },
+            { minAge: 3, maxAge: 120, msg: "Has pillado una gripe fuerte durante el invierno.", health: -20, happiness: -15, money: 0 },
+            { minAge: 3, maxAge: 120, msg: "Has tenido un año tranquilo y sin grandes sobresaltos.", health: 2, happiness: 2, money: 0 },
+            { minAge: 6, maxAge: 120, requiresPet: true, msg: "Tu mascota {petName} ha estado jugando contigo todo el día y te ha transmitido mucha alegría.", health: 2, happiness: 12, money: 0 },
+            { minAge: 18, maxAge: 120, requiresPet: true, msg: "Tuviste que llevar a {petName} al veterinario por un chequeo imprevisto.", health: 0, happiness: -5, money: -70 },
+            { minAge: 6, maxAge: 120, requiresPet: true, msg: "{petName} ha hecho de las suyas y ha mordisqueado algo valioso en casa.", health: 0, happiness: -5, money: 0 }
+        ];
 
-    function cumplirAno() {
-      edad++;
-      agregarLog(`Has cumplido ${edad} años.`);
-      
-      if (edad === 8 && !tieneMascota) {
-        document.getElementById("modal-evento").classList.remove("hidden");
-      }
+        const CHOICE_EVENTS = [
+            {
+                minAge: 6, maxAge: 11,
+                title: "🐾 Perro callejero",
+                msg: "Te encuentras a un perro pequeño abandonado cerca de Triana. ¿Qué haces?",
+                petType: "Perro",
+                options: [
+                    { text: "Llevártelo a casa y ponerle un nombre", cost: 0, health: 0, happiness: 20, money: 0, adoptsPet: true, resultMsg: "Decidiste llevarte al perrito a casa." },
+                    { text: "Dejarlo e ignorarlo", cost: 0, health: 0, happiness: -10, money: 0, adoptsPet: false, resultMsg: "Te fuiste a casa triste pensando en el perrito." }
+                ]
+            },
+            {
+                minAge: 13, maxAge: 17,
+                title: "🐱 Gato en el callejón",
+                msg: "Un gato mimoso te sigue por el barrio de Santa Cruz y busca mimos. ¿Qué haces?",
+                petType: "Gato",
+                options: [
+                    { text: "Adoptarlo y llevarlo a casa", cost: 0, health: 0, happiness: 20, money: 0, adoptsPet: true, resultMsg: "Te has llevado al gatito a casa." },
+                    { text: "Seguir tu camino", cost: 0, health: 0, happiness: -5, money: 0, adoptsPet: false, resultMsg: "Decidiste continuar sin hacerte cargo del gato." }
+                ]
+            },
+            {
+                minAge: 13, maxAge: 17,
+                title: "📝 Examen de Secundaria",
+                msg: "Tienes un examen muy difícil mañana y no has estudiado nada.",
+                options: [
+                    { text: "Preparar chuletas e intentar copiar", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Aprobaste de milagro, pero el estrés te dejó un mal sabor de boca." },
+                    { text: "Ir a dormir e intentar responder lo que sepas", cost: 0, health: 0, happiness: 10, money: 0, resultMsg: "Suspendiste dignamente pero descansaste bien." }
+                ]
+            },
+            {
+                minAge: 18, maxAge: 60,
+                title: "🎪 Puesto en la Feria",
+                msg: "Un amigo te propone invertir 300€ para montar un pequeño puesto de buñuelos en la Feria.",
+                options: [
+                    { text: "Invertir 300€", cost: 300, health: -5, happiness: 15, money: 700, resultMsg: "¡El puesto fue un éxito rotundo! Recuperaste la inversión y ganaste 400€ netos." },
+                    { text: "Rechazar la oferta", cost: 0, health: 0, happiness: 0, money: 0, resultMsg: "Decidiste no arriesgar tu dinero." }
+                ]
+            },
+            {
+                minAge: 20, maxAge: 65,
+                title: "💻 Curso de Capacitación",
+                msg: "Un centro privado ofrece un curso intensivo por 200€ que promete mejorar tus habilidades.",
+                options: [
+                    { text: "Pagar la matrícula (200€)", cost: 200, health: 0, happiness: 10, money: 0, resultMsg: "Completaste el curso con éxito. Ahora estás mejor preparado." },
+                    { text: "Ahorrar el dinero", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Preferiste mantener tus ahorros intactos." }
+                ]
+            },
+            {
+                minAge: 65, maxAge: 110,
+                title: "🚌 Viaje del IMSERSO",
+                msg: "Te ofrecen una plaza para un viaje de una semana a la costa por 100€.",
+                options: [
+                    { text: "Irte de viaje (100€)", cost: 100, health: 10, happiness: 25, money: 0, resultMsg: "¡Lo pasaste genial bailando y tomando el sol en la playa!" },
+                    { text: "Quedarte en Sevilla", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Te quedaste tranquilo en casa viendo la televisión." }
+                ]
+            }
+        ];
 
-      if (edad >= 80) {
-        mostrarPantallaMuerte("Has fallecido de vejez a los " + edad + " años.");
-      }
-    }
+        /**
+         * Storage Repository module.
+         */
+        const Storage = {
+            save(state) {
+                try {
+                    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state));
+                } catch (e) {
+                    console.error('Save operation failed:', e);
+                }
+            },
+            load() {
+                try {
+                    const raw = localStorage.getItem(CONFIG.STORAGE_KEY);
+                    return raw ? JSON.parse(raw) : null;
+                } catch (e) {
+                    console.error('Load operation failed:', e);
+                    return null;
+                }
+            },
+            clear() {
+                localStorage.removeItem(CONFIG.STORAGE_KEY);
+            }
+        };
 
-    function agregarLog(texto, esEvento = false) {
-      const log = document.getElementById("history-log");
-      const card = document.createElement("div");
-      card.className = esEvento ? "log-card event" : "log-card";
-      card.textContent = texto;
-      log.appendChild(card);
-      log.scrollTop = log.scrollHeight;
-    }
+        const gameState = {
+            player: null
+        };
 
-    function cerrarModalEvento() {
-      document.getElementById("modal-evento").classList.add("hidden");
-    }
+        const Utils = {
+            generateDNI() {
+                const num = Math.floor(10000000 + Math.random() * 68999999);
+                const letters = "TRWAGMYFPDXBNJZSQVHLCKE";
+                return `${num}${letters.charAt(num % 23)}`;
+            },
+            clamp(val, min, max) {
+                return Math.max(min, Math.min(max, val));
+            },
+            getRankName(rank) {
+                switch(rank) {
+                    case 1: return "Primaria";
+                    case 2: return "ESO";
+                    case 3: return "Bachillerato / FP Medio";
+                    case 4: return "FP Superior / Universidad";
+                    case 5: return "Máster";
+                    default: return "Sin estudios";
+                }
+            }
+        };
 
-    function elegirAdoptar() {
-      cerrarModalEvento();
-      const modalNombre = document.getElementById("modal-nombre");
-      const input = document.getElementById("input-nombre-perro");
-      modalNombre.classList.remove("hidden");
-      input.focus();
-      input.select();
-    }
+        /**
+         * UI Render & Component Controller.
+         */
+        const UI = {
+            elements: {
+                modal: document.getElementById('custom-modal'),
+                modalTitle: document.getElementById('modal-title-text'),
+                modalMsg: document.getElementById('modal-msg-text'),
+                modalDynamic: document.getElementById('modal-dynamic-content'),
+                modalBtns: document.getElementById('modal-buttons-container'),
+                startScreen: document.getElementById('start-screen'),
+                eventLog: document.getElementById('event-log'),
+                name: document.getElementById('player-name'),
+                age: document.getElementById('player-age'),
+                dni: document.getElementById('player-dni'),
+                pet: document.getElementById('player-pet'),
+                studies: document.getElementById('player-studies'),
+                job: document.getElementById('player-job'),
+                health: document.getElementById('health-val'),
+                happiness: document.getElementById('happiness-val'),
+                money: document.getElementById('money-val'),
+                fileSelector: document.getElementById('file-selector')
+            },
 
-    function confirmarNombre() {
-      const input = document.getElementById("input-nombre-perro");
-      nombreMascota = input.value.trim() || "Toby";
-      tieneMascota = true;
+            render() {
+                const p = gameState.player;
+                if (!p) return;
 
-      document.getElementById("modal-nombre").classList.add("hidden");
-      agregarLog(`🐶 Le has puesto de nombre ${nombreMascota} a tu nuevo perro.`, true);
-    }
+                this.elements.name.innerText = p.name;
+                this.elements.age.innerText = `Edad: ${p.age} años`;
+                this.elements.dni.innerText = `DNI: ${p.dni}`;
+                this.elements.pet.innerText = p.pet ? `🐾 ${p.pet.name} (${p.pet.type})` : "🐾 Sin mascota";
+                this.elements.health.innerText = p.health;
+                this.elements.happiness.innerText = p.happiness;
+                this.elements.money.innerText = p.money;
+                this.elements.studies.innerText = p.studies;
+                this.elements.job.innerText = p.job;
 
-    function mostrarPantallaMuerte(motivo) {
-      document.getElementById("texto-muerte").textContent = motivo || "Has fallecido.";
-      document.getElementById("modal-muerte").classList.remove("hidden");
-    }
+                this.renderLogs();
+            },
 
-    function reiniciarPartida() {
-      // Ocultar todos los modales
-      document.getElementById("modal-evento").classList.add("hidden");
-      document.getElementById("modal-nombre").classList.add("hidden");
-      document.getElementById("modal-muerte").classList.add("hidden");
+            renderLogs() {
+                const p = gameState.player;
+                if (!p) return;
 
-      // Resetear variables del juego
-      edad = 4;
-      tieneMascota = false;
-      nombreMascota = null;
+                this.elements.eventLog.innerHTML = "";
+                p.logs.forEach(msg => {
+                    const div = document.createElement('div');
+                    div.className = 'log-entry';
+                    div.innerText = msg;
+                    this.elements.eventLog.appendChild(div);
+                });
+                this.elements.eventLog.scrollTop = this.elements.eventLog.scrollHeight;
+            },
 
-      // Resetear historial
-      const log = document.getElementById("history-log");
-      log.innerHTML = `<div class="log-card">Has cumplido 4 años.</div>`;
-    }
-  </script>
+            openModal() {
+                this.elements.modal.classList.add('is-active');
+            },
+
+            closeModal() {
+                this.elements.modal.classList.remove('is-active');
+            },
+
+            showAlert(title, message, callback) {
+                this.elements.modalTitle.innerText = title;
+                this.elements.modalMsg.innerText = message;
+                this.elements.modalDynamic.innerHTML = '';
+                this.elements.modalBtns.innerHTML = `<button class="modal-btn modal-btn-confirm" data-action="close-alert-modal">Aceptar</button>`;
+                
+                this._modalCallback = callback;
+                this.openModal();
+            },
+
+            showDeathModal(cause) {
+                const p = gameState.player;
+                this.elements.modalTitle.innerText = "💀 FIN DE TU HISTORIA";
+                this.elements.modalMsg.innerText = `Has fallecido a los ${p.age} años. Causa: ${cause}.`;
+                this.elements.modalDynamic.innerHTML = `
+                    <div style="text-align:center; font-size:0.85em; color:#555; padding: 10px; background:#f9f9f9; border-radius:8px;">
+                        <p><strong>Estudios alcanzados:</strong> ${p.studies}</p>
+                        <p><strong>Último empleo:</strong> ${p.job}</p>
+                        <p><strong>Mascota:</strong> ${p.pet ? `${p.pet.name} (${p.pet.type})` : 'Ninguna'}</p>
+                        <p><strong>Herencia final:</strong> ${p.money}€</p>
+                    </div>
+                `;
+                this.elements.modalBtns.innerHTML = `
+                    <button class="modal-btn modal-btn-confirm" data-action="confirm-reset">Comenzar nueva vida</button>
+                `;
+                this.openModal();
+            },
+
+            showChoiceModal(eventObj) {
+                const p = gameState.player;
+                this.elements.modalTitle.innerText = eventObj.title;
+                this.elements.modalMsg.innerText = eventObj.msg;
+                this.elements.modalDynamic.innerHTML = '';
+                this.elements.modalBtns.innerHTML = '';
+
+                eventObj.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'modal-btn modal-btn-confirm';
+                    btn.style.marginBottom = '4px';
+                    btn.innerText = opt.text;
+
+                    if (opt.cost > 0 && p.money < opt.cost) {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.5';
+                        btn.innerText += ` (Sin fondos: ${opt.cost}€)`;
+                    }
+
+                    btn.dataset.action = 'select-choice-option';
+                    btn.dataset.choiceIdx = idx;
+                    this.elements.modalBtns.appendChild(btn);
+                });
+
+                this._currentChoiceEvent = eventObj;
+                this.openModal();
+            }
+        };
+
+        /**
+         * Core Engine Controller.
+         */
+        const Engine = {
+            init() {
+                const savedData = Storage.load();
+                if (savedData) {
+                    gameState.player = this.normalizeState(savedData);
+                    UI.elements.startScreen.classList.add('hidden');
+                    UI.render();
+
+                    if (gameState.player.isDead) {
+                        UI.showDeathModal("Fallecido");
+                    } else if (gameState.player.pendingStudyAge !== null) {
+                        this.openStudyModal();
+                    }
+                } else {
+                    UI.elements.startScreen.classList.remove('hidden');
+                }
+
+                this.bindFileInput();
+            },
+
+            normalizeState(raw) {
+                const completed = Array.isArray(raw.completedStudies) ? raw.completedStudies : [];
+                
+                // Migración para partidas guardadas antiguas
+                if (completed.length === 0 && raw.studies && raw.studies !== "Ninguno") {
+                    const found = STUDIES.find(s => s.title === raw.studies);
+                    if (found) {
+                        STUDIES.forEach(s => {
+                            if (s.rank <= found.rank) completed.push(s.id);
+                        });
+                    }
+                }
+
+                return {
+                    name: raw.name || "",
+                    dni: raw.dni || Utils.generateDNI(),
+                    age: raw.age || 0,
+                    health: raw.health !== undefined ? raw.health : 100,
+                    happiness: raw.happiness !== undefined ? raw.happiness : 100,
+                    money: raw.money !== undefined ? raw.money : 0,
+                    salary: raw.salary || 0,
+                    studies: raw.studies || "Ninguno",
+                    completedStudies: completed,
+                    job: raw.job || "En paro",
+                    pet: raw.pet || null,
+                    pendingStudyAge: raw.pendingStudyAge !== undefined ? raw.pendingStudyAge : null,
+                    isDead: !!raw.isDead,
+                    logs: Array.isArray(raw.logs) ? raw.logs.map(l => (typeof l === 'string' ? l : (l.msg || JSON.stringify(l)))) : []
+                };
+            },
+
+            getPlayerStudyRank() {
+                const p = gameState.player;
+                if (!p || !p.completedStudies || p.completedStudies.length === 0) return 0;
+                return p.completedStudies.reduce((max, id) => {
+                    const st = STUDIES.find(s => s.id === id);
+                    return st ? Math.max(max, st.rank) : max;
+                }, 0);
+            },
+
+            startGame() {
+                const nameEl = document.getElementById('name-input');
+                const s1El = document.getElementById('surname1-input');
+                const s2El = document.getElementById('surname2-input');
+
+                const n = nameEl.value.trim();
+                const s1 = s1El.value.trim();
+                const s2 = s2El.value.trim();
+
+                if (!n || !s1 || !s2) {
+                    UI.showAlert("Error", "Rellena todos los campos.");
+                    return;
+                }
+
+                const hospital = HOSPITALS[Math.floor(Math.random() * HOSPITALS.length)];
+
+                gameState.player = {
+                    name: `${n} ${s1} ${s2}`,
+                    dni: Utils.generateDNI(),
+                    age: 0,
+                    health: 100,
+                    happiness: 100,
+                    money: 0,
+                    salary: 0,
+                    studies: "Ninguno",
+                    completedStudies: [],
+                    job: "En paro",
+                    pet: null,
+                    pendingStudyAge: null,
+                    isDead: false,
+                    logs: [`Has nacido en ${hospital}. ¡Recién llegado y listo para dar guerra!`]
+                };
+
+                Storage.save(gameState.player);
+                UI.elements.startScreen.classList.add('hidden');
+                UI.render();
+            },
+
+            checkMortality() {
+                const p = gameState.player;
+                if (p.health <= 0) {
+                    return { dead: true, cause: "Complicaciones graves de salud" };
+                }
+                if (p.age >= 70) {
+                    let chance = (p.age - 70) * 0.03;
+                    if (p.age >= 100) chance = 1.0;
+                    if (Math.random() < chance) {
+                        return { dead: true, cause: "Causas naturales debido a la vejez" };
+                    }
+                }
+                return { dead: false };
+            },
+
+            nextYear() {
+                const p = gameState.player;
+                if (p.isDead) {
+                    UI.showDeathModal("Fallecido");
+                    return;
+                }
+
+                if (p.pendingStudyAge !== null) {
+                    this.openStudyModal();
+                    return;
+                }
+
+                p.age++;
+                p.logs.push(`Has cumplido ${p.age} años.`);
+
+                if (p.pet) {
+                    p.pet.age++;
+                    p.happiness = Utils.clamp(p.happiness + 5, 0, 100);
+
+                    if (p.age >= CONFIG.MIN_WORKING_AGE) {
+                        p.money -= CONFIG.PET_MAINTENANCE_COST;
+                        p.logs.push(`🐾 Mantenimiento anual de tu ${p.pet.type.toLowerCase()} ${p.pet.name} (-${CONFIG.PET_MAINTENANCE_COST}€, +5% felicidad).`);
+                    } else {
+                        p.logs.push(`🐾 Tu ${p.pet.type.toLowerCase()} ${p.pet.name} te da mucho cariño (+5% felicidad, gastos asumidos por tus padres).`);
+                    }
+
+                    if (p.pet.age >= CONFIG.PET_DEATH_MIN_AGE) {
+                        const petDeathChance = (p.pet.age - (CONFIG.PET_DEATH_MIN_AGE - 1)) * 0.20;
+                        if (p.pet.age >= CONFIG.PET_DEATH_MAX_AGE || Math.random() < petDeathChance) {
+                            p.logs.push(`🌈 Tu ${p.pet.type.toLowerCase()} ${p.pet.name} ha fallecido de viejito a los ${p.pet.age} años. Siempre estará en tu recuerdo.`);
+                            p.happiness = Utils.clamp(p.happiness - 25, 0, 100);
+                            p.pet = null;
+                        }
+                    }
+                }
+
+                let triggeredChoice = false;
+
+                if (p.age >= 3 && Math.random() < 0.35) {
+                    const availableChoices = CHOICE_EVENTS.filter(ev => {
+                        if (p.age < ev.minAge || p.age > ev.maxAge) return false;
+                        if (ev.petType && p.pet) return false;
+                        return true;
+                    });
+
+                    if (availableChoices.length > 0) {
+                        const choiceEv = availableChoices[Math.floor(Math.random() * availableChoices.length)];
+                        triggeredChoice = true;
+                        UI.showChoiceModal(choiceEv);
+                    }
+                }
+
+                if (!triggeredChoice && p.age >= 3) {
+                    const availableEvents = RANDOM_EVENTS.filter(ev => {
+                        if (p.age < ev.minAge || p.age > ev.maxAge) return false;
+                        if (ev.requiresPet && !p.pet) return false;
+                        return true;
+                    });
+
+                    if (availableEvents.length > 0) {
+                        const ev = availableEvents[Math.floor(Math.random() * availableEvents.length)];
+                        p.health = Utils.clamp(p.health + ev.health, 0, 100);
+                        p.happiness = Utils.clamp(p.happiness + ev.happiness, 0, 100);
+                        p.money += ev.money;
+
+                        let msgText = ev.msg;
+                        if (p.pet && msgText.includes("{petName}")) {
+                            msgText = msgText.replace(/\{petName\}/g, p.pet.name);
+                        }
+                        p.logs.push(`⚡ Evento: ${msgText}`);
+                    }
+                }
+
+                if (p.job !== "En paro" && p.salary > 0) {
+                    p.money += p.salary;
+                    p.logs.push(`Has cobrado tu sueldo anual de ${p.salary}€. ¡Dinero ahorrado!`);
+                }
+
+                if (!triggeredChoice) {
+                    const deathInfo = this.checkMortality();
+                    if (deathInfo.dead) {
+                        p.isDead = true;
+                        p.logs.push(`💀 Has fallecido a los ${p.age} años por: ${deathInfo.cause}.`);
+                        Storage.save(p);
+                        UI.render();
+                        UI.showDeathModal(deathInfo.cause);
+                        return;
+                    }
+                }
+
+                if (p.age < CONFIG.MIN_WORKING_AGE) {
+                    const mandatoryStudy = STUDIES.find(est => est.minAge === p.age);
+                    if (mandatoryStudy && !p.completedStudies.includes(mandatoryStudy.id)) {
+                        p.pendingStudyAge = p.age;
+                        p.logs.push(`¡Has cumplido ${p.age} años! Debes elegir tus nuevos estudios obligatoriamente.`);
+                        Storage.save(p);
+                        UI.render();
+                        this.openStudyModal();
+                        return;
+                    }
+                }
+
+                Storage.save(p);
+                UI.render();
+            },
+
+            handleChoiceOption(optionIdx) {
+                const p = gameState.player;
+                const eventObj = UI._currentChoiceEvent;
+                if (!eventObj || !eventObj.options[optionIdx]) return;
+
+                const opt = eventObj.options[optionIdx];
+                let logResultMsg = opt.resultMsg;
+
+                if (opt.adoptsPet) {
+                    const petType = eventObj.petType || "Mascota";
+                    const defaultName = petType === "Perro" ? "Toby" : "Michi";
+                    let petName = prompt(`¿Qué nombre quieres ponerle a tu ${petType.toLowerCase()}?`, defaultName);
+
+                    if (!petName || !petName.trim()) {
+                        petName = defaultName;
+                    }
+
+                    p.pet = {
+                        type: petType,
+                        name: petName.trim(),
+                        age: 0
+                    };
+                    logResultMsg += ` Le has puesto de nombre ${p.pet.name}.`;
+                }
+
+                p.money -= opt.cost;
+                p.health = Utils.clamp(p.health + opt.health, 0, 100);
+                p.happiness = Utils.clamp(p.happiness + opt.happiness, 0, 100);
+                p.money += opt.money;
+
+                p.logs.push(`🤔 Decisión: ${logResultMsg}`);
+                Storage.save(p);
+                UI.render();
+                UI.closeModal();
+
+                const deathInfo = this.checkMortality();
+                if (deathInfo.dead) {
+                    p.isDead = true;
+                    p.logs.push(`💀 Has fallecido a los ${p.age} años por: ${deathInfo.cause}.`);
+                    Storage.save(p);
+                    UI.render();
+                    UI.showDeathModal(deathInfo.cause);
+                }
+            },
+
+            openStudyModal() {
+                const p = gameState.player;
+                if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
+
+                UI.elements.modalTitle.innerText = "Centro de Estudios";
+                UI.elements.modalMsg.innerText = p.pendingStudyAge !== null ?
+                    "¡Has alcanzado una edad clave! Debes continuar tu formación académica:" :
+                    "Selecciona una titulación para ampliar tus oportunidades laborales:";
+
+                let listHTML = `<div class="modal-scrollable-content">`;
+                
+                STUDIES.forEach((est, idx) => {
+                    const isCompleted = p.completedStudies.includes(est.id);
+                    const meetsAge = p.age >= est.minAge;
+                    const meetsReq = !est.reqId || est.reqId.some(req => p.completedStudies.includes(req));
+                    const canAfford = p.money >= est.cost;
+
+                    let statusText = "";
+                    let isDisabled = false;
+
+                    if (isCompleted) {
+                        statusText = "✅ Completado";
+                        isDisabled = true;
+                    } else if (!meetsReq) {
+                        statusText = "🔒 Requiere estudios previos";
+                        isDisabled = true;
+                    } else if (!meetsAge) {
+                        statusText = `🔒 Mínimo ${est.minAge} años`;
+                        isDisabled = true;
+                    } else if (!canAfford) {
+                        statusText = `💰 Matrícula ${est.cost}€ (Insuficiente)`;
+                        isDisabled = true;
+                    } else {
+                        statusText = est.cost > 0 ? `Coste: ${est.cost}€` : "Gratuito";
+                    }
+
+                    listHTML += `
+                        <button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;" 
+                                ${isDisabled ? 'disabled' : ''} 
+                                data-action="select-study" 
+                                data-study-idx="${idx}">
+                            📚 ${est.title}
+                            <div style="font-size:0.75em; opacity:0.85; font-weight:normal;">${statusText}</div>
+                        </button>
+                    `;
+                });
+                
+                listHTML += `</div>`;
+
+                UI.elements.modalDynamic.innerHTML = listHTML;
+
+                if (p.pendingStudyAge !== null) {
+                    UI.elements.modalBtns.innerHTML = '';
+                } else {
+                    UI.elements.modalBtns.innerHTML = `<button class="modal-btn modal-btn-cancel" data-action="close-modal">Cerrar</button>`;
+                }
+                UI.openModal();
+            },
+
+            selectStudy(idx) {
+                const p = gameState.player;
+                const study = STUDIES[idx];
+                if (!study) return;
+
+                if (p.completedStudies.includes(study.id)) return;
+                if (study.cost > 0 && p.money < study.cost) return;
+
+                p.money -= study.cost;
+                p.completedStudies.push(study.id);
+                p.studies = study.title;
+                p.happiness = Utils.clamp(p.happiness + 15, 0, 100);
+                p.pendingStudyAge = null;
+
+                p.logs.push(`🎓 ¡Has completado con éxito: ${study.title}! ${study.cost > 0 ? `(-${study.cost}€)` : ''}`);
+                
+                Storage.save(p);
+                UI.render();
+                UI.closeModal();
+            },
+
+            openJobModal() {
+                const p = gameState.player;
+                if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
+                if (p.age < CONFIG.MIN_WORKING_AGE) {
+                    UI.showAlert("Menor de edad", "No puedes trabajar hasta cumplir los 18 años. ¡Céntrate en tus estudios!");
+                    return;
+                }
+
+                const playerRank = this.getPlayerStudyRank();
+
+                UI.elements.modalTitle.innerText = "Búsqueda de Empleo";
+                UI.elements.modalMsg.innerText = "Ofertas de trabajo disponibles según tu nivel académico:";
+
+                let listHTML = `<div class="modal-scrollable-content">`;
+                
+                JOBS.forEach((job, idx) => {
+                    const meetsRank = playerRank >= job.reqStudyRank;
+                    const reqTitle = Utils.getRankName(job.reqStudyRank);
+
+                    let statusText = "";
+                    let isDisabled = false;
+
+                    if (!meetsRank) {
+                        statusText = `🔒 Requiere estudios: ${reqTitle}`;
+                        isDisabled = true;
+                    } else {
+                        statusText = `Sueldo: ${job.salary}€/año`;
+                    }
+
+                    listHTML += `
+                        <button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;" 
+                                ${isDisabled ? 'disabled' : ''} 
+                                data-action="select-job" 
+                                data-job-idx="${idx}">
+                            💼 ${job.title}
+                            <div style="font-size:0.75em; opacity:0.85; font-weight:normal;">${statusText}</div>
+                        </button>
+                    `;
+                });
+
+                listHTML += `</div>`;
+
+                UI.elements.modalDynamic.innerHTML = listHTML;
+                UI.elements.modalBtns.innerHTML = `<button class="modal-btn modal-btn-cancel" data-action="close-modal">Cerrar</button>`;
+                UI.openModal();
+            },
+
+            selectJob(idx) {
+                const p = gameState.player;
+                const job = JOBS[idx];
+                if (!job) return;
+
+                const playerRank = this.getPlayerStudyRank();
+                if (playerRank < job.reqStudyRank) return;
+
+                p.job = job.title;
+                p.salary = job.salary;
+                p.logs.push(`💼 ¡Has comenzado a trabajar como ${job.title}! Sueldo anual: ${job.salary}€.`);
+
+                Storage.save(p);
+                UI.render();
+                UI.closeModal();
+            },
+
+            openManagerModal() {
+                UI.elements.modalTitle.innerText = "Gestión de Partida";
+                UI.elements.modalMsg.innerText = "¿Qué deseas hacer con los datos de tu partida?";
+                UI.elements.modalDynamic.innerHTML = '';
+
+                UI.elements.modalBtns.innerHTML = `
+                    <button class="modal-btn modal-btn-cancel" data-action="close-modal">Cerrar</button>
+                    <button class="modal-btn modal-btn-confirm" data-action="export-save">Guardar archivo</button>
+                    <button class="modal-btn modal-btn-confirm" data-action="trigger-load">Cargar archivo</button>
+                `;
+                UI.openModal();
+            },
+
+            exportSave() {
+                const p = gameState.player;
+                if (!p || !p.name) {
+                    UI.showAlert("Aviso", "No hay partida activa.");
+                    return;
+                }
+
+                UI.closeModal();
+                const dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(p, null, 2));
+                const anchor = document.createElement('a');
+                anchor.setAttribute("href", dataStr);
+                anchor.setAttribute("download", `sevillalife_${p.name.replace(/\s+/g, '_')}.json`);
+                document.body.appendChild(anchor);
+                anchor.click();
+                anchor.remove();
+            },
+
+            bindFileInput() {
+                UI.elements.fileSelector.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const importedPlayer = JSON.parse(e.target.result);
+                            if (importedPlayer.name !== undefined) {
+                                gameState.player = this.normalizeState(importedPlayer);
+                                gameState.player.logs.push("¡Papeles arreglaítos! Partida cargada correctamente.");
+                                Storage.save(gameState.player);
+                                UI.elements.startScreen.classList.add('hidden');
+                                UI.render();
+
+                                if (gameState.player.isDead) {
+                                    UI.showDeathModal("Partida anterior finalizada");
+                                } else {
+                                    UI.showAlert("Gestión completa", "Partida cargada con éxito.");
+                                    if (gameState.player.pendingStudyAge !== null) this.openStudyModal();
+                                }
+                            } else {
+                                UI.showAlert("Error", "El archivo no contiene una partida válida.");
+                            }
+                        } catch (err) {
+                            UI.showAlert("Error", "El archivo está corrupto o no tiene el formato correcto.");
+                        }
+                        event.target.value = "";
+                    };
+                    reader.readAsText(file);
+                });
+            },
+
+            resetGame() {
+                Storage.clear();
+                location.reload();
+            }
+        };
+
+        /**
+         * Global Event Delegation listening on root Document.
+         */
+        document.addEventListener('click', (event) => {
+            const actionBtn = event.target.closest('[data-action]');
+            if (!actionBtn || actionBtn.disabled) return;
+
+            const action = actionBtn.dataset.action;
+
+            switch (action) {
+                case 'start-game':
+                    Engine.startGame();
+                    break;
+                case 'next-year':
+                    Engine.nextYear();
+                    break;
+                case 'open-studies':
+                    Engine.openStudyModal();
+                    break;
+                case 'open-jobs':
+                    Engine.openJobModal();
+                    break;
+                case 'open-manager':
+                    Engine.openManagerModal();
+                    break;
+                case 'confirm-reset':
+                    Engine.resetGame();
+                    break;
+                case 'close-modal':
+                    UI.closeModal();
+                    break;
+                case 'close-alert-modal':
+                    UI.closeModal();
+                    if (typeof UI._modalCallback === 'function') {
+                        const cb = UI._modalCallback;
+                        UI._modalCallback = null;
+                        cb();
+                    }
+                    break;
+                case 'select-choice-option':
+                    Engine.handleChoiceOption(parseInt(actionBtn.dataset.choiceIdx, 10));
+                    break;
+                case 'select-study':
+                    Engine.selectStudy(parseInt(actionBtn.dataset.studyIdx, 10));
+                    break;
+                case 'select-job':
+                    Engine.selectJob(parseInt(actionBtn.dataset.jobIdx, 10));
+                    break;
+                case 'export-save':
+                    Engine.exportSave();
+                    break;
+                case 'trigger-load':
+                    UI.closeModal();
+                    UI.elements.fileSelector.click();
+                    break;
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            Engine.init();
+        });
+    })();
+    </script>
 </body>
 </html>
