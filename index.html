@@ -167,20 +167,20 @@
         let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, studies: "Ninguno", job: "En paro", logs: [] };
         
         const estudiosSevilla = [
-            { title: "Educación Primaria", cost: 0 },
-            { title: "Educación Secundaria (ESO)", cost: 0 },
-            { title: "Bachillerato", cost: 100 },
-            { title: "Grado Medio FP", cost: 300 },
-            { title: "Grado Superior FP", cost: 600 },
-            { title: "Universidad de Sevilla", cost: 1200 }
+            { title: "Educación Primaria", minAge: 6, cost: 0 },
+            { title: "Educación Secundaria (ESO)", minAge: 12, cost: 0 },
+            { title: "Bachillerato", minAge: 16, cost: 100 },
+            { title: "Grado Medio FP", minAge: 17, cost: 300 },
+            { title: "Grado Superior FP", minAge: 18, cost: 600 },
+            { title: "Universidad de Sevilla", minAge: 18, cost: 1200 }
         ];
 
         const trabajosSevilla = [
-            { title: "Repartidor", salary: 12000 }, 
-            { title: "Reponedor", salary: 14000 }, 
-            { title: "Camarero", salary: 15000 }, 
-            { title: "Dependiente", salary: 16500 }, 
-            { title: "Operario Lipasam", salary: 22000 }
+            { title: "Repartidor", minAge: 18, salary: 12000 }, 
+            { title: "Reponedor", minAge: 18, salary: 14000 }, 
+            { title: "Camarero", minAge: 18, salary: 15000 }, 
+            { title: "Dependiente", minAge: 18, salary: 16500 }, 
+            { title: "Operario Lipasam", minAge: 18, salary: 22000 }
         ];
 
         function generateDNI() {
@@ -202,13 +202,19 @@
         }
 
         function openStudyModal() {
+            if (player.age < 6) {
+                showModalAlert("Demasiado joven", "Eres muy pequeño para estudiar todavía. ¡Disfruta de la infancia!");
+                return;
+            }
+
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title-text').innerText = "Estudios";
             document.getElementById('modal-msg-text').innerText = "Elige qué formación deseas cursar:";
             
             let listHTML = `<div class="modal-scrollable-content">`;
             estudiosSevilla.forEach(est => {
-                listHTML += `<button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;" onclick="selectStudy('${est.title}')">📚 ${est.title} <span style="font-size:0.8em; opacity:0.8;">(${est.cost}€)</span></button>`;
+                let disabled = player.age < est.minAge ? "opacity: 0.5; pointer-events: none;" : "";
+                listHTML += `<button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px; ${disabled}" onclick="selectStudy('${est.title}')">📚 ${est.title} <span style="font-size:0.8em; opacity:0.8;">(Edad mín: ${est.minAge}, ${est.cost}€)</span></button>`;
             });
             listHTML += `</div>`;
             
@@ -227,6 +233,11 @@
         }
 
         function openJobModal() {
+            if (player.age < 18) {
+                showModalAlert("Menor de edad", "No puedes trabajar hasta cumplir los 18 años. ¡Céntrate en los estudios!");
+                return;
+            }
+
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title-text').innerText = "Búsqueda de Empleo";
             document.getElementById('modal-msg-text').innerText = "Selecciona un puesto de trabajo disponible en Sevilla:";
@@ -360,6 +371,13 @@
         function nextYear() { 
             player.age++; 
             player.logs.push(`Has cumplido ${player.age} años.`);
+
+            // Evento automático al cumplir 6 años
+            if (player.age === 6) {
+                player.studies = "Educación Primaria";
+                player.logs.push(`¡Has cumplido 6 años y has comenzado la Educación Primaria en el colegio!`);
+            }
+
             saveGame(); 
             updateUI(); 
             renderLogs(); 
