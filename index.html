@@ -168,6 +168,12 @@
     <script>
         let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", pendingStudyAge: null, isDead: false, logs: [] };
         
+        const hospitalesSevilla = [
+            "el Hospital Virgen del Rocío",
+            "el Hospital Virgen Macarena",
+            "el Hospital de Valme"
+        ];
+
         const estudiosSevilla = [
             { title: "Educación Primaria", minAge: 6, cost: 0 },
             { title: "Educación Secundaria (ESO)", minAge: 12, cost: 0 },
@@ -314,7 +320,7 @@
             let btnContainer = document.getElementById('modal-buttons-container');
             btnContainer.innerHTML = '';
 
-            eventObj.options.forEach((opt, idx) => {
+            eventObj.options.forEach((opt) => {
                 let btn = document.createElement('button');
                 btn.className = 'modal-btn modal-btn-confirm';
                 btn.style.marginBottom = '4px';
@@ -338,7 +344,6 @@
                     renderLogs();
                     modal.style.display = 'none';
 
-                    // Verificar muerte tras la decisión
                     let deathInfo = checkMortality();
                     if (deathInfo.dead) {
                         player.isDead = true;
@@ -512,7 +517,24 @@
             let s1 = document.getElementById('surname1-input').value.trim();
             let s2 = document.getElementById('surname2-input').value.trim();
             if (n === "" || s1 === "" || s2 === "") { showModalAlert("Error", "Rellena todos los campos."); return; }
-            player = { name: `${n} ${s1} ${s2}`, dni: generateDNI(), age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", pendingStudyAge: null, isDead: false, logs: [`Has nacido en Sevilla. ¡Bienvenido al mundo!`] };
+            
+            let hospital = hospitalesSevilla[Math.floor(Math.random() * hospitalesSevilla.length)];
+            
+            player = { 
+                name: `${n} ${s1} ${s2}`, 
+                dni: generateDNI(), 
+                age: 0, 
+                health: 100, 
+                happiness: 100, 
+                money: 0, 
+                salary: 0, 
+                studies: "Ninguno", 
+                job: "En paro", 
+                pendingStudyAge: null, 
+                isDead: false, 
+                logs: [`Has nacido en ${hospital}. ¡Recién llegado y listo para dar guerra!`] 
+            };
+            
             saveGame(); 
             document.getElementById('start-screen').classList.add('hidden'); 
             updateUI(); 
@@ -572,7 +594,6 @@
 
             let triggeredChoice = false;
 
-            // 35% de probabilidad de lanzar un evento de elección si hay alguno disponible para la edad
             if (player.age >= 3 && Math.random() < 0.35) {
                 let eleccionesDisponibles = eventosEleccion.filter(ev => player.age >= ev.minAge && player.age <= ev.maxAge);
                 if (eleccionesDisponibles.length > 0) {
@@ -582,7 +603,6 @@
                 }
             }
 
-            // Si no saltó evento de elección, salta un evento automático normal
             if (!triggeredChoice && player.age >= 3) {
                 let eventosDisponibles = eventosAleatorios.filter(ev => player.age >= ev.minAge && player.age <= ev.maxAge);
                 if (eventosDisponibles.length > 0) {
@@ -594,13 +614,11 @@
                 }
             }
 
-            // Cobro de sueldo
             if (player.job !== "En paro" && player.salary > 0) {
                 player.money += player.salary;
                 player.logs.push(`Has cobrado tu sueldo anual de ${player.salary}€. ¡Dinero ahorrado!`);
             }
 
-            // Comprobar muerte (solo si no hay un modal de elección en pantalla)
             if (!triggeredChoice) {
                 let deathInfo = checkMortality();
                 if (deathInfo.dead) {
@@ -614,7 +632,6 @@
                 }
             }
 
-            // Estudios obligatorios (< 18 años)
             if (player.age < 18) {
                 let reachedStudy = estudiosSevilla.find(est => est.minAge === player.age);
                 if (reachedStudy) {
