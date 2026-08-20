@@ -80,7 +80,8 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             transition: opacity 0.2s ease, transform 0.1s ease; text-align: center;
         }
-        .action-btn:active { transform: scale(0.98); opacity: 0.9; }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.6); }
+        .action-btn:not(:disabled):active { transform: scale(0.98); opacity: 0.9; }
 
         #custom-modal {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -189,20 +190,24 @@
         ];
 
         const STUDIES = [
-            { title: "Educación Primaria", minAge: 6, cost: 0 },
-            { title: "Educación Secundaria (ESO)", minAge: 12, cost: 0 },
-            { title: "Bachillerato", minAge: 16, cost: 0 },
-            { title: "Grado Medio FP", minAge: 17, cost: 0 },
-            { title: "Grado Superior FP", minAge: 18, cost: 600 },
-            { title: "Universidad de Sevilla", minAge: 18, cost: 1200 }
+            { id: 'primaria', title: "Educación Primaria", minAge: 6, cost: 0, reqId: null, rank: 1 },
+            { id: 'eso', title: "Educación Secundaria (ESO)", minAge: 12, cost: 0, reqId: ['primaria'], rank: 2 },
+            { id: 'bachillerato', title: "Bachillerato", minAge: 16, cost: 0, reqId: ['eso'], rank: 3 },
+            { id: 'fp_medio', title: "Grado Medio FP", minAge: 16, cost: 0, reqId: ['eso'], rank: 3 },
+            { id: 'fp_superior', title: "Grado Superior FP", minAge: 18, cost: 600, reqId: ['bachillerato', 'fp_medio'], rank: 4 },
+            { id: 'universidad', title: "Universidad de Sevilla", minAge: 18, cost: 1200, reqId: ['bachillerato', 'fp_superior'], rank: 4 },
+            { id: 'master', title: "Máster Universitario", minAge: 22, cost: 2500, reqId: ['universidad'], rank: 5 }
         ];
 
         const JOBS = [
-            { title: "Repartidor", minAge: 18, salary: 12000 }, 
-            { title: "Reponedor", minAge: 18, salary: 14000 }, 
-            { title: "Camarero", minAge: 18, salary: 15000 }, 
-            { title: "Dependiente", minAge: 18, salary: 16500 }, 
-            { title: "Operario Lipasam", minAge: 18, salary: 22000 }
+            { title: "Repartidor / Peón", minAge: 18, reqStudyRank: 0, salary: 12000 }, 
+            { title: "Camarero / Reponedor", minAge: 18, reqStudyRank: 1, salary: 14500 }, 
+            { title: "Dependiente de Comercio", minAge: 18, reqStudyRank: 2, salary: 17000 }, 
+            { title: "Operario Lipasam", minAge: 18, reqStudyRank: 2, salary: 22500 },
+            { title: "Técnico Administrativo", minAge: 18, reqStudyRank: 3, salary: 26000 },
+            { title: "Programador / Técnico Especializado", minAge: 19, reqStudyRank: 4, salary: 36000 },
+            { title: "Abogado / Ingeniero / Médico", minAge: 22, reqStudyRank: 4, salary: 48000 },
+            { title: "Director de Proyecto / Máster Exec.", minAge: 25, reqStudyRank: 5, salary: 65000 }
         ];
 
         const RANDOM_EVENTS = [
@@ -328,6 +333,16 @@
             },
             clamp(val, min, max) {
                 return Math.max(min, Math.min(max, val));
+            },
+            getRankName(rank) {
+                switch(rank) {
+                    case 1: return "Primaria";
+                    case 2: return "ESO";
+                    case 3: return "Bachillerato / FP Medio";
+                    case 4: return "FP Superior / Universidad";
+                    case 5: return "Máster";
+                    default: return "Sin estudios";
+                }
             }
         };
 
@@ -410,7 +425,7 @@
                 this.elements.modalMsg.innerText = `Has fallecido a los ${p.age} años. Causa: ${cause}.`;
                 this.elements.modalDynamic.innerHTML = `
                     <div style="text-align:center; font-size:0.85em; color:#555; padding: 10px; background:#f9f9f9; border-radius:8px;">
-                        <p><strong>Estudios finalizados:</strong> ${p.studies}</p>
+                        <p><strong>Estudios alcanzados:</strong> ${p.studies}</p>
                         <p><strong>Último empleo:</strong> ${p.job}</p>
                         <p><strong>Mascota:</strong> ${p.pet ? `${p.pet.name} (${p.pet.type})` : 'Ninguna'}</p>
                         <p><strong>Herencia final:</strong> ${p.money}€</p>
@@ -475,6 +490,18 @@
             },
 
             normalizeState(raw) {
+                const completed = Array.isArray(raw.completedStudies) ? raw.completedStudies : [];
+                
+                // Migración para partidas guardadas antiguas
+                if (completed.length === 0 && raw.studies && raw.studies !== "Ninguno") {
+                    const found = STUDIES.find(s => s.title === raw.studies);
+                    if (found) {
+                        STUDIES.forEach(s => {
+                            if (s.rank <= found.rank) completed.push(s.id);
+                        });
+                    }
+                }
+
                 return {
                     name: raw.name || "",
                     dni: raw.dni || Utils.generateDNI(),
@@ -484,12 +511,22 @@
                     money: raw.money !== undefined ? raw.money : 0,
                     salary: raw.salary || 0,
                     studies: raw.studies || "Ninguno",
+                    completedStudies: completed,
                     job: raw.job || "En paro",
                     pet: raw.pet || null,
                     pendingStudyAge: raw.pendingStudyAge !== undefined ? raw.pendingStudyAge : null,
                     isDead: !!raw.isDead,
                     logs: Array.isArray(raw.logs) ? raw.logs.map(l => (typeof l === 'string' ? l : (l.msg || JSON.stringify(l)))) : []
                 };
+            },
+
+            getPlayerStudyRank() {
+                const p = gameState.player;
+                if (!p || !p.completedStudies || p.completedStudies.length === 0) return 0;
+                return p.completedStudies.reduce((max, id) => {
+                    const st = STUDIES.find(s => s.id === id);
+                    return st ? Math.max(max, st.rank) : max;
+                }, 0);
             },
 
             startGame() {
@@ -517,6 +554,7 @@
                     money: 0,
                     salary: 0,
                     studies: "Ninguno",
+                    completedStudies: [],
                     job: "En paro",
                     pet: null,
                     pendingStudyAge: null,
@@ -635,8 +673,8 @@
                 }
 
                 if (p.age < CONFIG.MIN_WORKING_AGE) {
-                    const reachedStudy = STUDIES.find(est => est.minAge === p.age);
-                    if (reachedStudy) {
+                    const mandatoryStudy = STUDIES.find(est => est.minAge === p.age);
+                    if (mandatoryStudy && !p.completedStudies.includes(mandatoryStudy.id)) {
                         p.pendingStudyAge = p.age;
                         p.logs.push(`¡Has cumplido ${p.age} años! Debes elegir tus nuevos estudios obligatoriamente.`);
                         Storage.save(p);
@@ -699,17 +737,49 @@
                 const p = gameState.player;
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
 
-                UI.elements.modalTitle.innerText = "Estudios";
+                UI.elements.modalTitle.innerText = "Centro de Estudios";
                 UI.elements.modalMsg.innerText = p.pendingStudyAge !== null ?
-                    "¡Has alcanzado una edad clave! Debes elegir tus nuevos estudios para poder continuar:" :
-                    "Elige qué formación deseas cursar:";
+                    "¡Has alcanzado una edad clave! Debes continuar tu formación académica:" :
+                    "Selecciona una titulación para ampliar tus oportunidades laborales:";
 
                 let listHTML = `<div class="modal-scrollable-content">`;
+                
                 STUDIES.forEach((est, idx) => {
-                    const disabled = p.age < est.minAge ? "opacity: 0.5; pointer-events: none;" : "";
-                    const costText = est.cost > 0 ? `${est.cost}€` : "Gratuito";
-                    listHTML += `<button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px; ${disabled}" data-action="select-study" data-study-idx="${idx}">📚 ${est.title} <span style="font-size:0.8em; opacity:0.8;">(Edad mín: ${est.minAge}, ${costText})</span></button>`;
+                    const isCompleted = p.completedStudies.includes(est.id);
+                    const meetsAge = p.age >= est.minAge;
+                    const meetsReq = !est.reqId || est.reqId.some(req => p.completedStudies.includes(req));
+                    const canAfford = p.money >= est.cost;
+
+                    let statusText = "";
+                    let isDisabled = false;
+
+                    if (isCompleted) {
+                        statusText = "✅ Completado";
+                        isDisabled = true;
+                    } else if (!meetsReq) {
+                        statusText = "🔒 Requiere estudios previos";
+                        isDisabled = true;
+                    } else if (!meetsAge) {
+                        statusText = `🔒 Mínimo ${est.minAge} años`;
+                        isDisabled = true;
+                    } else if (!canAfford) {
+                        statusText = `💰 Matrícula ${est.cost}€ (Insuficiente)`;
+                        isDisabled = true;
+                    } else {
+                        statusText = est.cost > 0 ? `Coste: ${est.cost}€` : "Gratuito";
+                    }
+
+                    listHTML += `
+                        <button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;" 
+                                ${isDisabled ? 'disabled' : ''} 
+                                data-action="select-study" 
+                                data-study-idx="${idx}">
+                            📚 ${est.title}
+                            <div style="font-size:0.75em; opacity:0.85; font-weight:normal;">${statusText}</div>
+                        </button>
+                    `;
                 });
+                
                 listHTML += `</div>`;
 
                 UI.elements.modalDynamic.innerHTML = listHTML;
@@ -727,15 +797,16 @@
                 const study = STUDIES[idx];
                 if (!study) return;
 
-                if (study.cost > 0 && p.money < study.cost) {
-                    UI.showAlert("Sin fondos", `No tienes suficiente dinero para pagar la matrícula de ${study.title}. Cuesta ${study.cost}€.`);
-                    return;
-                }
+                if (p.completedStudies.includes(study.id)) return;
+                if (study.cost > 0 && p.money < study.cost) return;
 
                 p.money -= study.cost;
+                p.completedStudies.push(study.id);
                 p.studies = study.title;
+                p.happiness = Utils.clamp(p.happiness + 15, 0, 100);
                 p.pendingStudyAge = null;
-                p.logs.push(`Has comenzado a cursar: ${study.title} ${study.cost > 0 ? `(Coste: ${study.cost}€)` : '(Gratuito)'}.`);
+
+                p.logs.push(`🎓 ¡Has completado con éxito: ${study.title}! ${study.cost > 0 ? `(-${study.cost}€)` : ''}`);
                 
                 Storage.save(p);
                 UI.render();
@@ -746,17 +817,42 @@
                 const p = gameState.player;
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
                 if (p.age < CONFIG.MIN_WORKING_AGE) {
-                    UI.showAlert("Menor de edad", "No puedes trabajar hasta cumplir los 18 años. ¡Céntrate en los estudios!");
+                    UI.showAlert("Menor de edad", "No puedes trabajar hasta cumplir los 18 años. ¡Céntrate en tus estudios!");
                     return;
                 }
 
+                const playerRank = this.getPlayerStudyRank();
+
                 UI.elements.modalTitle.innerText = "Búsqueda de Empleo";
-                UI.elements.modalMsg.innerText = "Selecciona un puesto de trabajo disponible en Sevilla:";
+                UI.elements.modalMsg.innerText = "Ofertas de trabajo disponibles según tu nivel académico:";
 
                 let listHTML = `<div class="modal-scrollable-content">`;
+                
                 JOBS.forEach((job, idx) => {
-                    listHTML += `<button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;" data-action="select-job" data-job-idx="${idx}">💼 ${job.title} <span style="font-size:0.8em; opacity:0.8;">(${job.salary}€/año)</span></button>`;
+                    const meetsRank = playerRank >= job.reqStudyRank;
+                    const reqTitle = Utils.getRankName(job.reqStudyRank);
+
+                    let statusText = "";
+                    let isDisabled = false;
+
+                    if (!meetsRank) {
+                        statusText = `🔒 Requiere estudios: ${reqTitle}`;
+                        isDisabled = true;
+                    } else {
+                        statusText = `Sueldo: ${job.salary}€/año`;
+                    }
+
+                    listHTML += `
+                        <button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;" 
+                                ${isDisabled ? 'disabled' : ''} 
+                                data-action="select-job" 
+                                data-job-idx="${idx}">
+                            💼 ${job.title}
+                            <div style="font-size:0.75em; opacity:0.85; font-weight:normal;">${statusText}</div>
+                        </button>
+                    `;
                 });
+
                 listHTML += `</div>`;
 
                 UI.elements.modalDynamic.innerHTML = listHTML;
@@ -769,9 +865,12 @@
                 const job = JOBS[idx];
                 if (!job) return;
 
+                const playerRank = this.getPlayerStudyRank();
+                if (playerRank < job.reqStudyRank) return;
+
                 p.job = job.title;
                 p.salary = job.salary;
-                p.logs.push(`¡Has conseguido un nuevo trabajo como ${job.title}! Sueldo anual: ${job.salary}€.`);
+                p.logs.push(`💼 ¡Has comenzado a trabajar como ${job.title}! Sueldo anual: ${job.salary}€.`);
 
                 Storage.save(p);
                 UI.render();
@@ -853,7 +952,7 @@
          */
         document.addEventListener('click', (event) => {
             const actionBtn = event.target.closest('[data-action]');
-            if (!actionBtn) return;
+            if (!actionBtn || actionBtn.disabled) return;
 
             const action = actionBtn.dataset.action;
 
