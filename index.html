@@ -57,9 +57,9 @@
                 <div class="subtitle">Registro oficial de identidad y alta en el padrón municipal.</div>
                 <div class="note">* Nota: No es obligatorio introducir tus datos reales.</div>
 
-                <label>Nombre</label><input type="text" id="name-input" maxlength="15" placeholder="Ej: Francisco">
-                <label>Primer Apellido</label><input type="text" id="surname1-input" maxlength="15" placeholder="Ej: Pérez">
-                <label>Segundo Apellido</label><input type="text" id="surname2-input" maxlength="15" placeholder="Ej: Gómez">
+                <label>Nombre</label><input type="text" id="name-input" maxlength="15">
+                <label>Primer Apellido</label><input type="text" id="surname1-input" maxlength="15">
+                <label>Segundo Apellido</label><input type="text" id="surname2-input" maxlength="15">
                 
                 <label>Zona / Distrito de nacimiento</label>
                 <div class="select-trigger" onclick="openNeighborhoodModal()">
@@ -116,10 +116,10 @@
             { name: "Sur", info: "Cerca del parque, +Salud" },
             { name: "Los Remedios", info: "Poder adquisitivo, mayores gastos (-200€)" },
             { name: "Cerro-Amate", info: "Economía local, +Ahorro (+50€)" },
-            { name: "Este-Alcosa-Torreblanca", info: "Residencial tranquilo, +Felicidad" },
-            { name: "San Pablo-Santa Justa", info: "Bien conectado, +Inteligencia" },
-            { name: "Norte", info: "Barrio obrero, +Ahorro (+50€)" },
-            { name: "Bellavista-La Palmera", info: "Zona tranquila, +Salud" }
+            { name: "Este-Alcosa-Torreblanca", info: "Residencial tranquilo" },
+            { name: "San Pablo-Santa Justa", info: "Bien conectado" },
+            { name: "Norte", info: "Barrio obrero tradicional" },
+            { name: "Bellavista-La Palmera", info: "Zona tranquila" }
         ];
 
         function saveGame() { localStorage.setItem('sevillalife_save', JSON.stringify(player)); }
@@ -220,22 +220,6 @@
                 case "Cerro-Amate":
                     player.money += 50;
                     player.logs.push("Cerro-Amate: Has encontrado la forma de ahorrar algo en los tenderos locales (+50€).");
-                    break;
-                case "Este-Alcosa-Torreblanca":
-                    player.happiness = Math.min(100, player.happiness + 1);
-                    player.logs.push("Este-Alcosa-Torreblanca: La tranquilidad residencial te aporta bienestar (+1 Felicidad).");
-                    break;
-                case "San Pablo-Santa Justa":
-                    player.intelligence = Math.min(100, (player.intelligence || 50) + 1);
-                    player.logs.push("San Pablo-Santa Justa: Estar bien conectado te ha facilitado aprender cosas nuevas (+1 Inteligencia).");
-                    break;
-                case "Norte":
-                    player.money += 50;
-                    player.logs.push("Norte: El día a día en el barrio te ha permitido un pequeño ahorro (+50€).");
-                    break;
-                case "Bellavista-La Palmera":
-                    player.health = Math.min(100, player.health + 1);
-                    player.logs.push("Bellavista-La Palmera: La tranquilidad de la zona ha favorecido tu bienestar (+1 Salud).");
                     break;
                 default:
                     break;
