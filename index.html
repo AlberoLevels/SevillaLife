@@ -128,6 +128,7 @@
             <div class="header-info">
                 <div class="badge" id="player-age">Edad: 0 años</div>
                 <div class="badge" id="player-dni">DNI: ---</div>
+                <div class="badge" id="player-pet">🐾 Sin mascota</div>
             </div>
             <div class="status-grid">
                 <div class="status-badge">📚 <span id="player-studies">Ninguno</span></div>
@@ -166,7 +167,7 @@
     </div>
     
     <script>
-        let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", pendingStudyAge: null, isDead: false, logs: [] };
+        let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", pet: null, pendingStudyAge: null, isDead: false, logs: [] };
         
         const hospitalesSevilla = [
             "el Hospital Virgen del Rocío",
@@ -221,7 +222,12 @@
             { minAge: 3, maxAge: 120, msg: "Te has encontrado un billete de 10€ tirado en la Alameda.", health: 0, happiness: 10, money: 10 },
             { minAge: 3, maxAge: 120, msg: "Paseaste tranquilamente por el Parque María Luisa y desconectaste por completo.", health: 5, happiness: 10, money: 0 },
             { minAge: 3, maxAge: 120, msg: "Has pillado una gripe fuerte durante el invierno.", health: -20, happiness: -15, money: 0 },
-            { minAge: 3, maxAge: 120, msg: "Has tenido un año tranquilo y sin grandes sobresaltos.", health: 2, happiness: 2, money: 0 }
+            { minAge: 3, maxAge: 120, msg: "Has tenido un año tranquilo y sin grandes sobresaltos.", health: 2, happiness: 2, money: 0 },
+
+            // EVENTOS DE MASCOTA CONDICIONALES
+            { minAge: 6, maxAge: 120, requiresPet: true, msg: "Tu mascota {petName} ha estado jugando contigo todo el día y te ha transmitido mucha alegría.", health: 2, happiness: 12, money: 0 },
+            { minAge: 18, maxAge: 120, requiresPet: true, msg: "Tuviste que llevar a {petName} al veterinario por un chequeo imprevisto.", health: 0, happiness: -5, money: -70 },
+            { minAge: 6, maxAge: 120, requiresPet: true, msg: "{petName} ha hecho de las suyas y ha mordisqueado algo valioso en casa.", health: 0, happiness: -5, money: 0 }
         ];
 
         const eventosEleccion = [
@@ -230,12 +236,23 @@
                 minAge: 6, maxAge: 11,
                 title: "🐾 Perro callejero",
                 msg: "Te encuentras a un perro pequeño abandonado cerca de Triana. ¿Qué haces?",
+                petType: "Perro",
                 options: [
-                    { text: "Llevártelo a casa e intentar convencer a tus padres", cost: 0, health: 0, happiness: 20, money: -20, resultMsg: "Tus padres aceptaron al perro tras comprar comida y vacunas. ¡Eres más feliz!" },
-                    { text: "Dejarlo e ignorarlo", cost: 0, health: 0, happiness: -10, money: 0, resultMsg: "Te fuiste a casa triste pensando en el perrito." }
+                    { text: "Llevártelo a casa y ponerle un nombre", cost: 0, health: 0, happiness: 20, money: 0, adoptsPet: true, resultMsg: "Decidiste llevarte al perrito a casa." },
+                    { text: "Dejarlo e ignorarlo", cost: 0, health: 0, happiness: -10, money: 0, adoptsPet: false, resultMsg: "Te fuiste a casa triste pensando en el perrito." }
                 ]
             },
             // ADOLESCENCIA
+            {
+                minAge: 13, maxAge: 17,
+                title: "🐱 Gato en el callejón",
+                msg: "Un gato mimoso te sigue por el barrio de Santa Cruz y busca mimos. ¿Qué haces?",
+                petType: "Gato",
+                options: [
+                    { text: "Adoptarlo y llevarlo a casa", cost: 0, health: 0, happiness: 20, money: 0, adoptsPet: true, resultMsg: "Te has llevado al gatito a casa." },
+                    { text: "Seguir tu camino", cost: 0, health: 0, happiness: -5, money: 0, adoptsPet: false, resultMsg: "Decidiste continuar sin hacerte cargo del gato." }
+                ]
+            },
             {
                 minAge: 13, maxAge: 17,
                 title: "📝 Examen de Secundaria",
@@ -302,6 +319,7 @@
                 <div style="text-align:center; font-size:0.85em; color:#555; padding: 10px; background:#f9f9f9; border-radius:8px;">
                     <p><strong>Estudios finalizados:</strong> ${player.studies}</p>
                     <p><strong>Último empleo:</strong> ${player.job}</p>
+                    <p><strong>Mascota:</strong> ${player.pet ? `${player.pet.name} (${player.pet.type})` : 'Ninguna'}</p>
                     <p><strong>Herencia final:</strong> ${player.money}€</p>
                 </div>
             `;
@@ -333,12 +351,31 @@
                 }
 
                 btn.onclick = () => {
+                    let logResultMsg = opt.resultMsg;
+
+                    if (opt.adoptsPet) {
+                        let petType = eventObj.petType || "Mascota";
+                        let defaultName = petType === "Perro" ? "Toby" : "Michi";
+                        let petName = prompt(`¿Qué nombre quieres ponerle a tu ${petType.toLowerCase()}?`, defaultName);
+                        
+                        if (!petName || !petName.trim()) {
+                            petName = defaultName;
+                        }
+
+                        player.pet = {
+                            type: petType,
+                            name: petName.trim(),
+                            age: 0
+                        };
+                        logResultMsg += ` Le has puesto de nombre ${player.pet.name}.`;
+                    }
+
                     player.money -= opt.cost;
                     player.health = Math.max(0, Math.min(100, player.health + opt.health));
                     player.happiness = Math.max(0, Math.min(100, player.happiness + opt.happiness));
                     player.money += opt.money;
                     
-                    player.logs.push(`🤔 Decisión: ${opt.resultMsg}`);
+                    player.logs.push(`🤔 Decisión: ${logResultMsg}`);
                     saveGame();
                     updateUI();
                     renderLogs();
@@ -487,6 +524,7 @@
                     if (importedPlayer.name !== undefined) {
                         player = importedPlayer;
                         if (player.salary === undefined) player.salary = 0;
+                        if (player.pet === undefined) player.pet = null;
                         if (player.pendingStudyAge === undefined) player.pendingStudyAge = null;
                         if (player.isDead === undefined) player.isDead = false;
                         player.logs.push("¡Papeles arreglaítos! Partida cargada correctamente.");
@@ -530,6 +568,7 @@
                 salary: 0, 
                 studies: "Ninguno", 
                 job: "En paro", 
+                pet: null,
                 pendingStudyAge: null, 
                 isDead: false, 
                 logs: [`Has nacido en ${hospital}. ¡Recién llegado y listo para dar guerra!`] 
@@ -545,6 +584,7 @@
             document.getElementById('player-name').innerText = player.name;
             document.getElementById('player-age').innerText = `Edad: ${player.age} años`;
             document.getElementById('player-dni').innerText = `DNI: ${player.dni}`;
+            document.getElementById('player-pet').innerText = player.pet ? `🐾 ${player.pet.name} (${player.pet.type})` : "🐾 Sin mascota";
             document.getElementById('health-val').innerText = player.health;
             document.getElementById('happiness-val').innerText = player.happiness;
             document.getElementById('money-val').innerText = player.money;
@@ -592,10 +632,38 @@
             player.age++; 
             player.logs.push(`Has cumplido ${player.age} años.`);
 
+            // GESTIÓN CONTINUA DE LA MASCOTA
+            if (player.pet) {
+                player.pet.age++;
+                player.happiness = Math.min(100, player.happiness + 5);
+
+                if (player.age >= 18) {
+                    player.money -= 60;
+                    player.logs.push(`🐾 Mantenimiento anual de tu ${player.pet.type.toLowerCase()} ${player.pet.name} (-60€, +5% felicidad).`);
+                } else {
+                    player.logs.push(`🐾 Tu ${player.pet.type.toLowerCase()} ${player.pet.name} te da mucho cariño (+5% felicidad, gastos asumidos por tus padres).`);
+                }
+
+                // COMPROBACIÓN DE FALLECIMIENTO NATURAL DE LA MASCOTA
+                if (player.pet.age >= 12) {
+                    let petDeathChance = (player.pet.age - 11) * 0.20;
+                    if (player.pet.age >= 16 || Math.random() < petDeathChance) {
+                        player.logs.push(`🌈 Tu ${player.pet.type.toLowerCase()} ${player.pet.name} ha fallecido de viejito a los ${player.pet.age} años. Siempre estará en tu recuerdo.`);
+                        player.happiness = Math.max(0, player.happiness - 25);
+                        player.pet = null;
+                    }
+                }
+            }
+
             let triggeredChoice = false;
 
             if (player.age >= 3 && Math.random() < 0.35) {
-                let eleccionesDisponibles = eventosEleccion.filter(ev => player.age >= ev.minAge && player.age <= ev.maxAge);
+                let eleccionesDisponibles = eventosEleccion.filter(ev => {
+                    if (player.age < ev.minAge || player.age > ev.maxAge) return false;
+                    if (ev.petType && player.pet) return false; // No ofrecer más mascotas si ya tiene una
+                    return true;
+                });
+
                 if (eleccionesDisponibles.length > 0) {
                     let choiceEv = eleccionesDisponibles[Math.floor(Math.random() * eleccionesDisponibles.length)];
                     triggeredChoice = true;
@@ -604,13 +672,23 @@
             }
 
             if (!triggeredChoice && player.age >= 3) {
-                let eventosDisponibles = eventosAleatorios.filter(ev => player.age >= ev.minAge && player.age <= ev.maxAge);
+                let eventosDisponibles = eventosAleatorios.filter(ev => {
+                    if (player.age < ev.minAge || player.age > ev.maxAge) return false;
+                    if (ev.requiresPet && !player.pet) return false;
+                    return true;
+                });
+
                 if (eventosDisponibles.length > 0) {
                     let ev = eventosDisponibles[Math.floor(Math.random() * eventosDisponibles.length)];
                     player.health = Math.max(0, Math.min(100, player.health + ev.health));
                     player.happiness = Math.max(0, Math.min(100, player.happiness + ev.happiness));
                     player.money += ev.money;
-                    player.logs.push(`⚡ Evento: ${ev.msg}`);
+
+                    let msgText = ev.msg;
+                    if (player.pet && msgText.includes("{petName}")) {
+                        msgText = msgText.replace(/\{petName\}/g, player.pet.name);
+                    }
+                    player.logs.push(`⚡ Evento: ${msgText}`);
                 }
             }
 
@@ -660,6 +738,7 @@
             if (s) { 
                 player = JSON.parse(s); 
                 if (player.salary === undefined) player.salary = 0;
+                if (player.pet === undefined) player.pet = null;
                 if (player.pendingStudyAge === undefined) player.pendingStudyAge = null;
                 if (player.isDead === undefined) player.isDead = false;
                 document.getElementById('start-screen').classList.add('hidden'); 
