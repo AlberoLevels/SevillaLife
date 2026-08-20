@@ -164,7 +164,7 @@
     </div>
     
     <script>
-        let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, studies: "Ninguno", job: "En paro", logs: [] };
+        let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", logs: [] };
         
         const estudiosSevilla = [
             { title: "Educación Primaria", minAge: 6, cost: 0 },
@@ -255,6 +255,7 @@
 
         function selectJob(jobTitle, salary) {
             player.job = jobTitle;
+            player.salary = salary;
             player.logs.push(`¡Has conseguido un nuevo trabajo como ${jobTitle}! Sueldo anual: ${salary}€.`);
             saveGame();
             updateUI();
@@ -314,6 +315,7 @@
 
                     if (importedPlayer.name !== undefined) {
                         player = importedPlayer;
+                        if (player.salary === undefined) player.salary = 0;
                         player.logs.push("¡Papeles arreglaítos! Partida cargada correctamente.");
                         saveGame();
                         updateUI();
@@ -372,10 +374,16 @@
             player.age++; 
             player.logs.push(`Has cumplido ${player.age} años.`);
 
-            // Evento automático al cumplir 6 años
+            // Evento automático al cumplir 6 años para comenzar Primaria
             if (player.age === 6) {
                 player.studies = "Educación Primaria";
                 player.logs.push(`¡Has cumplido 6 años y has comenzado la Educación Primaria en el colegio!`);
+            }
+
+            // Sumar sueldo si tiene trabajo activo
+            if (player.job !== "En paro" && player.salary > 0) {
+                player.money += player.salary;
+                player.logs.push(`Has cobrado tu sueldo anual de ${player.salary}€. ¡Dinero ahorrado!`);
             }
 
             saveGame(); 
@@ -392,6 +400,7 @@
             let s = localStorage.getItem('sevillalife_save');
             if (s) { 
                 player = JSON.parse(s); 
+                if (player.salary === undefined) player.salary = 0;
                 document.getElementById('start-screen').style.display = 'none'; 
                 updateUI(); 
                 renderLogs(); 
