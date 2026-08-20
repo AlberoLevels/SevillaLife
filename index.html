@@ -98,7 +98,7 @@
         .modal-title { font-family: 'Montserrat', sans-serif; font-size: 1.1em; font-weight: 800; color: #C0392B; text-align: center; }
         .modal-message { font-size: 0.8em; color: #2c3e50; text-align: center; line-height: 1.4; }
         .modal-scrollable-content { width: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; max-height: 250px; }
-        .modal-buttons { display: flex; gap: 6px; margin-top: 4px; }
+        .modal-buttons { display: flex; gap: 6px; margin-top: 4px; flex-direction: column; }
         .modal-btn { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.8em; cursor: pointer; text-align: center; }
         .modal-btn-confirm { background: #C0392B; color: white; }
         .modal-btn-cancel { background: #ecf0f1; color: #555; }
@@ -120,4 +120,544 @@
                 <button class="start-btn" onclick="startGame()">Comenzar mi historia</button>
                 <button class="reset-btn" style="margin-top: 8px;" onclick="openManagerModal()">Gestión de Partida (Guardar / Cargar)</button>
             </div>
-            <div
+            <div class="start-copyright">&copy; 2026 AlberoLevels.</div>
+        </div>
+
+        <header>
+            <div id="player-name">---</div>
+            <div class="header-info">
+                <div class="badge" id="player-age">Edad: 0 años</div>
+                <div class="badge" id="player-dni">DNI: ---</div>
+            </div>
+            <div class="status-grid">
+                <div class="status-badge">📚 <span id="player-studies">Ninguno</span></div>
+                <div class="status-badge">💼 <span id="player-job">En paro</span></div>
+            </div>
+            <div class="stats">
+                <div>❤️ Salud: <span id="health-val">100</span>%</div>
+                <div>😊 Felicidad: <span id="happiness-val">100</span>%</div>
+                <div>💶 Dinero: <span id="money-val">0</span>€</div>
+            </div>
+        </header>
+
+        <main id="event-log"></main>
+
+        <div id="actions-panel">
+            <div class="action-row">
+                <button class="action-btn" onclick="nextYear()">Cumplir año</button>
+                <button class="action-btn" onclick="openStudyModal()">Estudiar</button>
+            </div>
+            <div class="action-row">
+                <button class="action-btn" onclick="openJobModal()">Buscar trabajo</button>
+            </div>
+            <button class="reset-btn" onclick="openManagerModal()">Gestión de Partida (Guardar / Cargar)</button>
+            <button class="reset-btn" onclick="confirmResetGame()">Reiniciar partida</button>
+            <div class="footer-copyright">&copy; 2026 AlberoLevels.</div>
+        </div>
+
+        <div id="custom-modal">
+            <div class="modal-card">
+                <div class="modal-title" id="modal-title-text">Aviso</div>
+                <div class="modal-message" id="modal-msg-text">Mensaje aquí</div>
+                <div id="modal-dynamic-content"></div>
+                <div class="modal-buttons" id="modal-buttons-container"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", pendingStudyAge: null, isDead: false, logs: [] };
+        
+        const estudiosSevilla = [
+            { title: "Educación Primaria", minAge: 6, cost: 0 },
+            { title: "Educación Secundaria (ESO)", minAge: 12, cost: 0 },
+            { title: "Bachillerato", minAge: 16, cost: 0 },
+            { title: "Grado Medio FP", minAge: 17, cost: 0 },
+            { title: "Grado Superior FP", minAge: 18, cost: 600 },
+            { title: "Universidad de Sevilla", minAge: 18, cost: 1200 }
+        ];
+
+        const trabajosSevilla = [
+            { title: "Repartidor", minAge: 18, salary: 12000 }, 
+            { title: "Reponedor", minAge: 18, salary: 14000 }, 
+            { title: "Camarero", minAge: 18, salary: 15000 }, 
+            { title: "Dependiente", minAge: 18, salary: 16500 }, 
+            { title: "Operario Lipasam", minAge: 18, salary: 22000 }
+        ];
+
+        const eventosAleatorios = [
+            // NIÑEZ
+            { minAge: 3, maxAge: 11, msg: "Te has caído jugando en el parque de María Luisa y te has raspado la rodilla.", health: -5, happiness: -5, money: 0 },
+            { minAge: 3, maxAge: 11, msg: "Tus padres te han llevado a tomar un helado en Los Italianos.", health: 0, happiness: 15, money: 0 },
+            { minAge: 3, maxAge: 11, msg: "Te han regañado en el colegio por distraerte mirando por la ventana.", health: 0, happiness: -10, money: 0 },
+            { minAge: 3, maxAge: 11, msg: "Has hecho un castillo de arena enorme durante un fin de semana en Matalascañas.", health: 5, happiness: 15, money: 0 },
+
+            // ADOLESCENCIA
+            { minAge: 12, maxAge: 17, msg: "Has quedado con tus amigos para dar una vuelta por Nervión.", health: 0, happiness: 10, money: -5 },
+            { minAge: 12, maxAge: 17, msg: "Has suspendido un examen importante y te han castigado sin salir.", health: 0, happiness: -15, money: 0 },
+            { minAge: 12, maxAge: 17, msg: "Tus padres te han subido un poco la paga semanal.", health: 0, happiness: 10, money: 10 },
+            { minAge: 12, maxAge: 17, msg: "Has estado bailando y disfrutando en la velá de tu barrio.", health: 0, happiness: 15, money: -10 },
+
+            // ADULTEZ
+            { minAge: 18, maxAge: 64, msg: "Has ido a la Feria de Abril y te has gastado un pico en la caseta.", health: 0, happiness: 15, money: -150 },
+            { minAge: 18, maxAge: 64, msg: "Un golpe de calor en pleno julio en Sevilla te ha dejado totalmente derretido.", health: -15, happiness: -10, money: 0 },
+            { minAge: 18, maxAge: 64, msg: "Fuiste al dentista a hacerte una revisión y una limpieza general.", health: 5, happiness: -5, money: -60 },
+            { minAge: 18, maxAge: 64, msg: "Te ha tocado un pequeño premio en un rasca y gana del centro.", health: 0, happiness: 15, money: 100 },
+            { minAge: 18, maxAge: 64, msg: "Comiste unos montaditos regulares y pasaste el fin de semana indispuesto.", health: -10, happiness: -10, money: 0 },
+
+            // VEJEZ
+            { minAge: 65, maxAge: 120, msg: "Te has sentado en un banco a comentar las obras del barrio con otros vecinos.", health: 5, happiness: 10, money: 0 },
+            { minAge: 65, maxAge: 120, msg: "Te duele la espalda por la humedad matutina del río Guadalquivir.", health: -10, happiness: -10, money: 0 },
+            { minAge: 65, maxAge: 120, msg: "Tus nietos te han visitado y les has dado un pequeño aguinaldo.", health: 5, happiness: 20, money: -20 },
+            { minAge: 65, maxAge: 120, msg: "Has ido al centro de salud a hacerte el chequeo anual y todo está correcto.", health: 10, happiness: 5, money: 0 },
+
+            // GENERALES
+            { minAge: 3, maxAge: 120, msg: "Te has encontrado un billete de 10€ tirado en la Alameda.", health: 0, happiness: 10, money: 10 },
+            { minAge: 3, maxAge: 120, msg: "Paseaste tranquilamente por el Parque María Luisa y desconectaste por completo.", health: 5, happiness: 10, money: 0 },
+            { minAge: 3, maxAge: 120, msg: "Has pillado una gripe fuerte durante el invierno.", health: -20, happiness: -15, money: 0 },
+            { minAge: 3, maxAge: 120, msg: "Has tenido un año tranquilo y sin grandes sobresaltos.", health: 2, happiness: 2, money: 0 }
+        ];
+
+        const eventosEleccion = [
+            // NIÑEZ
+            {
+                minAge: 6, maxAge: 11,
+                title: "🐾 Perro callejero",
+                msg: "Te encuentras a un perro pequeño abandonado cerca de Triana. ¿Qué haces?",
+                options: [
+                    { text: "Llevártelo a casa e intentar convencer a tus padres", cost: 0, health: 0, happiness: 20, money: -20, resultMsg: "Tus padres aceptaron al perro tras comprar comida y vacunas. ¡Eres más feliz!" },
+                    { text: "Dejarlo e ignorarlo", cost: 0, health: 0, happiness: -10, money: 0, resultMsg: "Te fuiste a casa triste pensando en el perrito." }
+                ]
+            },
+            // ADOLESCENCIA
+            {
+                minAge: 13, maxAge: 17,
+                title: "📝 Examen de Secundaria",
+                msg: "Tienes un examen muy difícil mañana y no has estudiado nada.",
+                options: [
+                    { text: "Preparar chuletas e intentar copiar", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Aprobaste de milagro, pero el estrés te dejó un mal sabor de boca." },
+                    { text: "Ir a dormir e intentar responder lo que sepas", cost: 0, health: 0, happiness: 10, money: 0, resultMsg: "Suspendiste dignamente pero descansaste bien." }
+                ]
+            },
+            // ADULTEZ
+            {
+                minAge: 18, maxAge: 60,
+                title: "🎪 Puesto en la Feria",
+                msg: "Un amigo te propone invertir 300€ para montar un pequeño puesto de buñuelos en la Feria.",
+                options: [
+                    { text: "Invertir 300€", cost: 300, health: -5, happiness: 15, money: 700, resultMsg: "¡El puesto fue un éxito rotundo! Recuperaste la inversión y ganaste 400€ netos." },
+                    { text: "Rechazar la oferta", cost: 0, health: 0, happiness: 0, money: 0, resultMsg: "Decidiste no arriesgar tu dinero." }
+                ]
+            },
+            {
+                minAge: 20, maxAge: 65,
+                title: "💻 Curso de Capacitación",
+                msg: "Un centro privado ofrece un curso intensivo por 200€ que promete mejorar tus habilidades.",
+                options: [
+                    { text: "Pagar la matrícula (200€)", cost: 200, health: 0, happiness: 10, money: 0, resultMsg: "Completaste el curso con éxito. Ahora estás mejor preparado." },
+                    { text: "Ahorrar el dinero", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Preferiste mantener tus ahorros intactos." }
+                ]
+            },
+            // VEJEZ
+            {
+                minAge: 65, maxAge: 110,
+                title: "🚌 Viaje del IMSERSO",
+                msg: "Te ofrecen una plaza para un viaje de una semana a la costa por 100€.",
+                options: [
+                    { text: "Irte de viaje (100€)", cost: 100, health: 10, happiness: 25, money: 0, resultMsg: "¡Lo pasaste genial bailando y tomando el sol en la playa!" },
+                    { text: "Quedarte en Sevilla", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Te quedaste tranquilo en casa viendo la televisión." }
+                ]
+            }
+        ];
+
+        function generateDNI() {
+            let num = Math.floor(10000000 + Math.random() * 68999999);
+            let letters = "TRWAGMYFPDXBNJZSQVHLCKE";
+            return `${num}${letters.charAt(num % 23)}`;
+        }
+
+        function saveGame() { localStorage.setItem('sevillalife_save', JSON.stringify(player)); }
+
+        function showModalAlert(title, message, callback) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title-text').innerText = title;
+            document.getElementById('modal-msg-text').innerText = message;
+            document.getElementById('modal-dynamic-content').innerHTML = '';
+            document.getElementById('modal-buttons-container').innerHTML = `<button class="modal-btn modal-btn-confirm" id="modal-ok-btn">Aceptar</button>`;
+            modal.style.display = 'flex';
+            document.getElementById('modal-ok-btn').onclick = () => { modal.style.display = 'none'; if (callback) callback(); };
+        }
+
+        function showDeathModal(cause) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title-text').innerText = "💀 FIN DE TU HISTORIA";
+            document.getElementById('modal-msg-text').innerText = `Has fallecido a los ${player.age} años. Causa: ${cause}.`;
+            document.getElementById('modal-dynamic-content').innerHTML = `
+                <div style="text-align:center; font-size:0.85em; color:#555; padding: 10px; background:#f9f9f9; border-radius:8px;">
+                    <p><strong>Estudios finalizados:</strong> ${player.studies}</p>
+                    <p><strong>Último empleo:</strong> ${player.job}</p>
+                    <p><strong>Herencia final:</strong> ${player.money}€</p>
+                </div>
+            `;
+            document.getElementById('modal-buttons-container').innerHTML = `
+                <button class="modal-btn modal-btn-confirm" onclick="confirmResetGame()">Comenzar nueva vida</button>
+            `;
+            modal.style.display = 'flex';
+        }
+
+        function showChoiceModal(eventObj) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title-text').innerText = eventObj.title;
+            document.getElementById('modal-msg-text').innerText = eventObj.msg;
+            document.getElementById('modal-dynamic-content').innerHTML = '';
+            
+            let btnContainer = document.getElementById('modal-buttons-container');
+            btnContainer.innerHTML = '';
+
+            eventObj.options.forEach((opt, idx) => {
+                let btn = document.createElement('button');
+                btn.className = 'modal-btn modal-btn-confirm';
+                btn.style.marginBottom = '4px';
+                btn.innerText = opt.text;
+
+                if (opt.cost > 0 && player.money < opt.cost) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.innerText += ` (Sin fondos: ${opt.cost}€)`;
+                }
+
+                btn.onclick = () => {
+                    player.money -= opt.cost;
+                    player.health = Math.max(0, Math.min(100, player.health + opt.health));
+                    player.happiness = Math.max(0, Math.min(100, player.happiness + opt.happiness));
+                    player.money += opt.money;
+                    
+                    player.logs.push(`🤔 Decisión: ${opt.resultMsg}`);
+                    saveGame();
+                    updateUI();
+                    renderLogs();
+                    modal.style.display = 'none';
+
+                    // Verificar muerte tras la decisión
+                    let deathInfo = checkMortality();
+                    if (deathInfo.dead) {
+                        player.isDead = true;
+                        player.logs.push(`💀 Has fallecido a los ${player.age} años por: ${deathInfo.cause}.`);
+                        saveGame();
+                        updateUI();
+                        renderLogs();
+                        showDeathModal(deathInfo.cause);
+                    }
+                };
+                btnContainer.appendChild(btn);
+            });
+
+            modal.style.display = 'flex';
+        }
+
+        function openStudyModal() {
+            if (player.isDead) { showDeathModal("Fallecido"); return; }
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title-text').innerText = "Estudios";
+            document.getElementById('modal-msg-text').innerText = player.pendingStudyAge !== null ? 
+                "¡Has alcanzado una edad clave! Debes elegir tus nuevos estudios para poder continuar:" : 
+                "Elige qué formación deseas cursar:";
+            
+            let listHTML = `<div class="modal-scrollable-content">`;
+            estudiosSevilla.forEach(est => {
+                let disabled = player.age < est.minAge ? "opacity: 0.5; pointer-events: none;" : "";
+                let costText = est.cost > 0 ? `${est.cost}€` : "Gratuito";
+                listHTML += `<button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px; ${disabled}" onclick="selectStudy('${est.title}', ${est.cost})">📚 ${est.title} <span style="font-size:0.8em; opacity:0.8;">(Edad mín: ${est.minAge}, ${costText})</span></button>`;
+            });
+            listHTML += `</div>`;
+            
+            document.getElementById('modal-dynamic-content').innerHTML = listHTML;
+            
+            let btnContainer = document.getElementById('modal-buttons-container');
+            if (player.pendingStudyAge !== null) {
+                btnContainer.innerHTML = '';
+            } else {
+                btnContainer.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`;
+            }
+            modal.style.display = 'flex';
+        }
+
+        function selectStudy(studyName, cost) {
+            if (cost > 0 && player.money < cost) {
+                showModalAlert("Sin fondos", `No tienes suficiente dinero para pagar la matrícula de ${studyName}. Cuesta ${cost}€.`);
+                return;
+            }
+            player.money -= cost;
+            player.studies = studyName;
+            player.pendingStudyAge = null; 
+            player.logs.push(`Has comenzado a cursar: ${studyName} ${cost > 0 ? `(Coste: ${cost}€)` : '(Gratuito)'}.`);
+            saveGame();
+            updateUI();
+            renderLogs();
+            document.getElementById('custom-modal').style.display = 'none';
+        }
+
+        function openJobModal() {
+            if (player.isDead) { showDeathModal("Fallecido"); return; }
+            if (player.age < 18) {
+                showModalAlert("Menor de edad", "No puedes trabajar hasta cumplir los 18 años. ¡Céntrate en los estudios!");
+                return;
+            }
+
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title-text').innerText = "Búsqueda de Empleo";
+            document.getElementById('modal-msg-text').innerText = "Selecciona un puesto de trabajo disponible en Sevilla:";
+            
+            let listHTML = `<div class="modal-scrollable-content">`;
+            trabajosSevilla.forEach(job => {
+                listHTML += `<button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;" onclick="selectJob('${job.title}', ${job.salary})">💼 ${job.title} <span style="font-size:0.8em; opacity:0.8;">(${job.salary}€/año)</span></button>`;
+            });
+            listHTML += `</div>`;
+
+            document.getElementById('modal-dynamic-content').innerHTML = listHTML;
+            document.getElementById('modal-buttons-container').innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`;
+            modal.style.display = 'flex';
+        }
+
+        function selectJob(jobTitle, salary) {
+            player.job = jobTitle;
+            player.salary = salary;
+            player.logs.push(`¡Has conseguido un nuevo trabajo como ${jobTitle}! Sueldo anual: ${salary}€.`);
+            saveGame();
+            updateUI();
+            renderLogs();
+            document.getElementById('custom-modal').style.display = 'none';
+        }
+
+        function openManagerModal() {
+            const modal = document.getElementById('custom-modal');
+            const btnContainer = document.getElementById('modal-buttons-container');
+            document.getElementById('modal-title-text').innerText = "Gestión de Partida";
+            document.getElementById('modal-msg-text').innerText = "¿Qué deseas hacer con los datos de tu partida?";
+            document.getElementById('modal-dynamic-content').innerHTML = '';
+            
+            btnContainer.innerHTML = `
+                <button class="modal-btn modal-btn-cancel" id="modal-close-mgr">Cerrar</button>
+                <button class="modal-btn modal-btn-confirm" id="modal-go-save">Guardar archivo</button>
+                <button class="modal-btn modal-btn-confirm" id="modal-go-load">Cargar archivo</button>
+            `;
+            modal.style.display = 'flex';
+
+            document.getElementById('modal-close-mgr').onclick = () => { modal.style.display = 'none'; };
+
+            document.getElementById('modal-go-save').onclick = () => {
+                if (player.name === "") { showModalAlert("Aviso", "No hay partida activa."); return; }
+                modal.style.display = 'none';
+                
+                let dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(player, null, 2));
+                let downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", `sevillalife_${player.name.replace(/\s+/g, '_')}.json`);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+            };
+
+            document.getElementById('modal-go-load').onclick = () => {
+                modal.style.display = 'none';
+                document.getElementById('file-selector').click();
+            };
+        }
+
+        function handleFileLoad(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let importedPlayer = JSON.parse(e.target.result);
+                    
+                    if (Array.isArray(importedPlayer.logs)) {
+                        importedPlayer.logs = importedPlayer.logs.map(log => 
+                            (typeof log === 'string') ? log : (log.msg || JSON.stringify(log))
+                        );
+                    }
+
+                    if (importedPlayer.name !== undefined) {
+                        player = importedPlayer;
+                        if (player.salary === undefined) player.salary = 0;
+                        if (player.pendingStudyAge === undefined) player.pendingStudyAge = null;
+                        if (player.isDead === undefined) player.isDead = false;
+                        player.logs.push("¡Papeles arreglaítos! Partida cargada correctamente.");
+                        saveGame();
+                        updateUI();
+                        renderLogs();
+                        document.getElementById('start-screen').classList.add('hidden');
+                        
+                        if (player.isDead) {
+                            showDeathModal("Partida anterior finalizada");
+                        } else {
+                            showModalAlert("Gestión completa", "Partida cargada con éxito.");
+                            if (player.pendingStudyAge !== null) openStudyModal();
+                        }
+                    } else {
+                        showModalAlert("Error", "El archivo no contiene una partida válida.");
+                    }
+                } catch (err) {
+                    showModalAlert("Error", "El archivo está corrupto o no tiene el formato correcto.");
+                }
+                event.target.value = "";
+            };
+            reader.readAsText(file);
+        }
+
+        function startGame() {
+            let n = document.getElementById('name-input').value.trim();
+            let s1 = document.getElementById('surname1-input').value.trim();
+            let s2 = document.getElementById('surname2-input').value.trim();
+            if (n === "" || s1 === "" || s2 === "") { showModalAlert("Error", "Rellena todos los campos."); return; }
+            player = { name: `${n} ${s1} ${s2}`, dni: generateDNI(), age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", pendingStudyAge: null, isDead: false, logs: [`Has nacido en Sevilla. ¡Bienvenido al mundo!`] };
+            saveGame(); 
+            document.getElementById('start-screen').classList.add('hidden'); 
+            updateUI(); 
+            renderLogs();
+        }
+
+        function updateUI() {
+            document.getElementById('player-name').innerText = player.name;
+            document.getElementById('player-age').innerText = `Edad: ${player.age} años`;
+            document.getElementById('player-dni').innerText = `DNI: ${player.dni}`;
+            document.getElementById('health-val').innerText = player.health;
+            document.getElementById('happiness-val').innerText = player.happiness;
+            document.getElementById('money-val').innerText = player.money;
+            document.getElementById('player-studies').innerText = player.studies;
+            document.getElementById('player-job').innerText = player.job;
+        }
+
+        function renderLogs() {
+            const eventLog = document.getElementById('event-log');
+            eventLog.innerHTML = "";
+            player.logs.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = 'log-entry'; 
+                div.innerText = msg;
+                eventLog.appendChild(div);
+            });
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+
+        function checkMortality() {
+            if (player.health <= 0) {
+                return { dead: true, cause: "Complicaciones graves de salud" };
+            }
+            if (player.age >= 70) {
+                let chance = (player.age - 70) * 0.03;
+                if (player.age >= 100) chance = 1.0;
+                if (Math.random() < chance) {
+                    return { dead: true, cause: "Causas naturales debido a la vejez" };
+                }
+            }
+            return { dead: false };
+        }
+
+        function nextYear() { 
+            if (player.isDead) {
+                showDeathModal("Fallecido");
+                return;
+            }
+
+            if (player.pendingStudyAge !== null) {
+                openStudyModal();
+                return;
+            }
+
+            player.age++; 
+            player.logs.push(`Has cumplido ${player.age} años.`);
+
+            let triggeredChoice = false;
+
+            // 35% de probabilidad de lanzar un evento de elección si hay alguno disponible para la edad
+            if (player.age >= 3 && Math.random() < 0.35) {
+                let eleccionesDisponibles = eventosEleccion.filter(ev => player.age >= ev.minAge && player.age <= ev.maxAge);
+                if (eleccionesDisponibles.length > 0) {
+                    let choiceEv = eleccionesDisponibles[Math.floor(Math.random() * eleccionesDisponibles.length)];
+                    triggeredChoice = true;
+                    showChoiceModal(choiceEv);
+                }
+            }
+
+            // Si no saltó evento de elección, salta un evento automático normal
+            if (!triggeredChoice && player.age >= 3) {
+                let eventosDisponibles = eventosAleatorios.filter(ev => player.age >= ev.minAge && player.age <= ev.maxAge);
+                if (eventosDisponibles.length > 0) {
+                    let ev = eventosDisponibles[Math.floor(Math.random() * eventosDisponibles.length)];
+                    player.health = Math.max(0, Math.min(100, player.health + ev.health));
+                    player.happiness = Math.max(0, Math.min(100, player.happiness + ev.happiness));
+                    player.money += ev.money;
+                    player.logs.push(`⚡ Evento: ${ev.msg}`);
+                }
+            }
+
+            // Cobro de sueldo
+            if (player.job !== "En paro" && player.salary > 0) {
+                player.money += player.salary;
+                player.logs.push(`Has cobrado tu sueldo anual de ${player.salary}€. ¡Dinero ahorrado!`);
+            }
+
+            // Comprobar muerte (solo si no hay un modal de elección en pantalla)
+            if (!triggeredChoice) {
+                let deathInfo = checkMortality();
+                if (deathInfo.dead) {
+                    player.isDead = true;
+                    player.logs.push(`💀 Has fallecido a los ${player.age} años por: ${deathInfo.cause}.`);
+                    saveGame();
+                    updateUI();
+                    renderLogs();
+                    showDeathModal(deathInfo.cause);
+                    return;
+                }
+            }
+
+            // Estudios obligatorios (< 18 años)
+            if (player.age < 18) {
+                let reachedStudy = estudiosSevilla.find(est => est.minAge === player.age);
+                if (reachedStudy) {
+                    player.pendingStudyAge = player.age;
+                    player.logs.push(`¡Has cumplido ${player.age} años! Debes elegir tus nuevos estudios obligatoriamente.`);
+                    saveGame();
+                    updateUI();
+                    renderLogs();
+                    openStudyModal();
+                    return;
+                }
+            }
+
+            saveGame(); 
+            updateUI(); 
+            renderLogs(); 
+        }
+
+        function confirmResetGame() { 
+            localStorage.removeItem('sevillalife_save'); 
+            location.reload(); 
+        }
+
+        window.onload = () => {
+            let s = localStorage.getItem('sevillalife_save');
+            if (s) { 
+                player = JSON.parse(s); 
+                if (player.salary === undefined) player.salary = 0;
+                if (player.pendingStudyAge === undefined) player.pendingStudyAge = null;
+                if (player.isDead === undefined) player.isDead = false;
+                document.getElementById('start-screen').classList.add('hidden'); 
+                updateUI(); 
+                renderLogs(); 
+
+                if (player.isDead) {
+                    showDeathModal("Fallecido");
+                } else if (player.pendingStudyAge !== null) {
+                    openStudyModal();
+                }
+            } else {
+                document.getElementById('start-screen').classList.remove('hidden');
+            }
+        };
+    </script>
+</body>
+</html>
