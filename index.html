@@ -166,7 +166,7 @@
     </div>
     
     <script>
-        let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", pendingStudyAge: null, logs: [] };
+        let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", pendingStudyAge: null, isDead: false, logs: [] };
         
         const estudiosSevilla = [
             { title: "Educación Primaria", minAge: 6, cost: 0 },
@@ -183,6 +183,19 @@
             { title: "Camarero", minAge: 18, salary: 15000 }, 
             { title: "Dependiente", minAge: 18, salary: 16500 }, 
             { title: "Operario Lipasam", minAge: 18, salary: 22000 }
+        ];
+
+        const eventosAleatorios = [
+            { msg: "Has ido a la Feria de Abril y te has gastado un pico en la caseta.", health: 0, happiness: 15, money: -150 },
+            { msg: "Un golpe de calor en pleno julio en Sevilla te ha dejado derretido.", health: -15, happiness: -10, money: 0 },
+            { msg: "Te has encontrado un billete de 20€ tirado en la Alameda.", health: 0, happiness: 10, money: 20 },
+            { msg: "Paseaste tranquilamente por el Parque María Luisa y desconectaste.", health: 5, happiness: 10, money: 0 },
+            { msg: "Has pillado una gripe fuerte durante el invierno.", health: -20, happiness: -15, money: -30 },
+            { msg: "Fuiste al dentista a hacerte una revisión y una limpieza.", health: 5, happiness: -5, money: -60 },
+            { msg: "Te ha tocado un pequeño premio en un rasca y gana.", health: 0, happiness: 15, money: 100 },
+            { msg: "Comiste unos montaditos regulares y pasaste el fin de semana indispuesto.", health: -10, happiness: -10, money: 0 },
+            { msg: "Has ido a la playa de Matalascañas a pasar un buen día.", health: 5, happiness: 15, money: -40 },
+            { msg: "Has tenido un año tranquilo y sin grandes sobresaltos.", health: 2, happiness: 2, money: 0 }
         ];
 
         function generateDNI() {
@@ -203,7 +216,25 @@
             document.getElementById('modal-ok-btn').onclick = () => { modal.style.display = 'none'; if (callback) callback(); };
         }
 
+        function showDeathModal(cause) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title-text').innerText = "💀 FIN DE TU HISTORIA";
+            document.getElementById('modal-msg-text').innerText = `Has fallecido a los ${player.age} años. Causa: ${cause}.`;
+            document.getElementById('modal-dynamic-content').innerHTML = `
+                <div style="text-align:center; font-size:0.85em; color:#555; padding: 10px; background:#f9f9f9; border-radius:8px;">
+                    <p><strong>Estudios finalizados:</strong> ${player.studies}</p>
+                    <p><strong>Último empleo:</strong> ${player.job}</p>
+                    <p><strong>Herencia final:</strong> ${player.money}€</p>
+                </div>
+            `;
+            document.getElementById('modal-buttons-container').innerHTML = `
+                <button class="modal-btn modal-btn-confirm" onclick="confirmResetGame()">Comenzar nueva vida</button>
+            `;
+            modal.style.display = 'flex';
+        }
+
         function openStudyModal() {
+            if (player.isDead) { showDeathModal("Fallecido"); return; }
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title-text').innerText = "Estudios";
             document.getElementById('modal-msg-text').innerText = player.pendingStudyAge !== null ? 
@@ -244,6 +275,7 @@
         }
 
         function openJobModal() {
+            if (player.isDead) { showDeathModal("Fallecido"); return; }
             if (player.age < 18) {
                 showModalAlert("Menor de edad", "No puedes trabajar hasta cumplir los 18 años. ¡Céntrate en los estudios!");
                 return;
@@ -328,15 +360,18 @@
                         player = importedPlayer;
                         if (player.salary === undefined) player.salary = 0;
                         if (player.pendingStudyAge === undefined) player.pendingStudyAge = null;
+                        if (player.isDead === undefined) player.isDead = false;
                         player.logs.push("¡Papeles arreglaítos! Partida cargada correctamente.");
                         saveGame();
                         updateUI();
                         renderLogs();
                         document.getElementById('start-screen').classList.add('hidden');
-                        showModalAlert("Gestión completa", "Partida cargada con éxito.");
                         
-                        if (player.pendingStudyAge !== null) {
-                            openStudyModal();
+                        if (player.isDead) {
+                            showDeathModal("Partida anterior finalizada");
+                        } else {
+                            showModalAlert("Gestión completa", "Partida cargada con éxito.");
+                            if (player.pendingStudyAge !== null) openStudyModal();
                         }
                     } else {
                         showModalAlert("Error", "El archivo no contiene una partida válida.");
@@ -354,9 +389,7 @@
             let s1 = document.getElementById('surname1-input').value.trim();
             let s2 = document.getElementById('surname2-input').value.trim();
             if (n === "" || s1 === "" || s2 === "") { showModalAlert("Error", "Rellena todos los campos."); return; }
-            player.name = `${n} ${s1} ${s2}`;
-            player.dni = generateDNI();
-            player.logs = [`Has nacido en Sevilla. ¡Bienvenido al mundo!`];
+            player = { name: `${n} ${s1} ${s2}`, dni: generateDNI(), age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", pendingStudyAge: null, isDead: false, logs: [`Has nacido en Sevilla. ¡Bienvenido al mundo!`] };
             saveGame(); 
             document.getElementById('start-screen').classList.add('hidden'); 
             updateUI(); 
@@ -386,7 +419,28 @@
             eventLog.scrollTop = eventLog.scrollHeight;
         }
 
+        function checkMortality() {
+            // Muerte por salud 0
+            if (player.health <= 0) {
+                return { dead: true, cause: "Complicaciones graves de salud" };
+            }
+            // Muerte natural por vejez (a partir de 70)
+            if (player.age >= 70) {
+                let chance = (player.age - 70) * 0.03;
+                if (player.age >= 100) chance = 1.0;
+                if (Math.random() < chance) {
+                    return { dead: true, cause: "Causas naturales debido a la vejez" };
+                }
+            }
+            return { dead: false };
+        }
+
         function nextYear() { 
+            if (player.isDead) {
+                showDeathModal("Fallecido");
+                return;
+            }
+
             if (player.pendingStudyAge !== null) {
                 openStudyModal();
                 return;
@@ -395,7 +449,34 @@
             player.age++; 
             player.logs.push(`Has cumplido ${player.age} años.`);
 
-            // Los estudios solo son obligatorios hasta los 17 años (menores de 18)
+            // Evento aleatorio anual
+            if (player.age >= 3) {
+                let ev = eventosAleatorios[Math.floor(Math.random() * eventosAleatorios.length)];
+                player.health = Math.max(0, Math.min(100, player.health + ev.health));
+                player.happiness = Math.max(0, Math.min(100, player.happiness + ev.happiness));
+                player.money += ev.money;
+                player.logs.push(`⚡ Evento: ${ev.msg}`);
+            }
+
+            // Cobro de sueldo
+            if (player.job !== "En paro" && player.salary > 0) {
+                player.money += player.salary;
+                player.logs.push(`Has cobrado tu sueldo anual de ${player.salary}€. ¡Dinero ahorrado!`);
+            }
+
+            // Comprobar muerte
+            let deathInfo = checkMortality();
+            if (deathInfo.dead) {
+                player.isDead = true;
+                player.logs.push(`💀 Has fallecido a los ${player.age} años por: ${deathInfo.cause}.`);
+                saveGame();
+                updateUI();
+                renderLogs();
+                showDeathModal(deathInfo.cause);
+                return;
+            }
+
+            // Estudios obligatorios (solo < 18)
             if (player.age < 18) {
                 let reachedStudy = estudiosSevilla.find(est => est.minAge === player.age);
                 if (reachedStudy) {
@@ -407,11 +488,6 @@
                     openStudyModal();
                     return;
                 }
-            }
-
-            if (player.job !== "En paro" && player.salary > 0) {
-                player.money += player.salary;
-                player.logs.push(`Has cobrado tu sueldo anual de ${player.salary}€. ¡Dinero ahorrado!`);
             }
 
             saveGame(); 
@@ -430,11 +506,14 @@
                 player = JSON.parse(s); 
                 if (player.salary === undefined) player.salary = 0;
                 if (player.pendingStudyAge === undefined) player.pendingStudyAge = null;
+                if (player.isDead === undefined) player.isDead = false;
                 document.getElementById('start-screen').classList.add('hidden'); 
                 updateUI(); 
                 renderLogs(); 
 
-                if (player.pendingStudyAge !== null) {
+                if (player.isDead) {
+                    showDeathModal("Fallecido");
+                } else if (player.pendingStudyAge !== null) {
                     openStudyModal();
                 }
             } else {
