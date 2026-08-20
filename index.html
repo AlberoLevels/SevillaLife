@@ -99,181 +99,24 @@
     </div>
     
     <script>
-        const defaultPlayerTemplate = {
-            name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, 
-            salary: 0, studies: "Ninguno", job: "En paro", neighborhood: "Casco Antiguo", logs: [],
-            intelligence: 50, inventory: [], pets: []
-        };
-
+        const defaultPlayerTemplate = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", neighborhood: "Casco Antiguo", logs: [], intelligence: 50, inventory: [], pets: [] };
         let player = JSON.parse(JSON.stringify(defaultPlayerTemplate));
         let selectedNeighborhoodTemp = "Casco Antiguo";
-
-        const districts = [
-            { name: "Casco Antiguo", info: "Coste alto (-100€), +Felicidad" },
-            { name: "Macarena", info: "Barrio equilibrado" },
-            { name: "Nervión", info: "Nivel alto, mayores gastos (-200€)" },
-            { name: "Triana", info: "Ambiente tradicional, +Felicidad" },
-            { name: "Sur", info: "Cerca del parque, +Salud" },
-            { name: "Los Remedios", info: "Poder adquisitivo, mayores gastos (-200€)" },
-            { name: "Cerro-Amate", info: "Economía local, +Ahorro (+50€)" },
-            { name: "Este-Alcosa-Torreblanca", info: "Residencial tranquilo, +Felicidad" },
-            { name: "San Pablo-Santa Justa", info: "Bien conectado, +Inteligencia" },
-            { name: "Norte", info: "Barrio obrero, +Ahorro (+50€)" },
-            { name: "Bellavista-La Palmera", info: "Zona tranquila, +Salud" }
-        ];
+        const districts = [ { name: "Casco Antiguo", info: "Coste alto (-100€), +Felicidad" }, { name: "Macarena", info: "Barrio equilibrado" }, { name: "Nervión", info: "Nivel alto, mayores gastos (-200€)" }, { name: "Triana", info: "Ambiente tradicional, +Felicidad" }, { name: "Sur", info: "Cerca del parque, +Salud" }, { name: "Los Remedios", info: "Poder adquisitivo, mayores gastos (-200€)" }, { name: "Cerro-Amate", info: "Economía local, +Ahorro (+50€)" }, { name: "Este-Alcosa-Torreblanca", info: "Residencial tranquilo, +Felicidad" }, { name: "San Pablo-Santa Justa", info: "Bien conectado, +Inteligencia" }, { name: "Norte", info: "Barrio obrero, +Ahorro (+50€)" }, { name: "Bellavista-La Palmera", info: "Zona tranquila, +Salud" } ];
 
         function saveGame() { localStorage.setItem('sevillalife_save', JSON.stringify(player)); }
-
-        function openNeighborhoodModal() {
-            const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title-text').innerText = "Selecciona Distrito";
-            document.getElementById('modal-msg-text').innerText = "Elige tu zona de nacimiento:";
-            
-            let listHTML = `<div class="modal-scrollable-content">`;
-            districts.forEach(d => {
-                let isSelected = selectedNeighborhoodTemp === d.name;
-                let bgStyle = isSelected ? "background: #fdf8f0; border: 2px solid #E5A54A;" : "background: #fff; border: 2px solid #ecf0f1;";
-                listHTML += `<button class="action-btn" style="${bgStyle} color: #2c3e50; text-align: left; padding: 8px; display:flex; flex-direction:column;" onclick="selectNeighborhood('${d.name}')">
-                    <span style="font-weight:bold;">${d.name}</span>
-                    <span style="font-size:0.7em; color:#888;">${d.info}</span>
-                </button>`;
-            });
-            listHTML += `</div>`;
-            listHTML += `<button class="reset-btn" style="margin-top:10px;" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`;
-            
-            document.getElementById('modal-buttons-container').innerHTML = listHTML;
-            modal.style.display = 'flex';
-        }
-
-        function selectNeighborhood(d) {
-            selectedNeighborhoodTemp = d;
-            document.getElementById('selected-neighborhood-text').innerText = d;
-            document.getElementById('custom-modal').style.display = 'none';
-        }
-
-        function openManagerModal() {
-            const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title-text').innerText = "Gestión de Partida";
-            document.getElementById('modal-msg-text').innerText = "¿Guardar o cargar tu partida JSON?";
-            document.getElementById('modal-buttons-container').innerHTML = `
-                <button class="action-btn" onclick="exportData()">Guardar archivo</button>
-                <button class="action-btn" onclick="document.getElementById('file-selector').click(); document.getElementById('custom-modal').style.display='none'">Cargar archivo</button>
-                <button class="reset-btn" style="margin-top:4px;" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>
-            `;
-            modal.style.display = 'flex';
-        }
-
-        function exportData() {
-            let dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(player, null, 4));
-            let dl = document.createElement('a');
-            dl.setAttribute("href", dataStr);
-            dl.setAttribute("download", `sevillalife_${player.name.replace(/\s+/g, '_')}.json`);
-            dl.click();
-        }
-
-        function handleFileLoad(event) {
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    player = JSON.parse(e.target.result);
-                    saveGame();
-                    location.reload();
-                } catch(err) { alert("Error al leer el archivo."); }
-            };
-            reader.readAsText(event.target.files[0]);
-        }
-
-        function startGame() {
-            let n = document.getElementById('name-input').value.trim();
-            let s1 = document.getElementById('surname1-input').value.trim();
-            let s2 = document.getElementById('surname2-input').value.trim();
-            if(!n || !s1 || !s2) return;
-            
-            player.name = `${n} ${s1} ${s2}`;
-            player.dni = Math.floor(Math.random()*99999999);
-            player.neighborhood = selectedNeighborhoodTemp;
-            player.logs = [`Has nacido en el distrito ${player.neighborhood}, Sevilla.`];
-            saveGame(); location.reload();
-        }
-
-        function applyNeighborhoodEffects() {
-            switch(player.neighborhood) {
-                case "Casco Antiguo":
-                    player.money = Math.max(0, player.money - 100);
-                    player.happiness = Math.min(100, player.happiness + 1);
-                    player.logs.push("Casco Antiguo: Has pagado los gastos de la zona centro (-100€).");
-                    break;
-                case "Triana":
-                    player.happiness = Math.min(100, player.happiness + 2);
-                    player.logs.push("Triana: El ambiente del barrio te ha aportado alegría (+2 Felicidad).");
-                    break;
-                case "Sur":
-                    player.health = Math.min(100, player.health + 1);
-                    player.logs.push("Zona Sur: Los paseos cerca del parque han beneficiado tu salud (+1 Salud).");
-                    break;
-                case "Nervión":
-                case "Los Remedios":
-                    player.money = Math.max(0, player.money - 200);
-                    player.happiness = Math.min(100, player.happiness + 1);
-                    player.logs.push(`${player.neighborhood}: Los costes de mantenimiento son elevados (-200€).`);
-                    break;
-                case "Cerro-Amate":
-                    player.money += 50;
-                    player.logs.push("Cerro-Amate: Has encontrado la forma de ahorrar algo en los tenderos locales (+50€).");
-                    break;
-                case "Este-Alcosa-Torreblanca":
-                    player.happiness = Math.min(100, player.happiness + 1);
-                    player.logs.push("Este-Alcosa-Torreblanca: La tranquilidad residencial te aporta bienestar (+1 Felicidad).");
-                    break;
-                case "San Pablo-Santa Justa":
-                    player.intelligence = Math.min(100, (player.intelligence || 50) + 1);
-                    player.logs.push("San Pablo-Santa Justa: Estar bien conectado te ha facilitado aprender cosas nuevas (+1 Inteligencia).");
-                    break;
-                case "Norte":
-                    player.money += 50;
-                    player.logs.push("Norte: El día a día en el barrio te ha permitido un pequeño ahorro (+50€).");
-                    break;
-                case "Bellavista-La Palmera":
-                    player.health = Math.min(100, player.health + 1);
-                    player.logs.push("Bellavista-La Palmera: La tranquilidad de la zona ha favorecido tu bienestar (+1 Salud).");
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        function nextYear() { 
-            player.age++; 
-            applyNeighborhoodEffects();
-            saveGame(); 
-            updateUI(); 
-            renderLogs(); 
-        }
-
-        function updateUI() {
-            document.getElementById('player-name').innerText = `${player.name} (${player.neighborhood})`;
-            document.getElementById('health-val').innerText = player.health;
-            document.getElementById('happiness-val').innerText = player.happiness;
-            document.getElementById('money-val').innerText = player.money;
-        }
-
-        function renderLogs() {
-            const log = document.getElementById('event-log');
-            log.innerHTML = "";
-            player.logs.forEach(msg => {
-                const div = document.createElement('div');
-                div.className = 'log-entry'; div.innerText = msg;
-                log.appendChild(div);
-            });
-            log.scrollTop = log.scrollHeight;
-        }
-
+        function openNeighborhoodModal() { const modal = document.getElementById('custom-modal'); document.getElementById('modal-title-text').innerText = "Selecciona Distrito"; document.getElementById('modal-msg-text').innerText = "Elige tu zona de nacimiento:"; let listHTML = `<div class="modal-scrollable-content">`; districts.forEach(d => { let isSelected = selectedNeighborhoodTemp === d.name; let bgStyle = isSelected ? "background: #fdf8f0; border: 2px solid #E5A54A;" : "background: #fff; border: 2px solid #ecf0f1;"; listHTML += `<button class="action-btn" style="${bgStyle} color: #2c3e50; text-align: left; padding: 8px; display:flex; flex-direction:column;" onclick="selectNeighborhood('${d.name}')"><span style="font-weight:bold;">${d.name}</span><span style="font-size:0.7em; color:#888;">${d.info}</span></button>`; }); listHTML += `</div><button class="reset-btn" style="margin-top:10px;" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`; document.getElementById('modal-buttons-container').innerHTML = listHTML; modal.style.display = 'flex'; }
+        function selectNeighborhood(d) { selectedNeighborhoodTemp = d; document.getElementById('selected-neighborhood-text').innerText = d; document.getElementById('custom-modal').style.display = 'none'; }
+        function openManagerModal() { const modal = document.getElementById('custom-modal'); document.getElementById('modal-title-text').innerText = "Gestión de Partida"; document.getElementById('modal-msg-text').innerText = "¿Guardar o cargar tu partida JSON?"; document.getElementById('modal-buttons-container').innerHTML = `<button class="action-btn" onclick="exportData()">Guardar archivo</button><button class="action-btn" onclick="document.getElementById('file-selector').click(); document.getElementById('custom-modal').style.display='none'">Cargar archivo</button><button class="reset-btn" style="margin-top:4px;" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`; modal.style.display = 'flex'; }
+        function exportData() { let dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(player, null, 4)); let dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `sevillalife_${player.name.replace(/\s+/g, '_')}.json`); dl.click(); }
+        function handleFileLoad(event) { let reader = new FileReader(); reader.onload = function(e) { try { player = JSON.parse(e.target.result); saveGame(); location.reload(); } catch(err) { alert("Error al leer el archivo."); } }; reader.readAsText(event.target.files[0]); }
+        function startGame() { let n = document.getElementById('name-input').value.trim(); let s1 = document.getElementById('surname1-input').value.trim(); let s2 = document.getElementById('surname2-input').value.trim(); if(!n || !s1 || !s2) return; player.name = `${n} ${s1} ${s2}`; player.dni = Math.floor(Math.random()*99999999); player.neighborhood = selectedNeighborhoodTemp; player.logs = [`Has nacido en el distrito ${player.neighborhood}, Sevilla.`]; saveGame(); location.reload(); }
+        function applyNeighborhoodEffects() { switch(player.neighborhood) { case "Casco Antiguo": player.money = Math.max(0, player.money - 100); player.happiness = Math.min(100, player.happiness + 1); player.logs.push("Casco Antiguo: Has pagado los gastos de la zona centro (-100€)."); break; case "Triana": player.happiness = Math.min(100, player.happiness + 2); player.logs.push("Triana: El ambiente del barrio te ha aportado alegría (+2 Felicidad)."); break; case "Sur": player.health = Math.min(100, player.health + 1); player.logs.push("Zona Sur: Los paseos cerca del parque han beneficiado tu salud (+1 Salud)."); break; case "Nervión": case "Los Remedios": player.money = Math.max(0, player.money - 200); player.happiness = Math.min(100, player.happiness + 1); player.logs.push(`${player.neighborhood}: Los costes de mantenimiento son elevados (-200€).`); break; case "Cerro-Amate": player.money += 50; player.logs.push("Cerro-Amate: Has encontrado la forma de ahorrar algo en los tenderos locales (+50€)."); break; case "Este-Alcosa-Torreblanca": player.happiness = Math.min(100, player.happiness + 1); player.logs.push("Este-Alcosa-Torreblanca: La tranquilidad residencial te aporta bienestar (+1 Felicidad)."); break; case "San Pablo-Santa Justa": player.intelligence = Math.min(100, (player.intelligence || 50) + 1); player.logs.push("San Pablo-Santa Justa: Estar bien conectado te ha facilitado aprender cosas nuevas (+1 Inteligencia)."); break; case "Norte": player.money += 50; player.logs.push("Norte: El día a día en el barrio te ha permitido un pequeño ahorro (+50€)."); break; case "Bellavista-La Palmera": player.health = Math.min(100, player.health + 1); player.logs.push("Bellavista-La Palmera: La tranquilidad de la zona ha favorecido tu bienestar (+1 Salud)."); break; } }
+        function nextYear() { player.age++; applyNeighborhoodEffects(); saveGame(); updateUI(); renderLogs(); }
+        function updateUI() { document.getElementById('player-name').innerText = `${player.name} (${player.neighborhood})`; document.getElementById('health-val').innerText = player.health; document.getElementById('happiness-val').innerText = player.happiness; document.getElementById('money-val').innerText = player.money; }
+        function renderLogs() { const log = document.getElementById('event-log'); log.innerHTML = ""; player.logs.forEach(msg => { const div = document.createElement('div'); div.className = 'log-entry'; div.innerText = msg; log.appendChild(div); }); log.scrollTop = log.scrollHeight; }
         function confirmResetGame() { localStorage.removeItem('sevillalife_save'); location.reload(); }
-
-        window.onload = () => {
-            let s = localStorage.getItem('sevillalife_save');
-            if (s) { player = JSON.parse(s); document.getElementById('start-screen').style.display = 'none'; updateUI(); renderLogs(); }
-        };
+        window.onload = () => { let s = localStorage.getItem('sevillalife_save'); if (s) { player = JSON.parse(s); document.getElementById('start-screen').style.display = 'none'; updateUI(); renderLogs(); } };
     </script>
 </body>
 </html>
