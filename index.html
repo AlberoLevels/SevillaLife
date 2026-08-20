@@ -26,13 +26,14 @@
         }
         h1 { color: #C0392B; font-family: 'Montserrat', sans-serif; font-size: 1.6em; font-weight: 800; margin-bottom: 2px; text-align: center; letter-spacing: -0.5px; }
         .subtitle { color: #7f8c8d; font-size: 0.75em; margin-bottom: 2px; text-align: center; }
+        .disclaimer { color: #95a5a6; font-size: 0.7em; text-align: center; margin-bottom: 8px; font-style: italic; }
         label { display: block; margin-top: 8px; font-weight: 600; font-size: 0.75em; color: #2c3e50; }
-        input, select { 
+        input { 
             width: 100%; padding: 8px; margin-top: 3px; 
             border: 2px solid #ecf0f1; border-radius: 8px; font-size: 0.9em; 
             outline: none; background: #fff; color: #2c3e50;
         }
-        input:focus, select:focus { border-color: #E5A54A; }
+        input:focus { border-color: #E5A54A; }
         .start-btn { width: 100%; margin-top: 14px; padding: 10px; background: #C0392B; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 0.95em; cursor: pointer; }
         .reset-btn { 
             background: #fff; color: #c0392b; border: 2px solid #e74c3c; 
@@ -50,7 +51,7 @@
         #player-name { font-family: 'Montserrat', sans-serif; font-size: 1.1em; font-weight: 800; margin-bottom: 1px; color: #C0392B; }
         .header-info { display: flex; justify-content: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap; }
         .badge { 
-            font-size: 0.7em; display: inline-block; padding: 3px 6px; border-radius: 8px; 
+            font-size: 0.75em; display: inline-block; padding: 3px 8px; border-radius: 10px; 
             color: #2c3e50; font-weight: 700; font-family: monospace; letter-spacing: 0.5px;
             background: #fdf8f0; border: 1px solid #f3e5d0;
         }
@@ -61,21 +62,18 @@
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         .status-badge span { font-weight: 700; color: #1a252f; }
-        
         .stats { 
-            margin-top: 4px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; font-size: 0.7em; font-weight: 600; 
-            background: #fdf8f0; padding: 6px; border-radius: 6px; border: 1px solid #f3e5d0; text-align: center;
+            margin-top: 4px; display: flex; justify-content: center; gap: 10px; font-size: 0.75em; font-weight: 600; 
+            background: #fdf8f0; padding: 4px; border-radius: 6px; border: 1px solid #f3e5d0;
         }
         .stats div { color: #555; }
-        .stats span { font-weight: 700; color: #2c3e50; display: block; font-size: 1.1em; }
-
+        .stats span { font-weight: 700; color: #2c3e50; }
         #event-log { flex-grow: 1; padding: 10px 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background: #FDFBF7; }
         .log-entry { 
             background: white; padding: 8px 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); 
             font-size: 0.8em; color: #333333; border-left: 3px solid #E5A54A; border-top: 1px solid #f1f1f1; 
         }
-        
-        #actions-panel { padding: 8px 12px; background: white; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+        #actions-panel { padding: 8px 12px 8px 12px; background: white; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
         .action-row { display: flex; gap: 6px; }
         .action-btn { 
             flex: 1; padding: 8px; background: #C0392B; color: white; border: none; 
@@ -98,11 +96,17 @@
         }
         .modal-title { font-family: 'Montserrat', sans-serif; font-size: 1.1em; font-weight: 800; color: #C0392B; text-align: center; }
         .modal-message { font-size: 0.8em; color: #2c3e50; text-align: center; line-height: 1.4; }
+        .modal-input { 
+            width: 100%; padding: 8px; border: 2px solid #ecf0f1; border-radius: 8px; 
+            font-size: 0.8em; outline: none; background: #fff; color: #2c3e50; resize: none;
+        }
+        .modal-input:focus { border-color: #E5A54A; }
         .modal-buttons { display: flex; gap: 6px; margin-top: 4px; }
         .modal-btn { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.8em; cursor: pointer; text-align: center; }
         .modal-btn-confirm { background: #C0392B; color: white; }
         .modal-btn-cancel { background: #ecf0f1; color: #555; }
         .footer-copyright { text-align: center; font-size: 0.55em; color: #7f8c8d; margin-top: 1px; }
+        .start-copyright { text-align: center; font-size: 0.6em; color: #7f8c8d; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -113,42 +117,29 @@
             <div class="form-card">
                 <h1>Sevillalife</h1>
                 <p class="subtitle">Registro oficial de identidad y alta en el padrón municipal.</p>
-                
                 <label>Nombre</label><input type="text" id="name-input" maxlength="15" placeholder="Curro">
                 <label>Primer Apellido</label><input type="text" id="surname1-input" maxlength="15" placeholder="García">
                 <label>Segundo Apellido</label><input type="text" id="surname2-input" maxlength="15" placeholder="Sevillano">
-                <label>Barrio de Residencia</label>
-                <select id="barrio-input">
-                    <option value="Macarena">Macarena</option>
-                    <option value="Triana">Triana</option>
-                    <option value="Nervión">Nervión</option>
-                    <option value="Los Remedios">Los Remedios</option>
-                    <option value="Cerro-Amate">Cerro-Amate</option>
-                    <option value="Este-Alcosa-Torreblanca">Sevilla Este</option>
-                    <option value="Casco Antiguo">Centro</option>
-                </select>
-
                 <button class="start-btn" onclick="startGame()">Comenzar mi historia</button>
                 <button class="reset-btn" style="margin-top: 8px;" onclick="openManagerModal()">Gestión de Partida (Guardar / Cargar)</button>
             </div>
+            <div class="start-copyright">&copy; 2026 AlberoLevels.</div>
         </div>
 
         <header>
             <div id="player-name">---</div>
             <div class="header-info">
-                <div class="badge" id="player-age">0 años</div>
+                <div class="badge" id="player-age">Edad: 0 años</div>
                 <div class="badge" id="player-dni">DNI: ---</div>
-                <div class="badge" id="player-barrio">📍 Barrio</div>
             </div>
             <div class="status-grid">
                 <div class="status-badge">📚 <span id="player-studies">Ninguno</span></div>
                 <div class="status-badge">💼 <span id="player-job">En paro</span></div>
             </div>
             <div class="stats">
-                <div>❤️ <span id="health-val">100</span> Salud</div>
-                <div>😊 <span id="happiness-val">100</span> Feliz</div>
-                <div>🧠 <span id="intel-val">50</span> Intel.</div>
-                <div>💶 <span id="money-val">0</span>€</div>
+                <div>❤️ Salud: <span id="health-val">100</span>%</div>
+                <div>😊 Felicidad: <span id="happiness-val">100</span>%</div>
+                <div>💶 Dinero: <span id="money-val">0</span>€</div>
             </div>
         </header>
 
@@ -171,71 +162,20 @@
             <div class="modal-card">
                 <div class="modal-title" id="modal-title-text">Aviso</div>
                 <div class="modal-message" id="modal-msg-text">Mensaje aquí</div>
+                <textarea id="modal-textarea" class="modal-input" rows="5" style="display:none;"></textarea>
                 <div class="modal-buttons" id="modal-buttons-container"></div>
             </div>
         </div>
     </div>
     
     <script>
-        // PLANTILLA BASE: Todo lo que se puede guardar en el JSON
-        const defaultPlayerTemplate = {
-            // Identidad y demografía
-            name: "",
-            dni: "",
-            age: 0,
-            gender: "No especificado",
-            neighborhood: "Macarena",
-            
-            // Atributos (0-100)
-            health: 100,
-            happiness: 100,
-            intelligence: 50,
-            looks: 50,
-            karma: 50,
-
-            // Economía y posesiones
-            money: 0,
-            bank_balance: 0,
-            salary: 0,
-            debt: 0,
-            properties: [], // Ej: ["Piso en Triana"]
-            vehicles: [],   // Ej: ["Yamaha Aerox"]
-            inventory: [],  // Ej: ["Móvil de última generación"]
-
-            // Educación e historial laboral
-            studies: "Ninguno",
-            degree_list: [],
-            job: "En paro",
-            work_experience: 0, // Años trabajados
-
-            // Estado y licencias
-            licenses: { driving: false, motorcycle: false },
-            criminal_record: false,
-            diseases: [],
-            
-            // Relaciones
-            family: [],
-            partner: null,
-            pets: [], // Ej: [{type: "Gato", name: "Dante"}]
-
-            // Historial de eventos
-            logs: []
-        };
-
-        // El jugador actual será una copia de la plantilla base
-        let player = JSON.parse(JSON.stringify(defaultPlayerTemplate));
-        
-        const trabajosSevilla = [{ title: "Repartidor", salary: 12000 }, { title: "Camarero", salary: 15000 }, { title: "Dependiente", salary: 16500 }, { title: "Operario Lipasam", salary: 22000 }];
+        let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, studies: "Ninguno", job: "En paro", logs: [] };
+        const trabajosSevilla = [{ title: "Repartidor", salary: 12000 }, { title: "Reponedor", salary: 14000 }, { title: "Camarero", salary: 15000 }, { title: "Dependiente", salary: 16500 }, { title: "Operario Lipasam", salary: 22000 }];
 
         function generateDNI() {
             let num = Math.floor(10000000 + Math.random() * 68999999);
             let letters = "TRWAGMYFPDXBNJZSQVHLCKE";
             return `${num}${letters.charAt(num % 23)}`;
-        }
-
-        // Sistema para asegurar que partidas viejas adquieran los nuevos campos
-        function mergeWithTemplate(importedData) {
-            return { ...defaultPlayerTemplate, ...importedData };
         }
 
         function saveGame() { localStorage.setItem('sevillalife_save', JSON.stringify(player)); }
@@ -244,6 +184,7 @@
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title-text').innerText = title;
             document.getElementById('modal-msg-text').innerText = message;
+            document.getElementById('modal-textarea').style.display = 'none';
             document.getElementById('modal-buttons-container').innerHTML = `<button class="modal-btn modal-btn-confirm" id="modal-ok-btn">Aceptar</button>`;
             modal.style.display = 'flex';
             document.getElementById('modal-ok-btn').onclick = () => { modal.style.display = 'none'; if (callback) callback(); };
@@ -254,6 +195,7 @@
             const btnContainer = document.getElementById('modal-buttons-container');
             document.getElementById('modal-title-text').innerText = "Gestión de Partida";
             document.getElementById('modal-msg-text').innerText = "¿Qué deseas hacer con los datos de tu partida?";
+            document.getElementById('modal-textarea').style.display = 'none';
             
             btnContainer.innerHTML = `
                 <button class="modal-btn modal-btn-cancel" id="modal-close-mgr">Cerrar</button>
@@ -268,8 +210,7 @@
                 if (player.name === "") { showModalAlert("Aviso", "No hay partida activa."); return; }
                 modal.style.display = 'none';
                 
-                // Genera el archivo JSON con toda la estructura de forma bonita y legible (identada)
-                let dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(player, null, 4));
+                let dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(player, null, 2));
                 let downloadAnchor = document.createElement('a');
                 downloadAnchor.setAttribute("href", dataStr);
                 downloadAnchor.setAttribute("download", `sevillalife_${player.name.replace(/\s+/g, '_')}.json`);
@@ -293,7 +234,6 @@
                 try {
                     let importedPlayer = JSON.parse(e.target.result);
                     
-                    // Asegurarnos de que logs que venían mezclados se corrijan
                     if (Array.isArray(importedPlayer.logs)) {
                         importedPlayer.logs = importedPlayer.logs.map(log => 
                             (typeof log === 'string') ? log : (log.msg || JSON.stringify(log))
@@ -301,13 +241,12 @@
                     }
 
                     if (importedPlayer.name !== undefined) {
-                        // AQUÍ está la clave: fusionamos su archivo viejo con la plantilla nueva
-                        player = mergeWithTemplate(importedPlayer);
+                        player = importedPlayer;
                         saveGame();
                         updateUI();
                         renderLogs();
                         document.getElementById('start-screen').style.display = 'none';
-                        showModalAlert("Éxito", "Partida cargada perfectamente. Datos actualizados al nuevo formato.");
+                        showModalAlert("Gestión completa", "¡Papeles arreglaítos! Partida cargada.");
                     } else {
                         showModalAlert("Error", "El archivo no contiene una partida válida.");
                     }
@@ -323,40 +262,20 @@
             let n = document.getElementById('name-input').value.trim();
             let s1 = document.getElementById('surname1-input').value.trim();
             let s2 = document.getElementById('surname2-input').value.trim();
-            let barrio = document.getElementById('barrio-input').value;
-
             if (n === "" || s1 === "" || s2 === "") { showModalAlert("Error", "Rellena todos los campos."); return; }
-            
-            // Reiniciamos con la plantilla, por si acaso
-            player = JSON.parse(JSON.stringify(defaultPlayerTemplate));
             player.name = `${n} ${s1} ${s2}`;
             player.dni = generateDNI();
-            player.neighborhood = barrio;
-            
-            // Asignar atributos iniciales al azar (entre 30 y 90)
-            player.intelligence = Math.floor(Math.random() * 60) + 30;
-            player.looks = Math.floor(Math.random() * 60) + 30;
-
-            player.logs = [`Has nacido en el barrio de ${barrio}, Sevilla.`];
-            saveGame(); 
-            document.getElementById('start-screen').style.display = 'none'; 
-            updateUI(); 
-            renderLogs();
+            player.logs = ["Has nacido en Sevilla."];
+            saveGame(); document.getElementById('start-screen').style.display = 'none'; updateUI(); renderLogs();
         }
 
         function updateUI() {
             document.getElementById('player-name').innerText = player.name;
-            document.getElementById('player-age').innerText = `${player.age} años`;
+            document.getElementById('player-age').innerText = `Edad: ${player.age} años`;
             document.getElementById('player-dni').innerText = `DNI: ${player.dni}`;
-            document.getElementById('player-barrio').innerText = `📍 ${player.neighborhood}`;
             document.getElementById('health-val').innerText = player.health;
             document.getElementById('happiness-val').innerText = player.happiness;
-            document.getElementById('intel-val').innerText = player.intelligence;
-            
-            // Si tiene más de 1000€, poner la K (ej: 1.5K€) para que quepa mejor en pantalla
-            let displayMoney = player.money > 9999 ? (player.money/1000).toFixed(1) + "k" : player.money;
-            document.getElementById('money-val').innerText = displayMoney;
-            
+            document.getElementById('money-val').innerText = player.money;
             document.getElementById('player-studies').innerText = player.studies;
             document.getElementById('player-job').innerText = player.job;
         }
@@ -366,57 +285,17 @@
             eventLog.innerHTML = "";
             player.logs.forEach(msg => {
                 const div = document.createElement('div');
-                div.className = 'log-entry'; 
-                div.innerText = msg;
+                div.className = 'log-entry'; div.innerText = msg;
                 eventLog.appendChild(div);
             });
-            // Auto-scroll hacia abajo
-            eventLog.scrollTop = eventLog.scrollHeight;
         }
 
-        function nextYear() { 
-            player.age++; 
-            if (player.job !== "En paro") {
-                player.money += player.salary;
-                player.logs.push(`Has ganado ${player.salary}€ por tu trabajo como ${player.job}.`);
-            }
-            saveGame(); 
-            updateUI(); 
-            renderLogs(); 
-        }
-
-        function study() {
-            // Ejemplo rápido: si estudias, sube inteligencia y se guarda
-            if (player.age < 3) { showModalAlert("Aviso", "Eres muy pequeño para estudiar."); return; }
-            player.intelligence = Math.min(100, player.intelligence + 2);
-            player.logs.push("Has dedicado el año a estudiar. Tu inteligencia ha subido.");
-            saveGame(); updateUI(); renderLogs();
-        }
-
-        function searchJob() {
-            if (player.age < 16) { showModalAlert("Aviso", "No puedes trabajar legalmente hasta los 16."); return; }
-            let job = trabajosSevilla[Math.floor(Math.random() * trabajosSevilla.length)];
-            player.job = job.title;
-            player.salary = job.salary;
-            player.logs.push(`¡Te han contratado como ${job.title}! Sueldo: ${job.salary}€/año.`);
-            saveGame(); updateUI(); renderLogs();
-        }
-
-        function confirmResetGame() { 
-            localStorage.removeItem('sevillalife_save'); 
-            location.reload(); 
-        }
+        function nextYear() { player.age++; saveGame(); updateUI(); renderLogs(); }
+        function confirmResetGame() { localStorage.removeItem('sevillalife_save'); location.reload(); }
 
         window.onload = () => {
             let s = localStorage.getItem('sevillalife_save');
-            if (s) { 
-                let importedPlayer = JSON.parse(s);
-                // Fusiona los datos guardados en LocalStorage con la nueva plantilla
-                player = mergeWithTemplate(importedPlayer);
-                document.getElementById('start-screen').style.display = 'none'; 
-                updateUI(); 
-                renderLogs(); 
-            }
+            if (s) { player = JSON.parse(s); document.getElementById('start-screen').style.display = 'none'; updateUI(); renderLogs(); }
         };
     </script>
 </body>
