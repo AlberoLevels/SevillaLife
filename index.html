@@ -26,7 +26,6 @@
         }
         h1 { color: #C0392B; font-family: 'Montserrat', sans-serif; font-size: 1.6em; font-weight: 800; margin-bottom: 2px; text-align: center; letter-spacing: -0.5px; }
         .subtitle { color: #7f8c8d; font-size: 0.75em; margin-bottom: 2px; text-align: center; }
-        .disclaimer { color: #95a5a6; font-size: 0.7em; text-align: center; margin-bottom: 8px; font-style: italic; }
         label { display: block; margin-top: 8px; font-weight: 600; font-size: 0.75em; color: #2c3e50; }
         input { 
             width: 100%; padding: 8px; margin-top: 3px; 
@@ -37,7 +36,7 @@
         .start-btn { width: 100%; margin-top: 14px; padding: 10px; background: #C0392B; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 0.95em; cursor: pointer; }
         .reset-btn { 
             background: #fff; color: #c0392b; border: 2px solid #e74c3c; 
-            padding: 5px; border-radius: 6px; font-size: 0.7em; font-weight: 700; 
+            padding: 6px; border-radius: 6px; font-size: 0.75em; font-weight: 700; 
             cursor: pointer; transition: background 0.2s, color 0.2s; text-align: center; width: 100%;
         }
         .reset-btn:hover { background: #e74c3c; color: white; }
@@ -73,13 +72,13 @@
             background: white; padding: 8px 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); 
             font-size: 0.8em; color: #333333; border-left: 3px solid #E5A54A; border-top: 1px solid #f1f1f1; 
         }
-        #actions-panel { padding: 8px 12px 8px 12px; background: white; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+        #actions-panel { padding: 8px 12px; background: white; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
         .action-row { display: flex; gap: 6px; }
         .action-btn { 
             flex: 1; padding: 8px; background: #C0392B; color: white; border: none; 
             border-radius: 8px; font-weight: bold; font-size: 0.8em; cursor: pointer; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: opacity 0.2s ease, transform 0.1s ease;
+            transition: opacity 0.2s ease, transform 0.1s ease; text-align: center;
         }
         .action-btn:active { transform: scale(0.98); opacity: 0.9; }
 
@@ -90,17 +89,13 @@
             display: none; justify-content: center; align-items: center; padding: 20px;
         }
         .modal-card {
-            background: white; width: 100%; max-width: 360px; padding: 18px;
+            background: white; width: 100%; max-width: 360px; max-height: 85vh; padding: 18px;
             border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            border-top: 5px solid #E5A54A; display: flex; flex-direction: column; gap: 10px;
+            border-top: 5px solid #E5A54A; display: flex; flex-direction: column; gap: 10px; overflow: hidden;
         }
         .modal-title { font-family: 'Montserrat', sans-serif; font-size: 1.1em; font-weight: 800; color: #C0392B; text-align: center; }
         .modal-message { font-size: 0.8em; color: #2c3e50; text-align: center; line-height: 1.4; }
-        .modal-input { 
-            width: 100%; padding: 8px; border: 2px solid #ecf0f1; border-radius: 8px; 
-            font-size: 0.8em; outline: none; background: #fff; color: #2c3e50; resize: none;
-        }
-        .modal-input:focus { border-color: #E5A54A; }
+        .modal-scrollable-content { width: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; max-height: 250px; }
         .modal-buttons { display: flex; gap: 6px; margin-top: 4px; }
         .modal-btn { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.8em; cursor: pointer; text-align: center; }
         .modal-btn-confirm { background: #C0392B; color: white; }
@@ -148,10 +143,10 @@
         <div id="actions-panel">
             <div class="action-row">
                 <button class="action-btn" onclick="nextYear()">Cumplir año</button>
-                <button class="action-btn" onclick="study()">Estudiar</button>
+                <button class="action-btn" onclick="openStudyModal()">Estudiar</button>
             </div>
             <div class="action-row">
-                <button class="action-btn" onclick="searchJob()">Buscar trabajo</button>
+                <button class="action-btn" onclick="openJobModal()">Buscar trabajo</button>
             </div>
             <button class="reset-btn" onclick="openManagerModal()">Gestión de Partida (Guardar / Cargar)</button>
             <button class="reset-btn" onclick="confirmResetGame()">Reiniciar partida</button>
@@ -162,7 +157,7 @@
             <div class="modal-card">
                 <div class="modal-title" id="modal-title-text">Aviso</div>
                 <div class="modal-message" id="modal-msg-text">Mensaje aquí</div>
-                <textarea id="modal-textarea" class="modal-input" rows="5" style="display:none;"></textarea>
+                <div id="modal-dynamic-content"></div>
                 <div class="modal-buttons" id="modal-buttons-container"></div>
             </div>
         </div>
@@ -170,7 +165,23 @@
     
     <script>
         let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, studies: "Ninguno", job: "En paro", logs: [] };
-        const trabajosSevilla = [{ title: "Repartidor", salary: 12000 }, { title: "Reponedor", salary: 14000 }, { title: "Camarero", salary: 15000 }, { title: "Dependiente", salary: 16500 }, { title: "Operario Lipasam", salary: 22000 }];
+        
+        const estudiosSevilla = [
+            { title: "Educación Primaria", cost: 0 },
+            { title: "Educación Secundaria (ESO)", cost: 0 },
+            { title: "Bachillerato", cost: 100 },
+            { title: "Grado Medio FP", cost: 300 },
+            { title: "Grado Superior FP", cost: 600 },
+            { title: "Universidad de Sevilla", cost: 1200 }
+        ];
+
+        const trabajosSevilla = [
+            { title: "Repartidor", salary: 12000 }, 
+            { title: "Reponedor", salary: 14000 }, 
+            { title: "Camarero", salary: 15000 }, 
+            { title: "Dependiente", salary: 16500 }, 
+            { title: "Operario Lipasam", salary: 22000 }
+        ];
 
         function generateDNI() {
             let num = Math.floor(10000000 + Math.random() * 68999999);
@@ -184,10 +195,60 @@
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title-text').innerText = title;
             document.getElementById('modal-msg-text').innerText = message;
-            document.getElementById('modal-textarea').style.display = 'none';
+            document.getElementById('modal-dynamic-content').innerHTML = '';
             document.getElementById('modal-buttons-container').innerHTML = `<button class="modal-btn modal-btn-confirm" id="modal-ok-btn">Aceptar</button>`;
             modal.style.display = 'flex';
             document.getElementById('modal-ok-btn').onclick = () => { modal.style.display = 'none'; if (callback) callback(); };
+        }
+
+        function openStudyModal() {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title-text').innerText = "Estudios";
+            document.getElementById('modal-msg-text').innerText = "Elige qué formación deseas cursar:";
+            
+            let listHTML = `<div class="modal-scrollable-content">`;
+            estudiosSevilla.forEach(est => {
+                listHTML += `<button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;" onclick="selectStudy('${est.title}')">📚 ${est.title} <span style="font-size:0.8em; opacity:0.8;">(${est.cost}€)</span></button>`;
+            });
+            listHTML += `</div>`;
+            
+            document.getElementById('modal-dynamic-content').innerHTML = listHTML;
+            document.getElementById('modal-buttons-container').innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`;
+            modal.style.display = 'flex';
+        }
+
+        function selectStudy(studyName) {
+            player.studies = studyName;
+            player.logs.push(`Has comenzado a cursar: ${studyName}.`);
+            saveGame();
+            updateUI();
+            renderLogs();
+            document.getElementById('custom-modal').style.display = 'none';
+        }
+
+        function openJobModal() {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title-text').innerText = "Búsqueda de Empleo";
+            document.getElementById('modal-msg-text').innerText = "Selecciona un puesto de trabajo disponible en Sevilla:";
+            
+            let listHTML = `<div class="modal-scrollable-content">`;
+            trabajosSevilla.forEach(job => {
+                listHTML += `<button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;" onclick="selectJob('${job.title}', ${job.salary})">💼 ${job.title} <span style="font-size:0.8em; opacity:0.8;">(${job.salary}€/año)</span></button>`;
+            });
+            listHTML += `</div>`;
+
+            document.getElementById('modal-dynamic-content').innerHTML = listHTML;
+            document.getElementById('modal-buttons-container').innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`;
+            modal.style.display = 'flex';
+        }
+
+        function selectJob(jobTitle, salary) {
+            player.job = jobTitle;
+            player.logs.push(`¡Has conseguido un nuevo trabajo como ${jobTitle}! Sueldo anual: ${salary}€.`);
+            saveGame();
+            updateUI();
+            renderLogs();
+            document.getElementById('custom-modal').style.display = 'none';
         }
 
         function openManagerModal() {
@@ -195,7 +256,7 @@
             const btnContainer = document.getElementById('modal-buttons-container');
             document.getElementById('modal-title-text').innerText = "Gestión de Partida";
             document.getElementById('modal-msg-text').innerText = "¿Qué deseas hacer con los datos de tu partida?";
-            document.getElementById('modal-textarea').style.display = 'none';
+            document.getElementById('modal-dynamic-content').innerHTML = '';
             
             btnContainer.innerHTML = `
                 <button class="modal-btn modal-btn-cancel" id="modal-close-mgr">Cerrar</button>
@@ -242,11 +303,12 @@
 
                     if (importedPlayer.name !== undefined) {
                         player = importedPlayer;
+                        player.logs.push("¡Papeles arreglaítos! Partida cargada correctamente.");
                         saveGame();
                         updateUI();
                         renderLogs();
                         document.getElementById('start-screen').style.display = 'none';
-                        showModalAlert("Gestión completa", "¡Papeles arreglaítos! Partida cargada.");
+                        showModalAlert("Gestión completa", "Partida cargada con éxito.");
                     } else {
                         showModalAlert("Error", "El archivo no contiene una partida válida.");
                     }
@@ -265,8 +327,11 @@
             if (n === "" || s1 === "" || s2 === "") { showModalAlert("Error", "Rellena todos los campos."); return; }
             player.name = `${n} ${s1} ${s2}`;
             player.dni = generateDNI();
-            player.logs = ["Has nacido en Sevilla."];
-            saveGame(); document.getElementById('start-screen').style.display = 'none'; updateUI(); renderLogs();
+            player.logs = [`Has nacido en Sevilla. ¡Bienvenido al mundo!`];
+            saveGame(); 
+            document.getElementById('start-screen').style.display = 'none'; 
+            updateUI(); 
+            renderLogs();
         }
 
         function updateUI() {
@@ -285,17 +350,34 @@
             eventLog.innerHTML = "";
             player.logs.forEach(msg => {
                 const div = document.createElement('div');
-                div.className = 'log-entry'; div.innerText = msg;
+                div.className = 'log-entry'; 
+                div.innerText = msg;
                 eventLog.appendChild(div);
             });
+            eventLog.scrollTop = eventLog.scrollHeight;
         }
 
-        function nextYear() { player.age++; saveGame(); updateUI(); renderLogs(); }
-        function confirmResetGame() { localStorage.removeItem('sevillalife_save'); location.reload(); }
+        function nextYear() { 
+            player.age++; 
+            player.logs.push(`Has cumplido ${player.age} años.`);
+            saveGame(); 
+            updateUI(); 
+            renderLogs(); 
+        }
+
+        function confirmResetGame() { 
+            localStorage.removeItem('sevillalife_save'); 
+            location.reload(); 
+        }
 
         window.onload = () => {
             let s = localStorage.getItem('sevillalife_save');
-            if (s) { player = JSON.parse(s); document.getElementById('start-screen').style.display = 'none'; updateUI(); renderLogs(); }
+            if (s) { 
+                player = JSON.parse(s); 
+                document.getElementById('start-screen').style.display = 'none'; 
+                updateUI(); 
+                renderLogs(); 
+            }
         };
     </script>
 </body>
