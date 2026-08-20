@@ -395,15 +395,18 @@
             player.age++; 
             player.logs.push(`Has cumplido ${player.age} años.`);
 
-            let reachedStudy = estudiosSevilla.find(est => est.minAge === player.age);
-            if (reachedStudy) {
-                player.pendingStudyAge = player.age;
-                player.logs.push(`¡Has cumplido ${player.age} años! Debes elegir tus nuevos estudios obligatoriamente.`);
-                saveGame();
-                updateUI();
-                renderLogs();
-                openStudyModal();
-                return;
+            // Los estudios solo son obligatorios hasta los 17 años (menores de 18)
+            if (player.age < 18) {
+                let reachedStudy = estudiosSevilla.find(est => est.minAge === player.age);
+                if (reachedStudy) {
+                    player.pendingStudyAge = player.age;
+                    player.logs.push(`¡Has cumplido ${player.age} años! Debes elegir tus nuevos estudios obligatoriamente.`);
+                    saveGame();
+                    updateUI();
+                    renderLogs();
+                    openStudyModal();
+                    return;
+                }
             }
 
             if (player.job !== "En paro" && player.salary > 0) {
