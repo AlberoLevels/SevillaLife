@@ -463,6 +463,28 @@
 
                 this._currentChoiceEvent = eventObj;
                 this.openModal();
+            },
+
+            showPetNameModal(petType, defaultName, callback) {
+                this.elements.modalTitle.innerText = `🐾 Nombre de tu ${petType.toLowerCase()}`;
+                this.elements.modalMsg.innerText = `¿Qué nombre quieres ponerle a tu ${petType.toLowerCase()}?`;
+                this.elements.modalDynamic.innerHTML = `
+                    <input type="text" id="pet-name-input" value="${defaultName}" maxlength="15" style="text-align: center; font-weight: bold; margin-bottom: 4px;" autocomplete="off" />
+                `;
+                this.elements.modalBtns.innerHTML = `
+                    <button class="modal-btn modal-btn-confirm" data-action="confirm-pet-name">Aceptar</button>
+                `;
+                
+                this._petNameCallback = callback;
+                this.openModal();
+
+                setTimeout(() => {
+                    const input = document.getElementById('pet-name-input');
+                    if (input) {
+                        input.focus();
+                        input.select();
+                    }
+                }, 50);
             }
         };
 
@@ -694,42 +716,48 @@
                 if (!eventObj || !eventObj.options[optionIdx]) return;
 
                 const opt = eventObj.options[optionIdx];
-                let logResultMsg = opt.resultMsg;
+
+                const processOptionResult = (petName = null) => {
+                    let logResultMsg = opt.resultMsg;
+
+                    if (opt.adoptsPet && petName) {
+                        const petType = eventObj.petType || "Mascota";
+                        p.pet = {
+                            type: petType,
+                            name: petName,
+                            age: 0
+                        };
+                        logResultMsg += ` Le has puesto de nombre ${p.pet.name}.`;
+                    }
+
+                    p.money -= opt.cost;
+                    p.health = Utils.clamp(p.health + opt.health, 0, 100);
+                    p.happiness = Utils.clamp(p.happiness + opt.happiness, 0, 100);
+                    p.money += opt.money;
+
+                    p.logs.push(`🤔 Decisión: ${logResultMsg}`);
+                    Storage.save(p);
+                    UI.render();
+                    UI.closeModal();
+
+                    const deathInfo = this.checkMortality();
+                    if (deathInfo.dead) {
+                        p.isDead = true;
+                        p.logs.push(`💀 Has fallecido a los ${p.age} años por: ${deathInfo.cause}.`);
+                        Storage.save(p);
+                        UI.render();
+                        UI.showDeathModal(deathInfo.cause);
+                    }
+                };
 
                 if (opt.adoptsPet) {
                     const petType = eventObj.petType || "Mascota";
                     const defaultName = petType === "Perro" ? "Toby" : "Michi";
-                    let petName = prompt(`¿Qué nombre quieres ponerle a tu ${petType.toLowerCase()}?`, defaultName);
-
-                    if (!petName || !petName.trim()) {
-                        petName = defaultName;
-                    }
-
-                    p.pet = {
-                        type: petType,
-                        name: petName.trim(),
-                        age: 0
-                    };
-                    logResultMsg += ` Le has puesto de nombre ${p.pet.name}.`;
-                }
-
-                p.money -= opt.cost;
-                p.health = Utils.clamp(p.health + opt.health, 0, 100);
-                p.happiness = Utils.clamp(p.happiness + opt.happiness, 0, 100);
-                p.money += opt.money;
-
-                p.logs.push(`🤔 Decisión: ${logResultMsg}`);
-                Storage.save(p);
-                UI.render();
-                UI.closeModal();
-
-                const deathInfo = this.checkMortality();
-                if (deathInfo.dead) {
-                    p.isDead = true;
-                    p.logs.push(`💀 Has fallecido a los ${p.age} años por: ${deathInfo.cause}.`);
-                    Storage.save(p);
-                    UI.render();
-                    UI.showDeathModal(deathInfo.cause);
+                    UI.showPetNameModal(petType, defaultName, (chosenName) => {
+                        processOptionResult(chosenName);
+                    });
+                } else {
+                    processOptionResult();
                 }
             },
 
@@ -984,6 +1012,15 @@
                         const cb = UI._modalCallback;
                         UI._modalCallback = null;
                         cb();
+                    }
+                    break;
+                case 'confirm-pet-name':
+                    const input = document.getElementById('pet-name-input');
+                    const chosenName = (input && input.value.trim()) ? input.value.trim() : "Toby";
+                    if (typeof UI._petNameCallback === 'function') {
+                        const cb = UI._petNameCallback;
+                        UI._petNameCallback = null;
+                        cb(chosenName);
                     }
                     break;
                 case 'select-choice-option':
