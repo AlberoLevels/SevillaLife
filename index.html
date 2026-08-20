@@ -13,7 +13,7 @@
     }
 
     body {
-      background-color: #384856;
+      background-color: #dae2ea;
       display: flex;
       justify-content: center;
       min-height: 100vh;
@@ -22,7 +22,7 @@
     .game-container {
       width: 100%;
       max-width: 480px;
-      background-color: #dce3ea;
+      background-color: #dae2ea;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -30,7 +30,7 @@
       position: relative;
     }
 
-    /* Historial / Log */
+    /* Historial */
     .history-log {
       display: flex;
       flex-direction: column;
@@ -43,17 +43,18 @@
     .log-card {
       background: #ffffff;
       border-radius: 12px;
-      padding: 12px 16px;
+      padding: 14px 16px;
       font-size: 0.95rem;
       color: #333;
-      border-left: 4px solid #d4a359;
+      border-left: 4px solid #d99b38;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
 
     .log-card.event {
       border-left-color: #b83b26;
     }
 
-    /* Controles de la interfaz */
+    /* Botones de la interfaz */
     .controls {
       display: flex;
       flex-direction: column;
@@ -67,10 +68,10 @@
 
     .btn-main {
       flex: 1;
-      background-color: #79434d;
+      background-color: #733e46;
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 14px;
       font-weight: bold;
       font-size: 0.95rem;
@@ -79,10 +80,10 @@
 
     .btn-main-full {
       width: 100%;
-      background-color: #79434d;
+      background-color: #733e46;
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 14px;
       font-weight: bold;
       font-size: 0.95rem;
@@ -92,9 +93,9 @@
     .btn-outline {
       width: 100%;
       background: transparent;
-      color: #79434d;
-      border: 2px solid #a8727b;
-      border-radius: 10px;
+      color: #733e46;
+      border: 2px solid #a2727a;
+      border-radius: 12px;
       padding: 12px;
       font-weight: bold;
       font-size: 0.9rem;
@@ -108,7 +109,7 @@
       margin-top: 8px;
     }
 
-    /* --- SISTEMA UNIFICADO DE VENTANAS MODALES --- */
+    /* Modales de Decisión, Nombre y Muerte */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -177,12 +178,12 @@
       cursor: pointer;
     }
 
-    /* Campo para escribir el nombre dentro de la tarjeta */
+    /* Campo para el nombre de la mascota */
     .input-modal {
       width: 100%;
       box-sizing: border-box;
       padding: 12px;
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: bold;
       text-align: center;
       color: #333;
@@ -225,7 +226,7 @@
     </div>
   </div>
 
-  <!-- MODAL 1: EVENTO DE DECISIÓN -->
+  <!-- MODAL DE EVENTO DE DECISIÓN -->
   <div id="modal-evento" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
@@ -241,7 +242,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: ELEGIR NOMBRE (MISMO ESTILO QUE EL DE DECISIÓN) -->
+  <!-- MODAL PARA ELEGIR NOMBRE -->
   <div id="modal-nombre" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
@@ -258,14 +259,14 @@
     </div>
   </div>
 
-  <!-- MODAL 3: PANTALLA DE MUERTE (MISMO ESTILO) -->
+  <!-- MODAL DE MUERTE -->
   <div id="modal-muerte" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
         <span class="modal-icon">💀</span>
         <h2 class="modal-title">Has fallecido</h2>
       </div>
-      <p class="modal-description" id="texto-muerte">Has muerto a la edad de 80 años por causas naturales.</p>
+      <p class="modal-description" id="texto-muerte">Has muerto.</p>
       
       <div class="modal-buttons">
         <button class="btn-modal" onclick="reiniciarPartida()">Reiniciar partida</button>
@@ -273,27 +274,21 @@
     </div>
   </div>
 
-  <!-- LÓGICA JAVASCRIPT -->
   <script>
     let edad = 7;
     let tieneMascota = false;
     let nombreMascota = null;
-    let estaMuerto = false;
 
     function cumplirAno() {
-      if (estaMuerto) return;
-
       edad++;
       agregarLog(`Has cumplido ${edad} años.`);
-
-      // Evento de perro a los 8 años
+      
       if (edad === 8 && !tieneMascota) {
         document.getElementById("modal-evento").classList.remove("hidden");
       }
 
-      // Evento de muerte de ejemplo a los 80 años
       if (edad >= 80) {
-        mostrarPantallaMuerte("Has fallecido por causas naturales a la edad de " + edad + " años.");
+        mostrarPantallaMuerte("Has fallecido de vejez a los " + edad + " años.");
       }
     }
 
@@ -314,7 +309,6 @@
       cerrarModalEvento();
       const modalNombre = document.getElementById("modal-nombre");
       const input = document.getElementById("input-nombre-perro");
-      
       modalNombre.classList.remove("hidden");
       input.focus();
       input.select();
@@ -330,26 +324,22 @@
     }
 
     function mostrarPantallaMuerte(motivo) {
-      estaMuerto = true;
-      document.getElementById("texto-muerte").textContent = motivo;
+      document.getElementById("texto-muerte").textContent = motivo || "Has fallecido.";
       document.getElementById("modal-muerte").classList.remove("hidden");
-      agregarLog(`💀 ${motivo}`, true);
     }
 
     function reiniciarPartida() {
-      // 1. Ocultar todos los modales inmediatamente
+      // Ocultar todos los modales
       document.getElementById("modal-evento").classList.add("hidden");
       document.getElementById("modal-nombre").classList.add("hidden");
       document.getElementById("modal-muerte").classList.add("hidden");
 
-      // 2. Resetear variables
+      // Resetear variables del juego
       edad = 4;
       tieneMascota = false;
       nombreMascota = null;
-      estaMuerto = false;
-      document.getElementById("input-nombre-perro").value = "Toby";
 
-      // 3. Resetear historial
+      // Resetear historial
       const log = document.getElementById("history-log");
       log.innerHTML = `<div class="log-card">Has cumplido 4 años.</div>`;
     }
