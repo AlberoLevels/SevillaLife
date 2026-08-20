@@ -164,7 +164,7 @@
     </div>
     
     <script>
-        let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", logs: [] };
+        let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", pendingStudyAge: null, logs: [] };
         
         const estudiosSevilla = [
             { title: "Educación Primaria", minAge: 6, cost: 0 },
@@ -202,30 +202,39 @@
         }
 
         function openStudyModal() {
-            if (player.age < 6) {
-                showModalAlert("Demasiado joven", "Eres muy pequeño para estudiar todavía. ¡Disfruta de la infancia!");
-                return;
-            }
-
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title-text').innerText = "Estudios";
-            document.getElementById('modal-msg-text').innerText = "Elige qué formación deseas cursar:";
+            document.getElementById('modal-msg-text').innerText = player.pendingStudyAge !== null ? 
+                "¡Has alcanzado una edad clave! Debes elegir tus nuevos estudios para poder continuar:" : 
+                "Elige qué formación deseas cursar:";
             
             let listHTML = `<div class="modal-scrollable-content">`;
             estudiosSevilla.forEach(est => {
                 let disabled = player.age < est.minAge ? "opacity: 0.5; pointer-events: none;" : "";
-                listHTML += `<button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px; ${disabled}" onclick="selectStudy('${est.title}')">📚 ${est.title} <span style="font-size:0.8em; opacity:0.8;">(Edad mín: ${est.minAge}, ${est.cost}€)</span></button>`;
+                listHTML += `<button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px; ${disabled}" onclick="selectStudy('${est.title}', ${est.cost})">📚 ${est.title} <span style="font-size:0.8em; opacity:0.8;">(Edad mín: ${est.minAge}, ${est.cost}€)</span></button>`;
             });
             listHTML += `</div>`;
             
             document.getElementById('modal-dynamic-content').innerHTML = listHTML;
-            document.getElementById('modal-buttons-container').innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`;
+            
+            // Si hay estudios pendientes, no dejamos cerrar el modal sin elegir
+            if (player.pendingStudyAge !== null) {
+                document.getElementById('modal-buttons-container').innerHTML = '';
+            } else {
+                document.getElementById('modal-buttons-container').innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`;
+            }
             modal.style.display = 'flex';
         }
 
-        function selectStudy(studyName) {
+        function selectStudy(studyName, cost) {
+            if (player.money < cost) {
+                showModalAlert("Sin fondos", `No tienes suficiente dinero para pagar la matrícula de ${studyName}. Cuesta ${cost}€.`);
+                return;
+            }
+            player.money -= cost;
             player.studies = studyName;
-            player.logs.push(`Has comenzado a cursar: ${studyName}.`);
+            player.pendingStudyAge = null; // Quitamos el bloqueo
+            player.logs.push(`Has comenzado a cursar: ${studyName} (Coste: ${cost}€).`);
             saveGame();
             updateUI();
             renderLogs();
@@ -316,12 +325,18 @@
                     if (importedPlayer.name !== undefined) {
                         player = importedPlayer;
                         if (player.salary === undefined) player.salary = 0;
+                        if (player.pendingStudyAge === undefined) player.pendingStudyAge = null;
                         player.logs.push("¡Papeles arreglaítos! Partida cargada correctamente.");
                         saveGame();
                         updateUI();
                         renderLogs();
                         document.getElementById('start-screen').style.display = 'none';
                         showModalAlert("Gestión completa", "Partida cargada con éxito.");
+                        
+                        // Si se cargó con estudios pendientes, abrir modal de inmediato
+                        if (player.pendingStudyAge !== null) {
+                            openStudyModal();
+                        }
                     } else {
                         showModalAlert("Error", "El archivo no contiene una partida válida.");
                     }
@@ -371,13 +386,25 @@
         }
 
         function nextYear() { 
+            // Si hay un estudio pendiente de elegir, impedimos avanzar el año
+            if (player.pendingStudyAge !== null) {
+                openStudyModal();
+                return;
+            }
+
             player.age++; 
             player.logs.push(`Has cumplido ${player.age} años.`);
 
-            // Evento automático al cumplir 6 años para comenzar Primaria
-            if (player.age === 6) {
-                player.studies = "Educación Primaria";
-                player.logs.push(`¡Has cumplido 6 años y has comenzado la Educación Primaria en el colegio!`);
+            // Comprobar si esta nueva edad desbloquea algún nivel de estudios obligatorio
+            let reachedStudy = estudiosSevilla.find(est => est.minAge === player.age);
+            if (reachedStudy) {
+                player.pendingStudyAge = player.age;
+                player.logs.push(`¡Has cumplido ${player.age} años! Debes elegir tus nuevos estudios obligatoriamente.`);
+                saveGame();
+                updateUI();
+                renderLogs();
+                openStudyModal();
+                return; // Cortamos aquí para que no cobre el sueldo todavía hasta que elija o se detenga
             }
 
             // Sumar sueldo si tiene trabajo activo
@@ -401,9 +428,15 @@
             if (s) { 
                 player = JSON.parse(s); 
                 if (player.salary === undefined) player.salary = 0;
+                if (player.pendingStudyAge === undefined) player.pendingStudyAge = null;
                 document.getElementById('start-screen').style.display = 'none'; 
                 updateUI(); 
                 renderLogs(); 
+
+                // Si al cargar la partida hay estudios pendientes, mostrar modal obligatorio
+                if (player.pendingStudyAge !== null) {
+                    openStudyModal();
+                }
             }
         };
     </script>
