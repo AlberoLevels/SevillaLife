@@ -43,8 +43,8 @@
         .action-btn { padding: 8px; background: #C0392B; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 0.8em; cursor: pointer; width: 100%; text-align: center; }
         
         #custom-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.7); z-index: 200; display: none; justify-content: center; align-items: center; padding: 20px; }
-        .modal-card { background: white; width: 100%; max-width: 360px; height: 80vh; max-height: 500px; padding: 18px; border-radius: 16px; border-top: 5px solid #E5A54A; display: flex; flex-direction: column; }
-        .modal-scrollable-content { width: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-top: 8px; padding-right: 4px; flex-grow: 1; }
+        .modal-card { background: white; width: 100%; max-width: 360px; max-height: 85vh; padding: 18px; border-radius: 16px; border-top: 5px solid #E5A54A; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
+        .modal-scrollable-content { width: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-top: 10px; padding-right: 2px; }
     </style>
 </head>
 <body>
@@ -91,9 +91,9 @@
 
         <div id="custom-modal">
             <div class="modal-card">
-                <div id="modal-title-text" style="font-weight:800; color:#C0392B; text-align:center; margin-bottom:2px;">Aviso</div>
-                <div id="modal-msg-text" style="font-size:0.8em; text-align:center; margin-bottom:5px;"></div>
-                <div id="modal-buttons-container" style="display:flex; flex-direction:column; flex-grow:1; overflow:hidden; width:100%;"></div>
+                <div id="modal-title-text" style="font-weight:800; color:#C0392B; text-align:center; margin-bottom:5px;">Aviso</div>
+                <div id="modal-msg-text" style="font-size:0.8em; text-align:center;"></div>
+                <div id="modal-buttons-container" style="display:flex; flex-direction:column; gap:6px; width:100%; align-items:center; margin-top:10px;"></div>
             </div>
         </div>
     </div>
@@ -116,10 +116,10 @@
             { name: "Sur", info: "Cerca del parque, +Salud" },
             { name: "Los Remedios", info: "Poder adquisitivo, mayores gastos (-200€)" },
             { name: "Cerro-Amate", info: "Economía local, +Ahorro (+50€)" },
-            { name: "Este-Alcosa-Torreblanca", info: "Residencial tranquilo" },
-            { name: "San Pablo-Santa Justa", info: "Bien conectado" },
-            { name: "Norte", info: "Barrio obrero tradicional" },
-            { name: "Bellavista-La Palmera", info: "Zona tranquila" }
+            { name: "Este-Alcosa-Torreblanca", info: "Residencial tranquilo, +Felicidad" },
+            { name: "San Pablo-Santa Justa", info: "Bien conectado, +Inteligencia" },
+            { name: "Norte", info: "Barrio obrero, +Ahorro (+50€)" },
+            { name: "Bellavista-La Palmera", info: "Zona tranquila, +Salud" }
         ];
 
         function saveGame() { localStorage.setItem('sevillalife_save', JSON.stringify(player)); }
@@ -129,19 +129,19 @@
             document.getElementById('modal-title-text').innerText = "Selecciona Distrito";
             document.getElementById('modal-msg-text').innerText = "Elige tu zona de nacimiento:";
             
-            let html = `<div class="modal-scrollable-content">`;
+            let listHTML = `<div class="modal-scrollable-content">`;
             districts.forEach(d => {
                 let isSelected = selectedNeighborhoodTemp === d.name;
                 let bgStyle = isSelected ? "background: #fdf8f0; border: 2px solid #E5A54A;" : "background: #fff; border: 2px solid #ecf0f1;";
-                html += `<button class="action-btn" style="${bgStyle} color: #2c3e50; text-align: left; padding: 8px; display:flex; flex-direction:column; margin-bottom:4px;" onclick="selectNeighborhood('${d.name}')">
+                listHTML += `<button class="action-btn" style="${bgStyle} color: #2c3e50; text-align: left; padding: 8px; display:flex; flex-direction:column;" onclick="selectNeighborhood('${d.name}')">
                     <span style="font-weight:bold;">${d.name}</span>
                     <span style="font-size:0.7em; color:#888;">${d.info}</span>
                 </button>`;
             });
-            html += `</div>`;
-            html += `<button class="reset-btn" style="margin-top:8px; flex-shrink:0;" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`;
+            listHTML += `</div>`;
+            listHTML += `<button class="reset-btn" style="margin-top:10px;" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`;
             
-            document.getElementById('modal-buttons-container').innerHTML = html;
+            document.getElementById('modal-buttons-container').innerHTML = listHTML;
             modal.style.display = 'flex';
         }
 
@@ -156,11 +156,9 @@
             document.getElementById('modal-title-text').innerText = "Gestión de Partida";
             document.getElementById('modal-msg-text').innerText = "¿Guardar o cargar tu partida JSON?";
             document.getElementById('modal-buttons-container').innerHTML = `
-                <div style="display:flex; flex-direction:column; gap:6px; width:100%; margin-top:10px; justify-content:center; flex-grow:1;">
-                    <button class="action-btn" onclick="exportData()">Guardar archivo</button>
-                    <button class="action-btn" onclick="document.getElementById('file-selector').click(); document.getElementById('custom-modal').style.display='none'">Cargar archivo</button>
-                    <button class="reset-btn" style="margin-top:4px;" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>
-                </div>
+                <button class="action-btn" onclick="exportData()">Guardar archivo</button>
+                <button class="action-btn" onclick="document.getElementById('file-selector').click(); document.getElementById('custom-modal').style.display='none'">Cargar archivo</button>
+                <button class="reset-btn" style="margin-top:4px;" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>
             `;
             modal.style.display = 'flex';
         }
@@ -223,6 +221,22 @@
                     player.money += 50;
                     player.logs.push("Cerro-Amate: Has encontrado la forma de ahorrar algo en los tenderos locales (+50€).");
                     break;
+                case "Este-Alcosa-Torreblanca":
+                    player.happiness = Math.min(100, player.happiness + 1);
+                    player.logs.push("Este-Alcosa-Torreblanca: La tranquilidad residencial te aporta bienestar (+1 Felicidad).");
+                    break;
+                case "San Pablo-Santa Justa":
+                    player.intelligence = Math.min(100, (player.intelligence || 50) + 1);
+                    player.logs.push("San Pablo-Santa Justa: Estar bien conectado te ha facilitado aprender cosas nuevas (+1 Inteligencia).");
+                    break;
+                case "Norte":
+                    player.money += 50;
+                    player.logs.push("Norte: El día a día en el barrio te ha permitido un pequeño ahorro (+50€).");
+                    break;
+                case "Bellavista-La Palmera":
+                    player.health = Math.min(100, player.health + 1);
+                    player.logs.push("Bellavista-La Palmera: La tranquilidad de la zona ha favorecido tu bienestar (+1 Salud).");
+                    break;
                 default:
                     break;
             }
@@ -258,21 +272,7 @@
 
         window.onload = () => {
             let s = localStorage.getItem('sevillalife_save');
-            if (s) { 
-                try {
-                    player = JSON.parse(s);
-                    // Si el nombre está vacío en los datos guardados, evitamos que salte mal y mostramos la pantalla inicial
-                    if (!player.name) {
-                        document.getElementById('start-screen').style.display = 'flex';
-                    } else {
-                        document.getElementById('start-screen').style.display = 'none'; 
-                        updateUI(); 
-                        renderLogs();
-                    }
-                } catch(e) {
-                    localStorage.removeItem('sevillalife_save');
-                }
-            }
+            if (s) { player = JSON.parse(s); document.getElementById('start-screen').style.display = 'none'; updateUI(); renderLogs(); }
         };
     </script>
 </body>
