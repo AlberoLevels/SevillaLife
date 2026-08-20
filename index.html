@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="es"><!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -21,6 +20,8 @@
             background: #FDFBF7; z-index: 100; padding: 16px;
             display: flex; flex-direction: column; justify-content: center;
         }
+        #start-screen.hidden { display: none !important; }
+
         .form-card { 
             background: white; padding: 16px; border-radius: 16px; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 5px solid #E5A54A; 
@@ -167,7 +168,6 @@
     <script>
         let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", pendingStudyAge: null, logs: [] };
         
-        // Estudios: Menores de edad (Bachillerato, Grado Medio) tienen coste 0€ (beca/educación pública obligatoria previa a la mayoría de edad)
         const estudiosSevilla = [
             { title: "Educación Primaria", minAge: 6, cost: 0 },
             { title: "Educación Secundaria (ESO)", minAge: 12, cost: 0 },
@@ -332,7 +332,7 @@
                         saveGame();
                         updateUI();
                         renderLogs();
-                        document.getElementById('start-screen').style.display = 'none';
+                        document.getElementById('start-screen').classList.add('hidden');
                         showModalAlert("Gestión completa", "Partida cargada con éxito.");
                         
                         if (player.pendingStudyAge !== null) {
@@ -358,7 +358,7 @@
             player.dni = generateDNI();
             player.logs = [`Has nacido en Sevilla. ¡Bienvenido al mundo!`];
             saveGame(); 
-            document.getElementById('start-screen').style.display = 'none'; 
+            document.getElementById('start-screen').classList.add('hidden'); 
             updateUI(); 
             renderLogs();
         }
@@ -427,455 +427,15 @@
                 player = JSON.parse(s); 
                 if (player.salary === undefined) player.salary = 0;
                 if (player.pendingStudyAge === undefined) player.pendingStudyAge = null;
-                document.getElementById('start-screen').style.display = 'none'; 
+                document.getElementById('start-screen').classList.add('hidden'); 
                 updateUI(); 
                 renderLogs(); 
 
                 if (player.pendingStudyAge !== null) {
                     openStudyModal();
                 }
-            }
-        };
-    </script>
-</body>
-</html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sevillalife</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #2c3e50; display: flex; justify-content: center; align-items: center; min-height: 100dvh; margin: 0; overflow: hidden; }
-        
-        #game-container { 
-            width: 100%; max-width: 440px; background-color: #FDFBF7; 
-            display: flex; flex-direction: column; height: 100dvh; position: relative; overflow: hidden;
-        }
-        
-        /* PANTALLA DE REGISTRO */
-        #start-screen { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #FDFBF7; z-index: 100; padding: 16px;
-            display: flex; flex-direction: column; justify-content: center;
-        }
-        .form-card { 
-            background: white; padding: 16px; border-radius: 16px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 5px solid #E5A54A; 
-        }
-        h1 { color: #C0392B; font-family: 'Montserrat', sans-serif; font-size: 1.6em; font-weight: 800; margin-bottom: 2px; text-align: center; letter-spacing: -0.5px; }
-        .subtitle { color: #7f8c8d; font-size: 0.75em; margin-bottom: 2px; text-align: center; }
-        label { display: block; margin-top: 8px; font-weight: 600; font-size: 0.75em; color: #2c3e50; }
-        input { 
-            width: 100%; padding: 8px; margin-top: 3px; 
-            border: 2px solid #ecf0f1; border-radius: 8px; font-size: 0.9em; 
-            outline: none; background: #fff; color: #2c3e50;
-        }
-        input:focus { border-color: #E5A54A; }
-        .start-btn { width: 100%; margin-top: 14px; padding: 10px; background: #C0392B; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 0.95em; cursor: pointer; }
-        .reset-btn { 
-            background: #fff; color: #c0392b; border: 2px solid #e74c3c; 
-            padding: 6px; border-radius: 6px; font-size: 0.75em; font-weight: 700; 
-            cursor: pointer; transition: background 0.2s, color 0.2s; text-align: center; width: 100%;
-        }
-        .reset-btn:hover { background: #e74c3c; color: white; }
-
-        /* PANTALLA DE JUEGO */
-        header { 
-            background: #ffffff; padding: 8px 12px; text-align: center; 
-            border-top: 5px solid #E5A54A; box-shadow: 0 2px 6px rgba(0,0,0,0.04); 
-            flex-shrink: 0;
-        }
-        #player-name { font-family: 'Montserrat', sans-serif; font-size: 1.1em; font-weight: 800; margin-bottom: 1px; color: #C0392B; }
-        .header-info { display: flex; justify-content: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap; }
-        .badge { 
-            font-size: 0.75em; display: inline-block; padding: 3px 8px; border-radius: 10px; 
-            color: #2c3e50; font-weight: 700; font-family: monospace; letter-spacing: 0.5px;
-            background: #fdf8f0; border: 1px solid #f3e5d0;
-        }
-        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 4px; }
-        .status-badge {
-            background: #fdf8f0; padding: 4px 8px; border-radius: 6px; border: 1px solid #f3e5d0;
-            font-size: 0.75em; font-weight: 700; color: #2c3e50; text-align: center;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-        }
-        .status-badge span { font-weight: 700; color: #1a252f; }
-        .stats { 
-            margin-top: 4px; display: flex; justify-content: center; gap: 10px; font-size: 0.75em; font-weight: 600; 
-            background: #fdf8f0; padding: 4px; border-radius: 6px; border: 1px solid #f3e5d0;
-        }
-        .stats div { color: #555; }
-        .stats span { font-weight: 700; color: #2c3e50; }
-        #event-log { flex-grow: 1; padding: 10px 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background: #FDFBF7; }
-        .log-entry { 
-            background: white; padding: 8px 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); 
-            font-size: 0.8em; color: #333333; border-left: 3px solid #E5A54A; border-top: 1px solid #f1f1f1; 
-        }
-        #actions-panel { padding: 8px 12px; background: white; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
-        .action-row { display: flex; gap: 6px; }
-        .action-btn { 
-            flex: 1; padding: 8px; background: #C0392B; color: white; border: none; 
-            border-radius: 8px; font-weight: bold; font-size: 0.8em; cursor: pointer; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: opacity 0.2s ease, transform 0.1s ease; text-align: center;
-        }
-        .action-btn:active { transform: scale(0.98); opacity: 0.9; }
-
-        /* MODAL */
-        #custom-modal {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(44, 62, 80, 0.7); z-index: 200;
-            display: none; justify-content: center; align-items: center; padding: 20px;
-        }
-        .modal-card {
-            background: white; width: 100%; max-width: 360px; max-height: 85vh; padding: 18px;
-            border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            border-top: 5px solid #E5A54A; display: flex; flex-direction: column; gap: 10px; overflow: hidden;
-        }
-        .modal-title { font-family: 'Montserrat', sans-serif; font-size: 1.1em; font-weight: 800; color: #C0392B; text-align: center; }
-        .modal-message { font-size: 0.8em; color: #2c3e50; text-align: center; line-height: 1.4; }
-        .modal-scrollable-content { width: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; max-height: 250px; }
-        .modal-buttons { display: flex; gap: 6px; margin-top: 4px; }
-        .modal-btn { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.8em; cursor: pointer; text-align: center; }
-        .modal-btn-confirm { background: #C0392B; color: white; }
-        .modal-btn-cancel { background: #ecf0f1; color: #555; }
-        .footer-copyright { text-align: center; font-size: 0.55em; color: #7f8c8d; margin-top: 1px; }
-        .start-copyright { text-align: center; font-size: 0.6em; color: #7f8c8d; margin-top: 10px; }
-    </style>
-</head>
-<body>
-    <div id="game-container">
-        <input type="file" id="file-selector" accept=".json,application/json,text/plain" style="display: none;" onchange="handleFileLoad(event)">
-
-        <div id="start-screen">
-            <div class="form-card">
-                <h1>Sevillalife</h1>
-                <p class="subtitle">Registro oficial de identidad y alta en el padrón municipal.</p>
-                <label>Nombre</label><input type="text" id="name-input" maxlength="15" placeholder="Curro">
-                <label>Primer Apellido</label><input type="text" id="surname1-input" maxlength="15" placeholder="García">
-                <label>Segundo Apellido</label><input type="text" id="surname2-input" maxlength="15" placeholder="Sevillano">
-                <button class="start-btn" onclick="startGame()">Comenzar mi historia</button>
-                <button class="reset-btn" style="margin-top: 8px;" onclick="openManagerModal()">Gestión de Partida (Guardar / Cargar)</button>
-            </div>
-            <div class="start-copyright">&copy; 2026 AlberoLevels.</div>
-        </div>
-
-        <header>
-            <div id="player-name">---</div>
-            <div class="header-info">
-                <div class="badge" id="player-age">Edad: 0 años</div>
-                <div class="badge" id="player-dni">DNI: ---</div>
-            </div>
-            <div class="status-grid">
-                <div class="status-badge">📚 <span id="player-studies">Ninguno</span></div>
-                <div class="status-badge">💼 <span id="player-job">En paro</span></div>
-            </div>
-            <div class="stats">
-                <div>❤️ Salud: <span id="health-val">100</span>%</div>
-                <div>😊 Felicidad: <span id="happiness-val">100</span>%</div>
-                <div>💶 Dinero: <span id="money-val">0</span>€</div>
-            </div>
-        </header>
-
-        <main id="event-log"></main>
-
-        <div id="actions-panel">
-            <div class="action-row">
-                <button class="action-btn" onclick="nextYear()">Cumplir año</button>
-                <button class="action-btn" onclick="openStudyModal()">Estudiar</button>
-            </div>
-            <div class="action-row">
-                <button class="action-btn" onclick="openJobModal()">Buscar trabajo</button>
-            </div>
-            <button class="reset-btn" onclick="openManagerModal()">Gestión de Partida (Guardar / Cargar)</button>
-            <button class="reset-btn" onclick="confirmResetGame()">Reiniciar partida</button>
-            <div class="footer-copyright">&copy; 2026 AlberoLevels.</div>
-        </div>
-
-        <div id="custom-modal">
-            <div class="modal-card">
-                <div class="modal-title" id="modal-title-text">Aviso</div>
-                <div class="modal-message" id="modal-msg-text">Mensaje aquí</div>
-                <div id="modal-dynamic-content"></div>
-                <div class="modal-buttons" id="modal-buttons-container"></div>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        let player = { name: "", dni: "", age: 0, health: 100, happiness: 100, money: 0, salary: 0, studies: "Ninguno", job: "En paro", pendingStudyAge: null, logs: [] };
-        
-        const estudiosSevilla = [
-            { title: "Educación Primaria", minAge: 6, cost: 0 },
-            { title: "Educación Secundaria (ESO)", minAge: 12, cost: 0 },
-            { title: "Bachillerato", minAge: 16, cost: 100 },
-            { title: "Grado Medio FP", minAge: 17, cost: 300 },
-            { title: "Grado Superior FP", minAge: 18, cost: 600 },
-            { title: "Universidad de Sevilla", minAge: 18, cost: 1200 }
-        ];
-
-        const trabajosSevilla = [
-            { title: "Repartidor", minAge: 18, salary: 12000 }, 
-            { title: "Reponedor", minAge: 18, salary: 14000 }, 
-            { title: "Camarero", minAge: 18, salary: 15000 }, 
-            { title: "Dependiente", minAge: 18, salary: 16500 }, 
-            { title: "Operario Lipasam", minAge: 18, salary: 22000 }
-        ];
-
-        function generateDNI() {
-            let num = Math.floor(10000000 + Math.random() * 68999999);
-            let letters = "TRWAGMYFPDXBNJZSQVHLCKE";
-            return `${num}${letters.charAt(num % 23)}`;
-        }
-
-        function saveGame() { localStorage.setItem('sevillalife_save', JSON.stringify(player)); }
-
-        function showModalAlert(title, message, callback) {
-            const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title-text').innerText = title;
-            document.getElementById('modal-msg-text').innerText = message;
-            document.getElementById('modal-dynamic-content').innerHTML = '';
-            document.getElementById('modal-buttons-container').innerHTML = `<button class="modal-btn modal-btn-confirm" id="modal-ok-btn">Aceptar</button>`;
-            modal.style.display = 'flex';
-            document.getElementById('modal-ok-btn').onclick = () => { modal.style.display = 'none'; if (callback) callback(); };
-        }
-
-        function openStudyModal() {
-            const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title-text').innerText = "Estudios";
-            document.getElementById('modal-msg-text').innerText = player.pendingStudyAge !== null ? 
-                "¡Has alcanzado una edad clave! Debes elegir tus nuevos estudios para poder continuar:" : 
-                "Elige qué formación deseas cursar:";
-            
-            let listHTML = `<div class="modal-scrollable-content">`;
-            estudiosSevilla.forEach(est => {
-                let disabled = player.age < est.minAge ? "opacity: 0.5; pointer-events: none;" : "";
-                listHTML += `<button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px; ${disabled}" onclick="selectStudy('${est.title}', ${est.cost})">📚 ${est.title} <span style="font-size:0.8em; opacity:0.8;">(Edad mín: ${est.minAge}, ${est.cost}€)</span></button>`;
-            });
-            listHTML += `</div>`;
-            
-            document.getElementById('modal-dynamic-content').innerHTML = listHTML;
-            
-            // Si hay estudios pendientes, no dejamos cerrar el modal sin elegir
-            if (player.pendingStudyAge !== null) {
-                document.getElementById('modal-buttons-container').innerHTML = '';
             } else {
-                document.getElementById('modal-buttons-container').innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`;
-            }
-            modal.style.display = 'flex';
-        }
-
-        function selectStudy(studyName, cost) {
-            if (player.money < cost) {
-                showModalAlert("Sin fondos", `No tienes suficiente dinero para pagar la matrícula de ${studyName}. Cuesta ${cost}€.`);
-                return;
-            }
-            player.money -= cost;
-            player.studies = studyName;
-            player.pendingStudyAge = null; // Quitamos el bloqueo
-            player.logs.push(`Has comenzado a cursar: ${studyName} (Coste: ${cost}€).`);
-            saveGame();
-            updateUI();
-            renderLogs();
-            document.getElementById('custom-modal').style.display = 'none';
-        }
-
-        function openJobModal() {
-            if (player.age < 18) {
-                showModalAlert("Menor de edad", "No puedes trabajar hasta cumplir los 18 años. ¡Céntrate en los estudios!");
-                return;
-            }
-
-            const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title-text').innerText = "Búsqueda de Empleo";
-            document.getElementById('modal-msg-text').innerText = "Selecciona un puesto de trabajo disponible en Sevilla:";
-            
-            let listHTML = `<div class="modal-scrollable-content">`;
-            trabajosSevilla.forEach(job => {
-                listHTML += `<button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;" onclick="selectJob('${job.title}', ${job.salary})">💼 ${job.title} <span style="font-size:0.8em; opacity:0.8;">(${job.salary}€/año)</span></button>`;
-            });
-            listHTML += `</div>`;
-
-            document.getElementById('modal-dynamic-content').innerHTML = listHTML;
-            document.getElementById('modal-buttons-container').innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="document.getElementById('custom-modal').style.display='none'">Cerrar</button>`;
-            modal.style.display = 'flex';
-        }
-
-        function selectJob(jobTitle, salary) {
-            player.job = jobTitle;
-            player.salary = salary;
-            player.logs.push(`¡Has conseguido un nuevo trabajo como ${jobTitle}! Sueldo anual: ${salary}€.`);
-            saveGame();
-            updateUI();
-            renderLogs();
-            document.getElementById('custom-modal').style.display = 'none';
-        }
-
-        function openManagerModal() {
-            const modal = document.getElementById('custom-modal');
-            const btnContainer = document.getElementById('modal-buttons-container');
-            document.getElementById('modal-title-text').innerText = "Gestión de Partida";
-            document.getElementById('modal-msg-text').innerText = "¿Qué deseas hacer con los datos de tu partida?";
-            document.getElementById('modal-dynamic-content').innerHTML = '';
-            
-            btnContainer.innerHTML = `
-                <button class="modal-btn modal-btn-cancel" id="modal-close-mgr">Cerrar</button>
-                <button class="modal-btn modal-btn-confirm" id="modal-go-save">Guardar archivo</button>
-                <button class="modal-btn modal-btn-confirm" id="modal-go-load">Cargar archivo</button>
-            `;
-            modal.style.display = 'flex';
-
-            document.getElementById('modal-close-mgr').onclick = () => { modal.style.display = 'none'; };
-
-            document.getElementById('modal-go-save').onclick = () => {
-                if (player.name === "") { showModalAlert("Aviso", "No hay partida activa."); return; }
-                modal.style.display = 'none';
-                
-                let dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(player, null, 2));
-                let downloadAnchor = document.createElement('a');
-                downloadAnchor.setAttribute("href", dataStr);
-                downloadAnchor.setAttribute("download", `sevillalife_${player.name.replace(/\s+/g, '_')}.json`);
-                document.body.appendChild(downloadAnchor);
-                downloadAnchor.click();
-                downloadAnchor.remove();
-            };
-
-            document.getElementById('modal-go-load').onclick = () => {
-                modal.style.display = 'none';
-                document.getElementById('file-selector').click();
-            };
-        }
-
-        function handleFileLoad(event) {
-            let file = event.target.files[0];
-            if (!file) return;
-
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    let importedPlayer = JSON.parse(e.target.result);
-                    
-                    if (Array.isArray(importedPlayer.logs)) {
-                        importedPlayer.logs = importedPlayer.logs.map(log => 
-                            (typeof log === 'string') ? log : (log.msg || JSON.stringify(log))
-                        );
-                    }
-
-                    if (importedPlayer.name !== undefined) {
-                        player = importedPlayer;
-                        if (player.salary === undefined) player.salary = 0;
-                        if (player.pendingStudyAge === undefined) player.pendingStudyAge = null;
-                        player.logs.push("¡Papeles arreglaítos! Partida cargada correctamente.");
-                        saveGame();
-                        updateUI();
-                        renderLogs();
-                        document.getElementById('start-screen').style.display = 'none';
-                        showModalAlert("Gestión completa", "Partida cargada con éxito.");
-                        
-                        // Si se cargó con estudios pendientes, abrir modal de inmediato
-                        if (player.pendingStudyAge !== null) {
-                            openStudyModal();
-                        }
-                    } else {
-                        showModalAlert("Error", "El archivo no contiene una partida válida.");
-                    }
-                } catch (err) {
-                    showModalAlert("Error", "El archivo está corrupto o no tiene el formato correcto.");
-                }
-                event.target.value = "";
-            };
-            reader.readAsText(file);
-        }
-
-        function startGame() {
-            let n = document.getElementById('name-input').value.trim();
-            let s1 = document.getElementById('surname1-input').value.trim();
-            let s2 = document.getElementById('surname2-input').value.trim();
-            if (n === "" || s1 === "" || s2 === "") { showModalAlert("Error", "Rellena todos los campos."); return; }
-            player.name = `${n} ${s1} ${s2}`;
-            player.dni = generateDNI();
-            player.logs = [`Has nacido en Sevilla. ¡Bienvenido al mundo!`];
-            saveGame(); 
-            document.getElementById('start-screen').style.display = 'none'; 
-            updateUI(); 
-            renderLogs();
-        }
-
-        function updateUI() {
-            document.getElementById('player-name').innerText = player.name;
-            document.getElementById('player-age').innerText = `Edad: ${player.age} años`;
-            document.getElementById('player-dni').innerText = `DNI: ${player.dni}`;
-            document.getElementById('health-val').innerText = player.health;
-            document.getElementById('happiness-val').innerText = player.happiness;
-            document.getElementById('money-val').innerText = player.money;
-            document.getElementById('player-studies').innerText = player.studies;
-            document.getElementById('player-job').innerText = player.job;
-        }
-
-        function renderLogs() {
-            const eventLog = document.getElementById('event-log');
-            eventLog.innerHTML = "";
-            player.logs.forEach(msg => {
-                const div = document.createElement('div');
-                div.className = 'log-entry'; 
-                div.innerText = msg;
-                eventLog.appendChild(div);
-            });
-            eventLog.scrollTop = eventLog.scrollHeight;
-        }
-
-        function nextYear() { 
-            // Si hay un estudio pendiente de elegir, impedimos avanzar el año
-            if (player.pendingStudyAge !== null) {
-                openStudyModal();
-                return;
-            }
-
-            player.age++; 
-            player.logs.push(`Has cumplido ${player.age} años.`);
-
-            // Comprobar si esta nueva edad desbloquea algún nivel de estudios obligatorio
-            let reachedStudy = estudiosSevilla.find(est => est.minAge === player.age);
-            if (reachedStudy) {
-                player.pendingStudyAge = player.age;
-                player.logs.push(`¡Has cumplido ${player.age} años! Debes elegir tus nuevos estudios obligatoriamente.`);
-                saveGame();
-                updateUI();
-                renderLogs();
-                openStudyModal();
-                return; // Cortamos aquí para que no cobre el sueldo todavía hasta que elija o se detenga
-            }
-
-            // Sumar sueldo si tiene trabajo activo
-            if (player.job !== "En paro" && player.salary > 0) {
-                player.money += player.salary;
-                player.logs.push(`Has cobrado tu sueldo anual de ${player.salary}€. ¡Dinero ahorrado!`);
-            }
-
-            saveGame(); 
-            updateUI(); 
-            renderLogs(); 
-        }
-
-        function confirmResetGame() { 
-            localStorage.removeItem('sevillalife_save'); 
-            location.reload(); 
-        }
-
-        window.onload = () => {
-            let s = localStorage.getItem('sevillalife_save');
-            if (s) { 
-                player = JSON.parse(s); 
-                if (player.salary === undefined) player.salary = 0;
-                if (player.pendingStudyAge === undefined) player.pendingStudyAge = null;
-                document.getElementById('start-screen').style.display = 'none'; 
-                updateUI(); 
-                renderLogs(); 
-
-                // Si al cargar la partida hay estudios pendientes, mostrar modal obligatorio
-                if (player.pendingStudyAge !== null) {
-                    openStudyModal();
-                }
+                document.getElementById('start-screen').classList.remove('hidden');
             }
         };
     </script>
