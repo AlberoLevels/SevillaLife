@@ -25,6 +25,23 @@
             background: white; padding: 16px; border-radius: 16px; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 5px solid #E5A54A; 
         }
+        
+        /* Estilos para el logo */
+        .app-logo {
+            display: block;
+            margin: 0 auto 10px auto;
+            max-width: 110px;
+            height: auto;
+            object-fit: contain;
+        }
+        .header-logo {
+            display: block;
+            margin: 0 auto 4px auto;
+            max-width: 50px;
+            height: auto;
+            object-fit: contain;
+        }
+
         h1 { color: #C0392B; font-family: 'Montserrat', sans-serif; font-size: 1.6em; font-weight: 800; margin-bottom: 2px; text-align: center; letter-spacing: -0.5px; }
         .subtitle { color: #7f8c8d; font-size: 0.75em; margin-bottom: 2px; text-align: center; }
         .warning-note { color: #7f8c8d; font-size: 0.7em; text-align: center; margin: 4px 0 2px 0; font-style: italic; }
@@ -112,6 +129,9 @@
 
         <div id="start-screen">
             <div class="form-card">
+                <!-- LOGO EN PANTALLA DE INICIO -->
+                <img src="logo.png" alt="AlberoLevels Logo" class="app-logo">
+                
                 <h1>Sevillalife</h1>
                 <p class="subtitle">Registro oficial de identidad y alta en el padrón municipal.</p>
                 <p class="warning-note">* Se recomienda no usar datos ni nombres reales.</p>
@@ -129,6 +149,9 @@
         </div>
 
         <header>
+            <!-- LOGO EN CABECERA DEL JUEGO -->
+            <img src="logo.png" alt="AlberoLevels" class="header-logo">
+            
             <div id="player-name">---</div>
             <div class="header-info">
                 <div class="badge" id="player-age">Edad: 0 años</div>
