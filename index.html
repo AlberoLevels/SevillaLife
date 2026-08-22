@@ -884,8 +884,14 @@
                 p.age++;
                 p.logs.push(`Has cumplido ${p.age} años.`);
 
-                p.activeJobOffers = Utils.generateJobOffers(p.age, p.completedStudies);
-                p.logs.push(`📋 El Servicio de Empleo ha actualizado la bolsa de ofertas laborales para este año.`);
+                if (p.age >= CONFIG.MIN_WORKING_AGE) {
+                    p.activeJobOffers = Utils.generateJobOffers(p.age, p.completedStudies);
+                    if (p.age === CONFIG.MIN_WORKING_AGE) {
+                        p.logs.push(`📋 ¡Ya eres mayor de edad! El Servicio de Empleo ha preparado tus primeras ofertas laborales.`);
+                    } else {
+                        p.logs.push(`📋 El Servicio de Empleo ha actualizado la bolsa de ofertas laborales para este año.`);
+                    }
+                }
 
                 if (p.job !== "En paro" && p.salary > 0) {
                     p.money += p.salary;
