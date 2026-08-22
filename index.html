@@ -219,66 +219,25 @@
         ];
 
         const RANDOM_EVENTS = [
-            // Infancia (3-11)
             { minAge: 3, maxAge: 11, msg: "Te has caído jugando en el parque de María Luisa y te has raspado la rodilla.", health: -5, happiness: -5, money: 0 },
             { minAge: 3, maxAge: 11, msg: "Tus padres te han llevado a tomar un helado en Los Italianos.", health: 0, happiness: 15, money: 0 },
             { minAge: 3, maxAge: 11, msg: "Te han regañado en el colegio por distraerte mirando por la ventana.", health: 0, happiness: -10, money: 0 },
             { minAge: 3, maxAge: 11, msg: "Has hecho un castillo de arena enorme durante un fin de semana en Matalascañas.", health: 5, happiness: 15, money: 0 },
-            { minAge: 3, maxAge: 11, msg: "Te compraste un tebeo en el quiosco de la esquina con tus ahorros infantiles.", health: 0, happiness: 10, money: -2 },
-            { minAge: 3, maxAge: 11, msg: "Jugaste una pachanga de fútbol en la plaza y metiste el gol de la victoria.", health: 5, happiness: 15, money: 0 },
-            { minAge: 3, maxAge: 11, msg: "Perdiste el autobús escolar y te tocó ir corriendo con prisa.", health: -3, happiness: -5, money: 0 },
-            { minAge: 3, maxAge: 11, msg: "Disfrutaste de una tarde de palomitas en el cine de verano.", health: 0, happiness: 12, money: -5 },
-            
-            // Adolescencia (12-17)
             { minAge: 12, maxAge: 17, msg: "Has quedado con tus amigos para dar una vuelta por Nervión.", health: 0, happiness: 10, money: -5 },
             { minAge: 12, maxAge: 17, msg: "Has suspendido un examen importante y te han castigado sin salir.", health: 0, happiness: -15, money: 0 },
-            { minAge: 12, maxAge: 17, msg: "Tus padres te han subido un poco la paga semanal.", health: 0, happiness: 10, money: 10 },
-            { minAge: 12, maxAge: 17, msg: "Has estado bailando y disfrutando en la velá de tu barrio.", health: 0, happiness: 15, money: -10 },
-            { minAge: 12, maxAge: 17, msg: "Fuiste al concierto de un grupo indie en el Cartuja Center.", health: 0, happiness: 18, money: -25 },
-            { minAge: 12, maxAge: 17, msg: "Hiciste una excursión con el instituto a las ruinas de Itálica.", health: 2, happiness: 8, money: -6 },
-            { minAge: 12, maxAge: 17, msg: "Te pilló una tormenta veraniega volviendo andando desde la orilla del río.", health: -5, happiness: -8, money: 0 },
-            { minAge: 12, maxAge: 17, msg: "Tuviste tu primer susto amoroso y pasaste la tarde escuchando música triste.", health: 0, happiness: -10, money: 0 },
-
-            // Adulto / Madurez (18-64)
             { minAge: 18, maxAge: 64, msg: "Has ido a la Feria de Abril y te has gastado un pico en la caseta.", health: 0, happiness: 15, money: -150 },
             { minAge: 18, maxAge: 64, msg: "Un golpe de calor en pleno julio en Sevilla te ha dejado totalmente derretido.", health: -15, happiness: -10, money: 0 },
-            { minAge: 18, maxAge: 64, msg: "Fuiste al dentista a hacerte una revisión y una limpieza general.", health: 5, happiness: -5, money: -60 },
-            { minAge: 18, maxAge: 64, msg: "Te ha tocado un pequeño premio en un rasca y gana del centro.", health: 0, happiness: 15, money: 100 },
-            { minAge: 18, maxAge: 64, msg: "Comiste unos montaditos regulares y pasaste el fin de semana indispuesto.", health: -10, happiness: -10, money: 0 },
-            { minAge: 18, maxAge: 64, msg: "Un atasco monumental en la SE-30 te hizo llegar tardísimo a una reunión clave.", health: -2, happiness: -10, money: 0 },
-            { minAge: 18, maxAge: 64, msg: "Disfrutaste de una tarde de paseo relajante por el Muelle de la Sal.", health: 5, happiness: 12, money: 0 },
-            { minAge: 18, maxAge: 64, msg: "Te rompiste levemente un dedo jugando al pádel con los compañeros de trabajo.", health: -12, happiness: -8, money: -30 },
-            { minAge: 18, maxAge: 64, msg: "Hiciste una escapada de fin de semana a la Sierra Norte de Sevilla.", health: 8, happiness: 15, money: -90 },
-            { minAge: 18, maxAge: 64, msg: "El recibo de la luz subió de forma imprevista y tocó apretarse el cinturón.", health: 0, happiness: -8, money: -75 },
-            { minAge: 18, maxAge: 64, msg: "Te invitaron a una boda por todo lo alto que vació parte de tus ahorros.", health: 0, happiness: 10, money: -250 },
             { minAge: 18, maxAge: 64, requiresJob: true, msg: "La empresa ha sufrido recortes y reestructuración. ¡Te han despedido y te quedas en el paro!", health: -3, happiness: -22, money: 0, losesJob: true },
-            { minAge: 18, maxAge: 64, requiresTeam: "Real Betis", msg: "Te cruzaste con varios jugadores del Real Betis tomando café por Heliópolis y te desearon un buen día.", health: 0, happiness: 12, money: 0 },
-            { minAge: 18, maxAge: 64, requiresTeam: "Sevilla FC", msg: "Coincidiste con un exfutbolista del Sevilla FC en el centro y te hizo gracia charlar un momento con él.", health: 0, happiness: 12, money: 0 },
-
-            // Vejez (65+)
             { minAge: 65, maxAge: 120, msg: "Te has sentado en un banco a comentar las obras del barrio con otros vecinos.", health: 5, happiness: 10, money: 0 },
-            { minAge: 65, maxAge: 120, msg: "Te duele la espalda por la humedad matutina del río Guadalquivir.", health: -10, happiness: -10, money: 0 },
-            { minAge: 65, maxAge: 120, msg: "Tus nietos te han visitado y les has dado un pequeño aguinaldo.", health: 5, happiness: 20, money: -20 },
-            { minAge: 65, maxAge: 120, msg: "Has ido al centro de salud a hacerte el chequeo anual y todo está correcto.", health: 10, happiness: 5, money: 0 },
-            { minAge: 65, maxAge: 120, msg: "Te apuntaste a un taller de memoria y manualidades en el centro cívico.", health: 3, happiness: 12, money: -10 },
-            { minAge: 65, maxAge: 120, msg: "Pasaste la mañana preparando rosquillas caseras para toda la familia.", health: 2, happiness: 15, money: -15 },
-            { minAge: 65, maxAge: 120, msg: "Te sentaste al sol de invierno en un banco de la Plaza de España.", health: 6, happiness: 10, money: 0 },
-            { minAge: 65, maxAge: 120, msg: "Tuviste que armarte de paciencia en una larga lista de espera del especialista médico.", health: -5, happiness: -10, money: 0 },
-
-            // Generales
             { minAge: 3, maxAge: 120, msg: "Te has encontrado un billete de 10€ tirado en la Alameda.", health: 0, happiness: 10, money: 10 },
-            { minAge: 3, maxAge: 120, msg: "Paseaste tranquilamente por el Parque María Luisa y desconectaste por completo.", health: 5, happiness: 10, money: 0 },
-            { minAge: 3, maxAge: 120, msg: "Has pillado una gripe fuerte durante el invierno.", health: -20, happiness: -15, money: 0 },
-            { minAge: 3, maxAge: 120, msg: "Has tenido un año tranquilo y sin grandes sobresaltos.", health: 2, happiness: 2, money: 0 },
-            { minAge: 6, maxAge: 120, requiresPet: true, msg: "Tu mascota {petName} ha estado jugando contigo todo el día y te ha transmitido mucha alegría.", health: 2, happiness: 12, money: 0 },
-            { minAge: 18, maxAge: 120, requiresPet: true, msg: "Tuviste que llevar a {petName} al veterinario por un chequeo imprevisto.", health: 0, happiness: -5, money: -70 },
-            { minAge: 6, maxAge: 120, requiresPet: true, msg: "{petName} ha hecho de las suyas y ha mordisqueado algo valioso en casa.", health: 0, happiness: -5, money: 0 }
+            { minAge: 6, maxAge: 120, requiresPet: true, msg: "Tu mascota {petName} ha estado jugando contigo todo el día y te ha transmitido mucha alegría.", health: 2, happiness: 12, money: 0 }
         ];
 
+        // 30 Eventos de elección clasificados en Hitos Únicos y Recurrentes con Cooldown
         const CHOICE_EVENTS = [
+            // 1. Hitos Únicos (unique: true)
             {
-                id: 'team_selection',
-                minAge: 8, maxAge: 16,
+                id: 'team_selection', unique: true, minAge: 8, maxAge: 16,
                 title: "⚽ Pasión en la ciudad",
                 msg: "En Sevilla la rivalidad futbolística se vive desde chico. ¿De qué equipo vas a ser?",
                 options: [
@@ -287,38 +246,16 @@
                 ]
             },
             {
-                id: 'season_ticket',
-                minAge: 18, maxAge: 32,
-                requiresAnyTeam: true,
-                title: "🎫 El carnet de abonado",
-                msg: "Ahora que ya eres mayor de edad, te planteas dar el paso definitivo y sacarte el abono anual para no perderte ningún partido del {favoriteTeam}.",
-                options: [
-                    { text: "Sacarse el abono (250€)", cost: 250, health: 0, happiness: 22, money: 0, resultMsg: "¡Ya tienes tu asiento en el estadio! Vives cada jornada con una ilusión tremenda." },
-                    { text: "Seguir viéndolo desde casa o el bar", cost: 0, health: 0, happiness: 4, money: 0, resultMsg: "Preferiste ahorrarte el dinero y disfrutar de los partidos con los amigos." }
-                ]
-            },
-            {
-                minAge: 18, maxAge: 65,
-                requiresAnyTeam: true,
-                title: "🏟️ ¡Llega el Gran Derbi!",
-                msg: "Se acerca el partido más esperado del año en la ciudad. Tu {favoriteTeam} se juega los tres puntos contra el eterno rival.",
-                options: [
-                    { text: "Comprar entrada para ir al campo (90€)", cost: 90, health: 0, happiness: 28, money: 0, resultMsg: "¡Ambiente imborrable en el estadio! La tensión y la alegría tras el pitido final fueron indescriptibles." },
-                    { text: "Verlo en la peña o bar con los amigos", cost: 12, health: 0, happiness: 15, money: 0, resultMsg: "Tarde de nervios, cañas, tapas y emoción compartida frente al televisor." }
-                ]
-            },
-            {
-                minAge: 6, maxAge: 11,
+                id: 'perro_callejero', unique: true, minAge: 6, maxAge: 11, petType: "Perro",
                 title: "🐾 Perro callejero",
                 msg: "Te encuentras a un perro pequeño abandonado cerca de Triana. ¿Qué haces?",
-                petType: "Perro",
                 options: [
                     { text: "Llevártelo a casa y ponerle un nombre", cost: 0, health: 0, happiness: 20, money: 0, adoptsPet: true, resultMsg: "Decidiste llevarte al perrito a casa." },
                     { text: "Dejarlo e ignorarlo", cost: 0, health: 0, happiness: -10, money: 0, adoptsPet: false, resultMsg: "Te fuiste a casa triste pensando en el perrito." }
                 ]
             },
             {
-                minAge: 6, maxAge: 11,
+                id: 'capricho_infantil', unique: true, minAge: 6, maxAge: 11,
                 title: "🚲 ¿Capricho infantil?",
                 msg: "Tus padres te dan a elegir entre comprarte una bicicleta nueva o ir una semana a un campamento de verano.",
                 options: [
@@ -327,83 +264,282 @@
                 ]
             },
             {
-                minAge: 13, maxAge: 17,
+                id: 'gato_callejon', unique: true, minAge: 13, maxAge: 17, petType: "Gato",
                 title: "🐱 Gato en el callejón",
                 msg: "Un gato mimoso te sigue por el barrio de Santa Cruz y busca caricias. ¿Qué haces?",
                 options: [
                     { text: "Adoptarlo y llevarlo a casa", cost: 0, health: 0, happiness: 20, money: 0, adoptsPet: true, resultMsg: "Te has llevado al gatito a casa." },
                     { text: "Seguir tu camino", cost: 0, health: 0, happiness: -5, money: 0, adoptsPet: false, resultMsg: "Decidiste continuar sin hacerte cargo del gato." }
-                ],
-                petType: "Gato"
+                ]
             },
             {
-                minAge: 13, maxAge: 17,
+                id: 'examen_secundaria', unique: true, minAge: 13, maxAge: 17,
                 title: "📝 Examen de Secundaria",
                 msg: "Tienes un examen muy difícil mañana y no has estudiado nada.",
                 options: [
                     { 
-                        text: "Preparar chuletas e intentar copiar (Riesgo)", 
-                        cost: 0, 
-                        successChance: 0.60,
-                        success: { health: 0, happiness: 12, money: 0, resultMsg: "¡Coló a la perfección! Copiaste disimuladamente y saliste con un aprobado." },
-                        failure: { health: -2, happiness: -18, money: 0, resultMsg: "¡Te pillaron copiando! Parte disciplinario, un sofoco terrible y examen suspendido." }
+                        text: "Preparar chuletas e intentar copiar (Riesgo)", cost: 0, successChance: 0.60,
+                        success: { health: 0, happiness: 12, money: 0, resultMsg: "¡Coló a la perfección! Copiaste disimuladamente y aprobaste." },
+                        failure: { health: -2, happiness: -18, money: 0, resultMsg: "¡Te pillaron copiando! Parte disciplinario y suspenso." }
                     },
-                    { text: "Ir a dormir e intentar responder lo que sepas", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Suspendiste de forma justa, pero al menos descansaste tranquilo sin sustos." }
+                    { text: "Ir a dormir e intentar responder lo que sepas", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Suspendiste de forma justa, pero al menos descansaste tranquilo." }
                 ]
             },
             {
-                minAge: 18, maxAge: 60,
-                title: "🎪 Puesto en la Feria",
-                msg: "Un amigo te propone invertir 300€ para montar un pequeño puesto de buñuelos en la Feria.",
-                options: [
-                    { 
-                        text: "Invertir 300€ (Incertidumbre)", 
-                        cost: 300, 
-                        successChance: 0.70,
-                        success: { health: -5, happiness: 20, money: 900, resultMsg: "¡El puesto fue un exitazo rotundo! Recuperaste la inversión con creces y ganaste un buen pico." },
-                        failure: { health: -5, happiness: -15, money: 0, resultMsg: "El negocio salió rana por la climatología y malas gestiones; perdiste la inversión inicial." }
-                    },
-                    { text: "Rechazar la oferta", cost: 0, health: 0, happiness: 0, money: 0, resultMsg: "Decidiste no arriesgar tu dinero y pasar de largo." }
-                ]
-            },
-            {
-                minAge: 20, maxAge: 65,
-                title: "💻 Curso de Capacitación",
-                msg: "Un centro privado ofrece un curso intensivo por 200€ que promete mejorar tus habilidades profesionales.",
-                options: [
-                    { 
-                        text: "Pagar la matrícula (200€)", 
-                        cost: 200, 
-                        successChance: 0.80,
-                        success: { health: 0, happiness: 15, money: 0, resultMsg: "El profesor era excelente y aprendiste herramientas muy útiles para tu carrera." },
-                        failure: { health: 0, happiness: -10, money: 0, resultMsg: "El curso resultó ser muy superficial y anticuado; sentiste que tiraste el dinero." }
-                    },
-                    { text: "Ahorrar el dinero", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Preferiste mantener tus ahorros intactos en el banco." }
-                ]
-            },
-            {
-                id: 'move_madrid',
-                minAge: 22, maxAge: 55,
+                id: 'move_madrid', unique: true, minAge: 22, maxAge: 55,
                 title: "✈️ Oferta de empleo fuera",
                 msg: "Te ha surgido la oportunidad de cambiar de aires e irte a trabajar a Madrid con un sueldo superior.",
                 options: [
                     { 
-                        text: "Aceptar el reto y mudarte", 
-                        cost: 400, 
-                        successChance: 0.75,
-                        success: { health: -5, happiness: 15, money: 1800, resultMsg: "Te adaptaste de maravilla a la capital y el impulso económico mereció totalmente la pena." },
-                        failure: { health: -10, happiness: -22, money: 400, resultMsg: "La morriña de Sevilla y el alto coste de vida te machacaron; tuviste que volver antes de tiempo." }
+                        text: "Aceptar el reto y mudarte", cost: 400, successChance: 0.75,
+                        success: { health: -5, happiness: 15, money: 1800, resultMsg: "Te adaptaste de maravilla a la capital y el impulso económico mereció la pena." },
+                        failure: { health: -10, happiness: -22, money: 400, resultMsg: "La morriña de Sevilla y el alto coste de vida te machacaron; tuviste que volver." }
                     },
                     { text: "Quedarte en Sevilla junto a los tuyos", cost: 0, health: 0, happiness: 15, money: 0, resultMsg: "Preferiste la tranquilidad y el compás de tu tierra." }
                 ]
             },
             {
-                minAge: 65, maxAge: 110,
+                id: 'inversion_dudosa', unique: true, minAge: 22, maxAge: 50,
+                title: "📉 El amigo inversor",
+                msg: "Un conocido te propone invertir 500€ en un negocio milagroso de criptomonedas y apuestas online.",
+                options: [
+                    {
+                        text: "Meter los 500€ (Alto riesgo)", cost: 500, successChance: 0.35,
+                        success: { health: 0, happiness: 25, money: 2000, resultMsg: "¡Doblaste el dinero! El proyecto subió como la espuma." },
+                        failure: { health: -2, happiness: -25, money: 0, resultMsg: "Era una estafa piramidal en toda regla; perdiste hasta el último céntimo." }
+                    },
+                    { text: "Desconfiar y pasar del tema", cost: 0, health: 0, happiness: 5, money: 0, resultMsg: "Hiciste bien en no fiarte de promesas tan fáciles." }
+                ]
+            },
+            {
+                id: 'herencia_familiar', unique: true, minAge: 30, maxAge: 70,
+                title: "📦 Un recuerdo familiar",
+                msg: "Un familiar lejano te deja en herencia un viejo local comercial cerrado en el centro de Sevilla.",
+                options: [
+                    { text: "Reformarlo y alquilarlo", cost: 1500, health: 0, happiness: 20, money: 2500, resultMsg: "La inversión inicial fue dura, pero ahora te genera ingresos estables." },
+                    { text: "Venderlo rápido tal como está", cost: 0, health: 0, happiness: 15, money: 4000, resultMsg: "Te quitaste jaleos de encima y te embolsaste un buen pellizco de golpe." }
+                ]
+            },
+
+            // 2. Eventos Recurrentes con Cooldown (cooldown: X años)
+            {
+                id: 'season_ticket', cooldown: 6, minAge: 18, maxAge: 32, requiresAnyTeam: true,
+                title: "🎫 El carnet de abonado",
+                msg: "Te planteas renovar o sacarte el abono anual para no perderte ningún partido del {favoriteTeam}.",
+                options: [
+                    { text: "Sacarse el abono (250€)", cost: 250, health: 0, happiness: 22, money: 0, resultMsg: "¡Disfrutas de tu asiento en el estadio cada fin de semana!" },
+                    { text: "Seguir viéndolo desde casa o el bar", cost: 0, health: 0, happiness: 4, money: 0, resultMsg: "Preferiste ahorrarte el dinero y verlo con los amigos." }
+                ]
+            },
+            {
+                id: 'gran_derbi_decision', cooldown: 3, minAge: 18, maxAge: 65, requiresAnyTeam: true,
+                title: "🏟️ ¡Llega el Gran Derbi!",
+                msg: "Se acerca el partido más esperado del año. Tu {favoriteTeam} se juega los tres puntos contra el eterno rival.",
+                options: [
+                    { text: "Comprar entrada para ir al campo (90€)", cost: 90, health: 0, happiness: 28, money: 0, resultMsg: "¡Ambiente imborrable en el estadio y victoria celebrada por todo lo alto!" },
+                    { text: "Verlo en la peña con los amigos", cost: 12, health: 0, happiness: 15, money: 0, resultMsg: "Tarde de nervios, cañas y emoción compartida frente al televisor." }
+                ]
+            },
+            {
+                id: 'puesto_feria', cooldown: 5, minAge: 18, maxAge: 60,
+                title: "🎪 Puesto en la Feria",
+                msg: "Un amigo te propone invertir 300€ para montar un pequeño puesto de buñuelos en la Feria.",
+                options: [
+                    { 
+                        text: "Invertir 300€ (Incertidumbre)", cost: 300, successChance: 0.70,
+                        success: { health: -5, happiness: 20, money: 900, resultMsg: "¡El puesto fue un exitazo rotundo y ganaste un buen dinero!" },
+                        failure: { health: -5, happiness: -15, money: 0, resultMsg: "El negocio salió rana por la climatología; perdiste la inversión." }
+                    },
+                    { text: "Rechazar la oferta", cost: 0, health: 0, happiness: 0, money: 0, resultMsg: "Decidiste no arriesgar tu dinero y disfrutar como visitante." }
+                ]
+            },
+            {
+                id: 'curso_capacitacion', cooldown: 4, minAge: 20, maxAge: 65,
+                title: "💻 Curso de Capacitación",
+                msg: "Un centro privado ofrece un curso intensivo por 200€ que promete mejorar tus habilidades profesionales.",
+                options: [
+                    { 
+                        text: "Pagar la matrícula (200€)", cost: 200, successChance: 0.80,
+                        success: { health: 0, happiness: 15, money: 0, resultMsg: "Aprendiste herramientas muy útiles para tu carrera." },
+                        failure: { health: 0, happiness: -10, money: 0, resultMsg: "El curso resultó ser muy superficial y anticuado." }
+                    },
+                    { text: "Ahorrar el dinero", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Preferiste mantener tus ahorros intactos en el banco." }
+                ]
+            },
+            {
+                id: 'viaje_imserso', cooldown: 4, minAge: 65, maxAge: 110,
                 title: "🚌 Viaje del IMSERSO",
                 msg: "Te ofrecen una plaza para un viaje de una semana a la costa por 100€.",
                 options: [
                     { text: "Irte de viaje (100€)", cost: 100, health: 10, happiness: 25, money: 0, resultMsg: "¡Lo pasaste genial bailando y tomando el sol en la playa!" },
                     { text: "Quedarte en Sevilla", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Te quedaste tranquilo en casa viendo la televisión." }
+                ]
+            },
+            {
+                id: 'comprar_patinete', cooldown: 6, minAge: 18, maxAge: 50,
+                title: "🛴 Movilidad urbana",
+                msg: "Te planteas comprar un patinete eléctrico para moverte con agilidad por los carriles bici de Sevilla.",
+                options: [
+                    { text: "Comprar patinete (350€)", cost: 350, health: 2, happiness: 15, money: 0, resultMsg: "¡Te ahorras muchísimos atascos y llegas rápido a todos lados!" },
+                    { text: "Seguir usando el autobús o caminar", cost: 0, health: 2, happiness: -2, money: 0, resultMsg: "Continuaste con tu rutina de transporte habitual." }
+                ]
+            },
+            {
+                id: 'multa_trafico', cooldown: 3, minAge: 18, maxAge: 75,
+                title: "🚨 Multa imprevista",
+                msg: "Te llega una notificación de tráfico a casa por un despiste aparcando en doble fila.",
+                options: [
+                    { text: "Pagar con pronto pago (60€)", cost: 60, health: 0, happiness: -8, money: 0, resultMsg: "Abonaste la multa rápido para evitar recargos mayores." },
+                    { text: "Recurrir por vía administrativa", cost: 15, successChance: 0.40,
+                        success: { health: 0, happiness: 10, money: 0, resultMsg: "¡Ganaste el recurso! Te libraste de pagar la sanción gorda." },
+                        failure: { health: 0, happiness: -15, money: 120, resultMsg: "El recurso fue desestimado y el recargo aumentó considerablemente." }
+                    }
+                ]
+            },
+            {
+                id: 'apuesta_quiniela', cooldown: 2, minAge: 18, maxAge: 85,
+                title: "⚽ El boleto de la suerte",
+                msg: "Pagas un pequeño boleto de lotería o quiniela en el estanco del barrio.",
+                options: [
+                    { 
+                        text: "Probar suerte (10€)", cost: 10, successChance: 0.30,
+                        success: { health: 0, happiness: 20, money: 150, resultMsg: "¡Premio menor acertado! Recuperaste con creces lo jugado." },
+                        failure: { health: 0, happiness: -3, money: 0, resultMsg: "Boleto sin premio. Otra vez será." }
+                    },
+                    { text: "No jugar", cost: 0, health: 0, happiness: 0, money: 0, resultMsg: "Decidiste guardar tus monedas." }
+                ]
+            },
+            {
+                id: 'donar_sangre', cooldown: 3, minAge: 18, maxAge: 65,
+                title: "🩸 Unidad Móvil de Donación",
+                msg: "La hermandad de donantes de sangre se encuentra en tu zona y te animas a participar.",
+                options: [
+                    { text: "Donar sangre de forma altruista", cost: 0, health: 5, happiness: 15, money: 0, resultMsg: "Te sentiste muy realizado ayudando a salvar vidas en los hospitales." },
+                    { text: "Seguir de largo", cost: 0, health: 0, happiness: 0, money: 0, resultMsg: "Tenías prisa y decidiste no entrar." }
+                ]
+            },
+            {
+                id: 'escapada_playa_cadiz', cooldown: 3, minAge: 16, maxAge: 70,
+                title: "🏖️ Fin de semana en Cádiz",
+                msg: "Unos amigos organizan una escapada rápida a la costa gaditana para desconectar del calor sevillano.",
+                options: [
+                    { text: "Ir a la playa (120€)", cost: 120, health: 8, happiness: 22, money: 0, resultMsg: "¡Fin de semana maravilloso de pescaíto frito, playa y buena compañía!" },
+                    { text: "Quedarse en casa con el aire acondicionado", cost: 0, health: 2, happiness: -4, money: 0, resultMsg: "Preferiste ahorrar el dinero y descansar en casa." }
+                ]
+            },
+            {
+                id: 'problema_comunidad', cooldown: 5, minAge: 25, maxAge: 80,
+                title: "🏢 Derrama en la comunidad",
+                msg: "En la junta de vecinos se aprueba una derrama obligatoria para arreglar el portal y la fachada del edificio.",
+                options: [
+                    { text: "Abonar la derrama (350€)", cost: 350, health: 0, happiness: -5, money: 0, resultMsg: "Pagaste tu parte y el edificio ha ganado bastante valor estético." },
+                    { text: "Protestar en la reunión", cost: 0, health: 0, happiness: -10, money: 0, resultMsg: "Te ganaste una discusión vecinal tensa, pero al final tuviste que pagar igual." }
+                ]
+            },
+            {
+                id: 'comprar_coche', cooldown: 10, minAge: 18, maxAge: 65,
+                title: "🚗 Vehículo nuevo de ocasión",
+                msg: "Necesitas un medio de transporte más cómodo para desplazarte fuera de la ciudad.",
+                options: [
+                    { text: "Comprar utilitario de segunda mano (3500€)", cost: 3500, health: 5, happiness: 20, money: 0, resultMsg: "¡Te da una libertad tremunda para hacer viajes y excursiones!" },
+                    { text: "Seguir usando transporte público", cost: 0, health: 0, happiness: -2, money: 0, resultMsg: "Evitaste gastos de seguro, gasolina e ITV." }
+                ]
+            },
+            {
+                id: 'apuntarse_gimnasio', cooldown: 4, minAge: 18, maxAge: 65,
+                title: "💪 Propósito saludable",
+                msg: "Te planteas apuntarte a un gimnasio del barrio para ponerte en forma.",
+                options: [
+                    { text: "Matricularte y pagar anualidad (400€)", cost: 400, health: 12, happiness: 15, money: 0, resultMsg: "¡Gané mucha energía, salud y vitalidad durante todo el año!" },
+                    { text: "Entrenar corriendo por el parque por tu cuenta", cost: 0, health: 6, happiness: 8, money: 0, resultMsg: "Ahorraste dinero saliendo a trotar al aire libre." }
+                ]
+            },
+            {
+                id: 'reforma_casa', cooldown: 8, minAge: 28, maxAge: 75,
+                title: "🛠️ Reforma en el hogar",
+                msg: "La cocina y el baño de casa se han quedado anticuados y necesitan una buena actualización.",
+                options: [
+                    { text: "Contratar reforma completa (2000€)", cost: 2000, health: 2, happiness: 22, money: 0, resultMsg: "¡El hogar ha quedado moderno, cómodo y muy acogedor!" },
+                    { text: "Hacer pequeños arreglos caseros tú mismo", cost: 150, health: 0, happiness: 8, money: 0, resultMsg: "Con maña y paciencia solucionaste lo más urgente gastando poco." }
+                ]
+            },
+            {
+                id: 'concierto_estadio', cooldown: 3, minAge: 16, maxAge: 65,
+                title: "🎸 Concierto internacional",
+                msg: "Un grupo mundialmente conocido actúa en el estadio de la Cartuja y las entradas vuelan.",
+                options: [
+                    { text: "Comprar entrada de pista (75€)", cost: 75, health: -3, happiness: 24, money: 0, resultMsg: "¡Noche inolvidable cantando tus canciones favoritas en directo!" },
+                    { text: "Escucharlo desde fuera con los amigos", cost: 0, health: 0, happiness: 10, money: 0, resultMsg: "Ambiente divertido en las inmediaciones tomando algo." }
+                ]
+            },
+            {
+                id: 'invitacion_boda', cooldown: 3, minAge: 22, maxAge: 65,
+                title: "💒 ¡Boda a la vista!",
+                msg: "Un buen amigo o familiar te invita a su boda por todo lo alto en una hacienda sevillana.",
+                options: [
+                    { text: "Asistir y dar sobre con regalo (200€)", cost: 200, health: 0, happiness: 18, money: 0, resultMsg: "Gran celebración, comida excelente y reencuentro con viejos conocidos." },
+                    { text: "Disculparte educadamente y no ir", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Te ahorraste el compromiso y el dinero del regalo." }
+                ]
+            },
+            {
+                id: 'curso_cocina', cooldown: 5, minAge: 20, maxAge: 75,
+                title: "🍳 Taller gastronómico",
+                msg: "Se organiza un curso intensivo de cocina tradicional andaluza y arroces en un centro cívico.",
+                options: [
+                    { text: "Inscribirse en el taller (80€)", cost: 80, health: 2, happiness: 16, money: 0, resultMsg: "Aprendiste trucos culinarios excelentes que ahora disfrutas en casa." },
+                    { text: "Comer de tupper y pasar", cost: 0, health: 0, happiness: 0, money: 0, resultMsg: "Seguiste con tus recetas habituales." }
+                ]
+            },
+            {
+                id: 'loteria_navidad', cooldown: 1, minAge: 18, maxAge: 100,
+                title: "🎄 Lotería de Navidad",
+                msg: "Como manda la tradición navideña, pasas por la administración de la C. / Sierpes a comprar un décimo.",
+                options: [
+                    { 
+                        text: "Comprar décimo (20€)", cost: 20, successChance: 0.15,
+                        success: { health: 0, happiness: 30, money: 400, resultMsg: "¡Toca un pellizquito de la suerte en Navidades!" },
+                        failure: { health: 0, happiness: 2, money: 0, resultMsg: "El décimo no resultó premiado, pero queda la ilusión." }
+                    },
+                    { text: "Este año sin lotería", cost: 0, health: 0, happiness: 0, money: 0, resultMsg: "Pasaste de la tradición este año." }
+                ]
+            },
+            {
+                id: 'problema_fontaneria', cooldown: 6, minAge: 22, maxAge: 80,
+                title: "🚰 Urgencia de fontanería",
+                msg: "Una tubería principal de la casa se ha roto causando una gotera importante al vecino de abajo.",
+                options: [
+                    { text: "Llamar a fontanero urgente (250€)", cost: 250, health: -2, happiness: -10, money: 0, resultMsg: "Reparación rápida y eficiente; problema solucionado." },
+                    { text: "Intentar apañarlo provisionalmente", cost: 40, successChance: 0.50,
+                        success: { health: 0, happiness: 5, money: 0, resultMsg: "¡Avería apañada con maña!" },
+                        failure: { health: -3, happiness: -15, money: 180, resultMsg: "La chapuza empeoró y tuviste que pagar el doble de urgencia." }
+                    }
+                ]
+            },
+            {
+                id: 'voluntariado_ong', cooldown: 4, minAge: 18, maxAge: 80,
+                title: "🤝 Solidaridad local",
+                msg: "Una ONG del barrio busca voluntarios para repartir alimentos y ayuda social durante los fines de semana.",
+                options: [
+                    { text: "Colaborar activamente", cost: 0, health: 2, happiness: 22, money: 0, resultMsg: "Una experiencia humana enriquecedora que te aporta gran paz interior." },
+                    { text: "No disponer de tiempo libre", cost: 0, health: 0, happiness: 0, money: 0, resultMsg: "Tus obligaciones personales te impidieron participar." }
+                ]
+            },
+            {
+                id: 'escapada_sierra', cooldown: 3, minAge: 18, maxAge: 75,
+                title: "🌲 Excursión a la Sierra Norte",
+                msg: "Tienes la oportunidad de pasar un fin de semana de senderismo y turismo rural por Cazalla de la Sierra.",
+                options: [
+                    { text: "Hacer la escapada (90€)", cost: 90, health: 8, happiness: 18, money: 0, resultMsg: "Aire puro, buena gastronomía serrana y desconexión total." },
+                    { text: "Quedarse en la ciudad", cost: 0, health: 0, happiness: 0, money: 0, resultMsg: "Te quedaste descansando en tu entorno habitual." }
+                ]
+            },
+            {
+                id: 'cambio_operador_luz', cooldown: 4, minAge: 21, maxAge: 85,
+                title: "💡 Ahorro en la factura",
+                msg: "Te ofrecen revisar tu tarifa eléctrica y de gas para buscar una oferta más económica en el mercado.",
+                options: [
+                    { text: "Cambiar de compañía", cost: 0, health: 0, happiness: 10, money: 120, resultMsg: "¡Notas un alivio claro en las facturas mensuales de los siguientes meses!" },
+                    { text: "Quedarte como estás", cost: 0, health: 0, happiness: -2, money: 0, resultMsg: "Preferiste no complicarte con trámites de contratos." }
                 ]
             }
         ];
@@ -443,19 +579,13 @@
             clamp(val, min, max) {
                 return Math.max(min, Math.min(max, val));
             },
-            getStudyTitle(id) {
-                const st = STUDIES.find(s => s.id === id);
-                return st ? st.title : id;
-            },
             generateJobOffers(age, completedStudies) {
-                // Filtramos trabajos accesibles por edad y estudios requeridos
                 const validJobs = JOBS.filter(job => {
                     if (age < job.minAge) return false;
                     const meetsReq = job.reqStudyIds.length === 0 || job.reqStudyIds.some(id => completedStudies.includes(id));
                     return meetsReq;
                 });
 
-                // Si hay pocos, cogemos todos; si hay muchos, barajamos y sacamos 3 o 4 aleatorios
                 const shuffled = [...validJobs].sort(() => 0.5 - Math.random());
                 return shuffled.slice(0, 4);
             }
@@ -644,6 +774,7 @@
             normalizeState(raw) {
                 const completed = Array.isArray(raw.completedStudies) ? raw.completedStudies : [];
                 const completedChoices = Array.isArray(raw.completedChoices) ? raw.completedChoices : [];
+                const lastChoices = (raw.lastChoices && typeof raw.lastChoices === 'object') ? raw.lastChoices : {};
                 
                 if (completed.length === 0 && raw.studies && raw.studies !== "Ninguno") {
                     const found = STUDIES.find(s => s.title === raw.studies);
@@ -670,6 +801,7 @@
                     studies: raw.studies || "Ninguno",
                     completedStudies: completed,
                     completedChoices: completedChoices,
+                    lastChoices: lastChoices,
                     job: raw.job || "En paro",
                     activeJobOffers: activeOffers,
                     pet: raw.pet || null,
@@ -707,6 +839,7 @@
                     studies: "Ninguno",
                     completedStudies: [],
                     completedChoices: [],
+                    lastChoices: {},
                     job: "En paro",
                     activeJobOffers: Utils.generateJobOffers(0, []),
                     pet: null,
@@ -751,17 +884,14 @@
                 p.age++;
                 p.logs.push(`Has cumplido ${p.age} años.`);
 
-                // Actualizar bolsa de empleo anual del SAE
                 p.activeJobOffers = Utils.generateJobOffers(p.age, p.completedStudies);
                 p.logs.push(`📋 El Servicio de Empleo ha actualizado la bolsa de ofertas laborales para este año.`);
 
-                // Cobro de sueldo anual (si tiene trabajo antes de pagar gastos)
                 if (p.job !== "En paro" && p.salary > 0) {
                     p.money += p.salary;
                     p.logs.push(`Has cobrado tu sueldo anual de ${p.salary}€. ¡Dinero ingresado!`);
                 }
 
-                // Gastos de vida anuales para adultos
                 if (p.age >= CONFIG.MIN_WORKING_AGE) {
                     if (p.money >= CONFIG.ANNUAL_LIVING_COST) {
                         p.money -= CONFIG.ANNUAL_LIVING_COST;
@@ -800,9 +930,18 @@
                 if (p.age >= 3 && Math.random() < 0.35) {
                     const availableChoices = CHOICE_EVENTS.filter(ev => {
                         if (p.age < ev.minAge || p.age > ev.maxAge) return false;
-                        if (ev.id && p.completedChoices.includes(ev.id)) return false;
                         if (ev.petType && p.pet) return false;
                         if (ev.requiresAnyTeam && !p.favoriteTeam) return false;
+                        if (ev.requiresTeam && p.favoriteTeam !== ev.requiresTeam) return false;
+
+                        // Comprobación de hito único o cooldown
+                        if (ev.unique) {
+                            if (p.completedChoices.includes(ev.id)) return false;
+                        } else if (ev.cooldown) {
+                            const lastAge = p.lastChoices[ev.id];
+                            if (lastAge !== undefined && (p.age - lastAge < ev.cooldown)) return false;
+                        }
+
                         return true;
                     });
 
@@ -920,8 +1059,13 @@
                         p.favoriteTeam = opt.setsTeam;
                     }
 
-                    if (eventObj.id && !p.completedChoices.includes(eventObj.id)) {
-                        p.completedChoices.push(eventObj.id);
+                    // Registrar hito único o cooldown actual
+                    if (eventObj.unique) {
+                        if (!p.completedChoices.includes(eventObj.id)) {
+                            p.completedChoices.push(eventObj.id);
+                        }
+                    } else if (eventObj.cooldown) {
+                        p.lastChoices[eventObj.id] = p.age;
                     }
 
                     p.money -= opt.cost;
@@ -1028,7 +1172,6 @@
                 p.happiness = Utils.clamp(p.happiness + 15, 0, 100);
                 p.pendingStudyAge = null;
 
-                // Actualizar bolsa de empleo con los nuevos estudios
                 p.activeJobOffers = Utils.generateJobOffers(p.age, p.completedStudies);
 
                 p.logs.push(`🎓 ¡Has completado con éxito: ${study.title}! ${study.cost > 0 ? `(-${study.cost}€)` : ''}`);
@@ -1046,7 +1189,6 @@
                     return;
                 }
 
-                // Asegurar ofertas activas si por algo estuvieran vacías
                 if (!p.activeJobOffers || p.activeJobOffers.length === 0) {
                     p.activeJobOffers = Utils.generateJobOffers(p.age, p.completedStudies);
                 }
@@ -1091,17 +1233,15 @@
                 const job = JOBS.find(j => j.id === jobId);
                 if (!job) return;
 
-                // Calcular probabilidad de éxito en la entrevista
-                // Base: 65%. Si tienes estudios superiores a los mínimos requeridos, +15%
                 let successChance = 0.65;
                 if (job.reqStudyIds.length > 0) {
                     const hasHigher = p.completedStudies.some(id => {
                         const sObj = STUDIES.find(st => st.id === id);
-                        return sObj && sObj.rank > 2; // Títulos avanzados
+                        return sObj && sObj.rank > 2;
                     });
                     if (hasHigher) successChance = 0.85;
                 } else {
-                    successChance = 0.75; // Trabajos básicos
+                    successChance = 0.75;
                 }
 
                 const roll = Math.random();
