@@ -326,19 +326,25 @@
                 minAge: 13, maxAge: 17,
                 title: "🐱 Gato en el callejón",
                 msg: "Un gato mimoso te sigue por el barrio de Santa Cruz y busca caricias. ¿Qué haces?",
-                petType: "Gato",
                 options: [
                     { text: "Adoptarlo y llevarlo a casa", cost: 0, health: 0, happiness: 20, money: 0, adoptsPet: true, resultMsg: "Te has llevado al gatito a casa." },
                     { text: "Seguir tu camino", cost: 0, health: 0, happiness: -5, money: 0, adoptsPet: false, resultMsg: "Decidiste continuar sin hacerte cargo del gato." }
-                ]
+                ],
+                petType: "Gato"
             },
             {
                 minAge: 13, maxAge: 17,
                 title: "📝 Examen de Secundaria",
                 msg: "Tienes un examen muy difícil mañana y no has estudiado nada.",
                 options: [
-                    { text: "Preparar chuletas e intentar copiar", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Aprobaste de milagro, pero el estrés te dejó mal cuerpo." },
-                    { text: "Ir a dormir e intentar responder lo que sepas", cost: 0, health: 0, happiness: 10, money: 0, resultMsg: "Suspendiste dignamente pero descansaste bien por la noche." }
+                    { 
+                        text: "Preparar chuletas e intentar copiar (Riesgo)", 
+                        cost: 0, 
+                        successChance: 0.60, // 60% éxito, 40% que te pillen
+                        success: { health: 0, happiness: 12, money: 0, resultMsg: "¡Coló a la perfección! Copiaste disimuladamente y saliste con un aprobado." },
+                        failure: { health: -2, happiness: -18, money: 0, resultMsg: "¡Te pillaron copiando! Parte disciplinario, un sofoco terrible y examen suspendido." }
+                    },
+                    { text: "Ir a dormir e intentar responder lo que sepas", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Suspendiste de forma justa, pero al menos descansaste tranquilo sin sustos." }
                 ]
             },
             {
@@ -346,7 +352,13 @@
                 title: "🎪 Puesto en la Feria",
                 msg: "Un amigo te propone invertir 300€ para montar un pequeño puesto de buñuelos en la Feria.",
                 options: [
-                    { text: "Invertir 300€", cost: 300, health: -5, happiness: 15, money: 700, resultMsg: "¡El puesto fue un éxito rotundo! Recuperaste la inversión y ganaste un buen pico." },
+                    { 
+                        text: "Invertir 300€ (Incertidumbre)", 
+                        cost: 300, 
+                        successChance: 0.70, // 70% éxito comercial, 30% pérdidas
+                        success: { health: -5, happiness: 20, money: 900, resultMsg: "¡El puesto fue un exitazo rotundo! Recuperaste la inversión con creces y ganaste un buen pico." },
+                        failure: { health: -5, happiness: -15, money: 0, resultMsg: "El negocio salió rana por la climatología y malas gestiones; perdiste la inversión inicial." }
+                    },
                     { text: "Rechazar la oferta", cost: 0, health: 0, happiness: 0, money: 0, resultMsg: "Decidiste no arriesgar tu dinero y pasar de largo." }
                 ]
             },
@@ -355,7 +367,13 @@
                 title: "💻 Curso de Capacitación",
                 msg: "Un centro privado ofrece un curso intensivo por 200€ que promete mejorar tus habilidades profesionales.",
                 options: [
-                    { text: "Pagar la matrícula (200€)", cost: 200, health: 0, happiness: 10, money: 0, resultMsg: "Completaste el curso con éxito. Ahora estás mejor preparado." },
+                    { 
+                        text: "Pagar la matrícula (200€)", 
+                        cost: 200, 
+                        successChance: 0.80, // 80% éxito
+                        success: { health: 0, happiness: 15, money: 0, resultMsg: "El profesor era excelente y aprendiste herramientas muy útiles para tu carrera." },
+                        failure: { health: 0, happiness: -10, money: 0, resultMsg: "El curso resultó ser muy superficial y anticuado; sentiste que tiraste el dinero." }
+                    },
                     { text: "Ahorrar el dinero", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Preferiste mantener tus ahorros intactos en el banco." }
                 ]
             },
@@ -364,7 +382,13 @@
                 title: "✈️ Oferta de empleo fuera",
                 msg: "Te ha surgido la oportunidad de cambiar de aires e irte a trabajar a Madrid con un sueldo superior.",
                 options: [
-                    { text: "Aceptar el reto y mudarte", cost: 400, health: -5, happiness: 10, money: 1500, resultMsg: "Te mudaste a la capital. Echabas de menos el sur, pero la experiencia laboral valió la pena." },
+                    { 
+                        text: "Aceptar el reto y mudarte", 
+                        cost: 400, 
+                        successChance: 0.75, // 75% adaptación óptima
+                        success: { health: -5, happiness: 15, money: 1800, resultMsg: "Te adaptaste de maravilla a la capital y el impulso económico mereció totalmente la pena." },
+                        failure: { health: -10, happiness: -22, money: 400, resultMsg: "La morriña de Sevilla y el alto coste de vida te machacaron; tuviste que volver antes de tiempo." }
+                    },
                     { text: "Quedarte en Sevilla junto a los tuyos", cost: 0, health: 0, happiness: 15, money: 0, resultMsg: "Preferiste la tranquilidad y el compás de tu tierra." }
                 ]
             },
@@ -739,7 +763,6 @@
                         p.health = Utils.clamp(p.health + ev.health, 0, 100);
                         p.happiness = Utils.clamp(p.happiness + ev.happiness, 0, 100);
                         
-                        // Si es menor de edad, impedimos que los eventos aleatorios le dejen dinero en negativo
                         if (p.age < CONFIG.MIN_WORKING_AGE && ev.money < 0) {
                             p.money = Math.max(0, p.money + ev.money);
                         } else {
@@ -799,6 +822,25 @@
 
                 const processOptionResult = (petName = null) => {
                     let logResultMsg = opt.resultMsg;
+                    let finalHealth = opt.health || 0;
+                    let finalHappiness = opt.happiness || 0;
+                    let finalMoney = opt.money || 0;
+
+                    // Manejo de probabilidad y riesgo en opciones con successChance
+                    if (opt.successChance !== undefined) {
+                        const roll = Math.random();
+                        if (roll < opt.successChance) {
+                            logResultMsg = opt.success.resultMsg;
+                            finalHealth += (opt.success.health || 0);
+                            finalHappiness += (opt.success.happiness || 0);
+                            finalMoney += (opt.success.money || 0);
+                        } else {
+                            logResultMsg = opt.failure.resultMsg;
+                            finalHealth += (opt.failure.health || 0);
+                            finalHappiness += (opt.failure.happiness || 0);
+                            finalMoney += (opt.failure.money || 0);
+                        }
+                    }
 
                     if (opt.adoptsPet && petName) {
                         const petType = eventObj.petType || "Mascota";
@@ -815,9 +857,9 @@
                     }
 
                     p.money -= opt.cost;
-                    p.health = Utils.clamp(p.health + opt.health, 0, 100);
-                    p.happiness = Utils.clamp(p.happiness + opt.happiness, 0, 100);
-                    p.money += opt.money;
+                    p.health = Utils.clamp(p.health + finalHealth, 0, 100);
+                    p.happiness = Utils.clamp(p.happiness + finalHappiness, 0, 100);
+                    p.money += finalMoney;
 
                     p.logs.push(`🤔 Decisión: ${logResultMsg}`);
                     Storage.save(p);
@@ -860,8 +902,6 @@
                     const isCompleted = p.completedStudies.includes(est.id);
                     const meetsAge = p.age >= est.minAge;
                     const meetsReq = !est.reqId || est.reqId.some(req => p.completedStudies.includes(req));
-                    
-                    // Si el estudio es gratuito (cost: 0), se puede permitir aunque el dinero esté en negativo
                     const canAfford = est.cost === 0 || p.money >= est.cost;
 
                     let statusText = "";
@@ -931,7 +971,7 @@
                 const p = gameState.player;
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
                 if (p.age < CONFIG.MIN_WORKING_AGE) {
-                    UI.showAlert("Menor de edad", "No puedes trabalhar hasta cumplir los 18 años. ¡Céntrate en tus estudios!");
+                    UI.showAlert("Menor de edad", "No puedes trabajar hasta cumplir los 18 años. ¡Céntrate en tus estudios!");
                     return;
                 }
 
