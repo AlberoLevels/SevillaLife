@@ -181,7 +181,8 @@
             MIN_WORKING_AGE: 18,
             PET_MAINTENANCE_COST: 60,
             PET_DEATH_MIN_AGE: 12,
-            PET_DEATH_MAX_AGE: 16
+            PET_DEATH_MAX_AGE: 16,
+            ANNUAL_LIVING_COST: 8500
         });
 
         const HOSPITALS = [
@@ -250,6 +251,7 @@
             { minAge: 18, maxAge: 64, msg: "Hiciste una escapada de fin de semana a la Sierra Norte de Sevilla.", health: 8, happiness: 15, money: -90 },
             { minAge: 18, maxAge: 64, msg: "El recibo de la luz subió de forma imprevista y tocó apretarse el cinturón.", health: 0, happiness: -8, money: -75 },
             { minAge: 18, maxAge: 64, msg: "Te invitaron a una boda por todo lo alto que vació parte de tus ahorros.", health: 0, happiness: 10, money: -250 },
+            { minAge: 18, maxAge: 64, requiresJob: true, msg: "La empresa ha sufrido recortes y reestructuración. ¡Te han despedido y te quedas en el paro!", health: -3, happiness: -22, money: 0, losesJob: true },
             { minAge: 18, maxAge: 64, requiresTeam: "Real Betis", msg: "Te cruzaste con varios jugadores del Real Betis tomando café por Heliópolis y te desearon un buen día.", health: 0, happiness: 12, money: 0 },
             { minAge: 18, maxAge: 64, requiresTeam: "Sevilla FC", msg: "Coincidiste con un exfutbolista del Sevilla FC en el centro y te hizo gracia charlar un momento con él.", health: 0, happiness: 12, money: 0 },
 
@@ -275,6 +277,7 @@
 
         const CHOICE_EVENTS = [
             {
+                id: 'team_selection',
                 minAge: 8, maxAge: 16,
                 title: "⚽ Pasión en la ciudad",
                 msg: "En Sevilla la rivalidad futbolística se vive desde chico. ¿De qué equipo vas a ser?",
@@ -284,6 +287,7 @@
                 ]
             },
             {
+                id: 'season_ticket',
                 minAge: 18, maxAge: 32,
                 requiresAnyTeam: true,
                 title: "🎫 El carnet de abonado",
@@ -340,7 +344,7 @@
                     { 
                         text: "Preparar chuletas e intentar copiar (Riesgo)", 
                         cost: 0, 
-                        successChance: 0.60, // 60% éxito, 40% que te pillen
+                        successChance: 0.60,
                         success: { health: 0, happiness: 12, money: 0, resultMsg: "¡Coló a la perfección! Copiaste disimuladamente y saliste con un aprobado." },
                         failure: { health: -2, happiness: -18, money: 0, resultMsg: "¡Te pillaron copiando! Parte disciplinario, un sofoco terrible y examen suspendido." }
                     },
@@ -355,7 +359,7 @@
                     { 
                         text: "Invertir 300€ (Incertidumbre)", 
                         cost: 300, 
-                        successChance: 0.70, // 70% éxito comercial, 30% pérdidas
+                        successChance: 0.70,
                         success: { health: -5, happiness: 20, money: 900, resultMsg: "¡El puesto fue un exitazo rotundo! Recuperaste la inversión con creces y ganaste un buen pico." },
                         failure: { health: -5, happiness: -15, money: 0, resultMsg: "El negocio salió rana por la climatología y malas gestiones; perdiste la inversión inicial." }
                     },
@@ -370,7 +374,7 @@
                     { 
                         text: "Pagar la matrícula (200€)", 
                         cost: 200, 
-                        successChance: 0.80, // 80% éxito
+                        successChance: 0.80,
                         success: { health: 0, happiness: 15, money: 0, resultMsg: "El profesor era excelente y aprendiste herramientas muy útiles para tu carrera." },
                         failure: { health: 0, happiness: -10, money: 0, resultMsg: "El curso resultó ser muy superficial y anticuado; sentiste que tiraste el dinero." }
                     },
@@ -378,6 +382,7 @@
                 ]
             },
             {
+                id: 'move_madrid',
                 minAge: 22, maxAge: 55,
                 title: "✈️ Oferta de empleo fuera",
                 msg: "Te ha surgido la oportunidad de cambiar de aires e irte a trabajar a Madrid con un sueldo superior.",
@@ -385,7 +390,7 @@
                     { 
                         text: "Aceptar el reto y mudarte", 
                         cost: 400, 
-                        successChance: 0.75, // 75% adaptación óptima
+                        successChance: 0.75,
                         success: { health: -5, happiness: 15, money: 1800, resultMsg: "Te adaptaste de maravilla a la capital y el impulso económico mereció totalmente la pena." },
                         failure: { health: -10, happiness: -22, money: 400, resultMsg: "La morriña de Sevilla y el alto coste de vida te machacaron; tuviste que volver antes de tiempo." }
                     },
@@ -614,6 +619,7 @@
 
             normalizeState(raw) {
                 const completed = Array.isArray(raw.completedStudies) ? raw.completedStudies : [];
+                const completedChoices = Array.isArray(raw.completedChoices) ? raw.completedChoices : [];
                 
                 if (completed.length === 0 && raw.studies && raw.studies !== "Ninguno") {
                     const found = STUDIES.find(s => s.title === raw.studies);
@@ -634,6 +640,7 @@
                     salary: raw.salary || 0,
                     studies: raw.studies || "Ninguno",
                     completedStudies: completed,
+                    completedChoices: completedChoices,
                     job: raw.job || "En paro",
                     pet: raw.pet || null,
                     favoriteTeam: raw.favoriteTeam || null,
@@ -669,6 +676,7 @@
                     salary: 0,
                     studies: "Ninguno",
                     completedStudies: [],
+                    completedChoices: [],
                     job: "En paro",
                     pet: null,
                     favoriteTeam: null,
@@ -712,6 +720,25 @@
                 p.age++;
                 p.logs.push(`Has cumplido ${p.age} años.`);
 
+                // Cobro de sueldo anual (si tiene trabajo antes de pagar gastos)
+                if (p.job !== "En paro" && p.salary > 0) {
+                    p.money += p.salary;
+                    p.logs.push(`Has cobrado tu sueldo anual de ${p.salary}€. ¡Dinero ingresado!`);
+                }
+
+                // Gastos de vida anuales para adultos
+                if (p.age >= CONFIG.MIN_WORKING_AGE) {
+                    if (p.money >= CONFIG.ANNUAL_LIVING_COST) {
+                        p.money -= CONFIG.ANNUAL_LIVING_COST;
+                        p.logs.push(`🏠 Gastos anuales de alquiler, comida y facturas (-${CONFIG.ANNUAL_LIVING_COST}€).`);
+                    } else {
+                        p.money = 0;
+                        p.health = Utils.clamp(p.health - 5, 0, 100);
+                        p.happiness = Utils.clamp(p.happiness - 15, 0, 100);
+                        p.logs.push(`🏠 Apuros económicos: no tenías suficientes ahorros para los gastos anuales (${CONFIG.ANNUAL_LIVING_COST}€). ¡Estrés y salud resentida!`);
+                    }
+                }
+
                 if (p.pet) {
                     p.pet.age++;
                     p.happiness = Utils.clamp(p.happiness + 5, 0, 100);
@@ -738,6 +765,7 @@
                 if (p.age >= 3 && Math.random() < 0.35) {
                     const availableChoices = CHOICE_EVENTS.filter(ev => {
                         if (p.age < ev.minAge || p.age > ev.maxAge) return false;
+                        if (ev.id && p.completedChoices.includes(ev.id)) return false;
                         if (ev.petType && p.pet) return false;
                         if (ev.requiresAnyTeam && !p.favoriteTeam) return false;
                         return true;
@@ -755,11 +783,18 @@
                         if (p.age < ev.minAge || p.age > ev.maxAge) return false;
                         if (ev.requiresPet && !p.pet) return false;
                         if (ev.requiresTeam && p.favoriteTeam !== ev.requiresTeam) return false;
+                        if (ev.requiresJob && p.job === "En paro") return false;
                         return true;
                     });
 
                     if (availableEvents.length > 0) {
                         const ev = availableEvents[Math.floor(Math.random() * availableEvents.length)];
+                        
+                        if (ev.losesJob) {
+                            p.job = "En paro";
+                            p.salary = 0;
+                        }
+
                         p.health = Utils.clamp(p.health + ev.health, 0, 100);
                         p.happiness = Utils.clamp(p.happiness + ev.happiness, 0, 100);
                         
@@ -778,11 +813,6 @@
                         }
                         p.logs.push(`⚡ Evento: ${msgText}`);
                     }
-                }
-
-                if (p.job !== "En paro" && p.salary > 0) {
-                    p.money += p.salary;
-                    p.logs.push(`Has cobrado tu sueldo anual de ${p.salary}€. ¡Dinero ahorrado!`);
                 }
 
                 if (!triggeredChoice) {
@@ -826,7 +856,6 @@
                     let finalHappiness = opt.happiness || 0;
                     let finalMoney = opt.money || 0;
 
-                    // Manejo de probabilidad y riesgo en opciones con successChance
                     if (opt.successChance !== undefined) {
                         const roll = Math.random();
                         if (roll < opt.successChance) {
@@ -854,6 +883,10 @@
 
                     if (opt.setsTeam) {
                         p.favoriteTeam = opt.setsTeam;
+                    }
+
+                    if (eventObj.id && !p.completedChoices.includes(eventObj.id)) {
+                        p.completedChoices.push(eventObj.id);
                     }
 
                     p.money -= opt.cost;
