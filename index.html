@@ -202,20 +202,20 @@
         ];
 
         const JOBS = [
-            { title: "Repartidor de comida a domicilio", minAge: 18, reqStudyIds: [], salary: 14000 },
-            { title: "Camarero de bar de barrio", minAge: 18, reqStudyIds: [], salary: 15500 },
-            { title: "Peón agrícola temporal", minAge: 18, reqStudyIds: [], salary: 16000 },
-            { title: "Dependiente en tienda de centro comercial", minAge: 18, reqStudyIds: ['eso', 'bachillerato', 'fp_medio', 'fp_superior', 'universidad', 'master'], salary: 17500 },
-            { title: "Auxiliar administrativo junior", minAge: 18, reqStudyIds: ['bachillerato', 'fp_medio', 'fp_superior', 'universidad', 'master'], salary: 20000 },
-            { title: "Operario de Lipasam", minAge: 18, reqStudyIds: ['eso', 'bachillerato', 'fp_medio', 'fp_superior', 'universidad', 'master'], salary: 23000 },
-            { title: "Técnico de mantenimiento industrial", minAge: 19, reqStudyIds: ['fp_medio', 'fp_superior', 'universidad', 'master'], salary: 24500 },
-            { title: "Programador Junior / Soporte IT", minAge: 20, reqStudyIds: ['fp_superior', 'universidad', 'master'], salary: 28000 },
-            { title: "Enfermero/a (SAS)", minAge: 22, reqStudyIds: ['universidad', 'master'], salary: 33000 },
-            { title: "Técnico de Administración General (Ayuntamiento)", minAge: 21, reqStudyIds: ['fp_superior', 'universidad', 'master'], salary: 35000 },
-            { title: "Ingeniero / Arquitecto Senior", minAge: 23, reqStudyIds: ['universidad', 'master'], salary: 46000 },
-            { title: "Médico Especialista (SAS)", minAge: 25, reqStudyIds: ['universidad', 'master'], salary: 60000 },
-            { title: "Abogado / Consultor de Empresas", minAge: 23, reqStudyIds: ['universidad', 'master'], salary: 52000 },
-            { title: "Director de Proyectos / Ejecutivo", minAge: 26, reqStudyIds: ['master'], salary: 72000 }
+            { id: 'repartidor', title: "Repartidor de comida a domicilio", minAge: 18, reqStudyIds: [], salary: 14000 },
+            { id: 'camarero', title: "Camarero de bar de barrio", minAge: 18, reqStudyIds: [], salary: 15500 },
+            { id: 'peon', title: "Peón agrícola temporal", minAge: 18, reqStudyIds: [], salary: 16000 },
+            { id: 'dependiente', title: "Dependiente en tienda de centro comercial", minAge: 18, reqStudyIds: ['eso', 'bachillerato', 'fp_medio', 'fp_superior', 'universidad', 'master'], salary: 17500 },
+            { id: 'admin_junior', title: "Auxiliar administrativo junior", minAge: 18, reqStudyIds: ['bachillerato', 'fp_medio', 'fp_superior', 'universidad', 'master'], salary: 20000 },
+            { id: 'lipasam', title: "Operario de Lipasam", minAge: 18, reqStudyIds: ['eso', 'bachillerato', 'fp_medio', 'fp_superior', 'universidad', 'master'], salary: 23000 },
+            { id: 'tecnico_mantenimiento', title: "Técnico de mantenimiento industrial", minAge: 19, reqStudyIds: ['fp_medio', 'fp_superior', 'universidad', 'master'], salary: 24500 },
+            { id: 'programador', title: "Programador Junior / Soporte IT", minAge: 20, reqStudyIds: ['fp_superior', 'universidad', 'master'], salary: 28000 },
+            { id: 'enfermero', title: "Enfermero/a (SAS)", minAge: 22, reqStudyIds: ['universidad', 'master'], salary: 33000 },
+            { id: 'tag', title: "Técnico de Administración General (Ayuntamiento)", minAge: 21, reqStudyIds: ['fp_superior', 'universidad', 'master'], salary: 35000 },
+            { id: 'ingeniero', title: "Ingeniero / Arquitecto Senior", minAge: 23, reqStudyIds: ['universidad', 'master'], salary: 46000 },
+            { id: 'medico', title: "Médico Especialista (SAS)", minAge: 25, reqStudyIds: ['universidad', 'master'], salary: 60000 },
+            { id: 'abogado', title: "Abogado / Consultor de Empresas", minAge: 23, reqStudyIds: ['universidad', 'master'], salary: 52000 },
+            { id: 'director', title: "Director de Proyectos / Ejecutivo", minAge: 26, reqStudyIds: ['master'], salary: 72000 }
         ];
 
         const RANDOM_EVENTS = [
@@ -446,6 +446,18 @@
             getStudyTitle(id) {
                 const st = STUDIES.find(s => s.id === id);
                 return st ? st.title : id;
+            },
+            generateJobOffers(age, completedStudies) {
+                // Filtramos trabajos accesibles por edad y estudios requeridos
+                const validJobs = JOBS.filter(job => {
+                    if (age < job.minAge) return false;
+                    const meetsReq = job.reqStudyIds.length === 0 || job.reqStudyIds.some(id => completedStudies.includes(id));
+                    return meetsReq;
+                });
+
+                // Si hay pocos, cogemos todos; si hay muchos, barajamos y sacamos 3 o 4 aleatorios
+                const shuffled = [...validJobs].sort(() => 0.5 - Math.random());
+                return shuffled.slice(0, 4);
             }
         };
 
@@ -574,6 +586,18 @@
                 this.openModal();
             },
 
+            showInterviewModal(job) {
+                const p = gameState.player;
+                this.elements.modalTitle.innerText = "👔 Entrevista de Trabajo";
+                this.elements.modalMsg.innerText = `Has concertado una entrevista para el puesto de:\n"${job.title}" (${job.salary}€/año).\n\nEl departamento de recursos humanos va a evaluar tu perfil y experiencia. ¿Te preparas para la entrevista?`;
+                this.elements.modalDynamic.innerHTML = '';
+                this.elements.modalBtns.innerHTML = `
+                    <button class="modal-btn modal-btn-confirm" data-action="confirm-interview" data-job-id="${job.id}">Afrontar la entrevista</button>
+                    <button class="modal-btn modal-btn-cancel" data-action="open-jobs">Volver a la bolsa de empleo</button>
+                `;
+                this.openModal();
+            },
+
             showPetNameModal(petType, defaultName, callback) {
                 this.elements.modalTitle.innerText = `🐾 Nombre de tu ${petType.toLowerCase()}`;
                 this.elements.modalMsg.innerText = `¿Qué nombre quieres ponerle a tu ${petType.toLowerCase()}?`;
@@ -630,10 +654,15 @@
                     }
                 }
 
+                const age = raw.age || 0;
+                const activeOffers = Array.isArray(raw.activeJobOffers) && raw.activeJobOffers.length > 0 
+                    ? raw.activeJobOffers 
+                    : Utils.generateJobOffers(age, completed);
+
                 return {
                     name: raw.name || "",
                     dni: raw.dni || Utils.generateDNI(),
-                    age: raw.age || 0,
+                    age: age,
                     health: raw.health !== undefined ? raw.health : 100,
                     happiness: raw.happiness !== undefined ? raw.happiness : 100,
                     money: raw.money !== undefined ? raw.money : 0,
@@ -642,6 +671,7 @@
                     completedStudies: completed,
                     completedChoices: completedChoices,
                     job: raw.job || "En paro",
+                    activeJobOffers: activeOffers,
                     pet: raw.pet || null,
                     favoriteTeam: raw.favoriteTeam || null,
                     pendingStudyAge: raw.pendingStudyAge !== undefined ? raw.pendingStudyAge : null,
@@ -678,6 +708,7 @@
                     completedStudies: [],
                     completedChoices: [],
                     job: "En paro",
+                    activeJobOffers: Utils.generateJobOffers(0, []),
                     pet: null,
                     favoriteTeam: null,
                     pendingStudyAge: null,
@@ -719,6 +750,10 @@
 
                 p.age++;
                 p.logs.push(`Has cumplido ${p.age} años.`);
+
+                // Actualizar bolsa de empleo anual del SAE
+                p.activeJobOffers = Utils.generateJobOffers(p.age, p.completedStudies);
+                p.logs.push(`📋 El Servicio de Empleo ha actualizado la bolsa de ofertas laborales para este año.`);
 
                 // Cobro de sueldo anual (si tiene trabajo antes de pagar gastos)
                 if (p.job !== "En paro" && p.salary > 0) {
@@ -993,6 +1028,9 @@
                 p.happiness = Utils.clamp(p.happiness + 15, 0, 100);
                 p.pendingStudyAge = null;
 
+                // Actualizar bolsa de empleo con los nuevos estudios
+                p.activeJobOffers = Utils.generateJobOffers(p.age, p.completedStudies);
+
                 p.logs.push(`🎓 ¡Has completado con éxito: ${study.title}! ${study.cost > 0 ? `(-${study.cost}€)` : ''}`);
                 
                 Storage.save(p);
@@ -1008,36 +1046,30 @@
                     return;
                 }
 
-                const playerCompleted = p.completedStudies || [];
+                // Asegurar ofertas activas si por algo estuvieran vacías
+                if (!p.activeJobOffers || p.activeJobOffers.length === 0) {
+                    p.activeJobOffers = Utils.generateJobOffers(p.age, p.completedStudies);
+                }
 
-                UI.elements.modalTitle.innerText = "Búsqueda de Empleo";
-                UI.elements.modalMsg.innerText = "Ofertas de trabajo disponibles según tus estudios:";
+                UI.elements.modalTitle.innerText = "Bolsa de Empleo (SAE)";
+                UI.elements.modalMsg.innerText = "Ofertas disponibles este año según tu perfil y formación:";
 
                 let listHTML = `<div class="modal-scrollable-content">`;
                 
-                JOBS.forEach((job, idx) => {
-                    const meetsReq = job.reqStudyIds.length === 0 || job.reqStudyIds.some(id => playerCompleted.includes(id));
-                    let statusText = "";
-                    let isDisabled = false;
-
-                    if (!meetsReq) {
-                        const reqNames = job.reqStudyIds.map(id => Utils.getStudyTitle(id)).join(' o ');
-                        statusText = `🔒 Requiere: ${reqNames}`;
-                        isDisabled = true;
-                    } else {
-                        statusText = `Sueldo: ${job.salary}€/año`;
-                    }
-
-                    listHTML += `
-                        <button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;" 
-                                ${isDisabled ? 'disabled' : ''} 
-                                data-action="select-job" 
-                                data-job-idx="${idx}">
-                            💼 ${job.title}
-                            <div style="font-size:0.75em; opacity:0.85; font-weight:normal;">${statusText}</div>
-                        </button>
-                    `;
-                });
+                if (p.activeJobOffers.length === 0) {
+                    listHTML += `<p style="text-align:center; font-size:0.8em; color:#777; padding: 10px;">No hay ofertas disponibles en este momento. Prueba a cumplir año para renovar la bolsa de empleo.</p>`;
+                } else {
+                    p.activeJobOffers.forEach((job) => {
+                        listHTML += `
+                            <button class="action-btn" style="width:100%; text-align:left; margin-bottom:6px;" 
+                                    data-action="apply-job" 
+                                    data-job-id="${job.id}">
+                                💼 ${job.title}
+                                <div style="font-size:0.75em; opacity:0.85; font-weight:normal;">Sueldo: ${job.salary}€/año</div>
+                            </button>
+                        `;
+                    });
+                }
 
                 listHTML += `</div>`;
 
@@ -1046,22 +1078,48 @@
                 UI.openModal();
             },
 
-            selectJob(idx) {
+            selectJob(jobId) {
                 const p = gameState.player;
-                const job = JOBS[idx];
+                const job = JOBS.find(j => j.id === jobId);
                 if (!job) return;
 
-                const playerCompleted = p.completedStudies || [];
-                const meetsReq = job.reqStudyIds.length === 0 || job.reqStudyIds.some(id => playerCompleted.includes(id));
-                if (!meetsReq) return;
+                UI.showInterviewModal(job);
+            },
 
-                p.job = job.title;
-                p.salary = job.salary;
-                p.logs.push(`💼 ¡Has comenzado a trabajar como ${job.title}! Sueldo anual: ${job.salary}€.`);
+            processInterview(jobId) {
+                const p = gameState.player;
+                const job = JOBS.find(j => j.id === jobId);
+                if (!job) return;
 
-                Storage.save(p);
-                UI.render();
-                UI.closeModal();
+                // Calcular probabilidad de éxito en la entrevista
+                // Base: 65%. Si tienes estudios superiores a los mínimos requeridos, +15%
+                let successChance = 0.65;
+                if (job.reqStudyIds.length > 0) {
+                    const hasHigher = p.completedStudies.some(id => {
+                        const sObj = STUDIES.find(st => st.id === id);
+                        return sObj && sObj.rank > 2; // Títulos avanzados
+                    });
+                    if (hasHigher) successChance = 0.85;
+                } else {
+                    successChance = 0.75; // Trabajos básicos
+                }
+
+                const roll = Math.random();
+                if (roll < successChance) {
+                    p.job = job.title;
+                    p.salary = job.salary;
+                    p.happiness = Utils.clamp(p.happiness + 10, 0, 100);
+                    p.logs.push(`💼 ¡Entrevista superada con éxito! Has conseguido el puesto de ${job.title} (${job.salary}€/año).`);
+                    Storage.save(p);
+                    UI.render();
+                    UI.showAlert("¡Contratado!", `¡Enhorabuena! El comité de selección ha valorado positivamente tu perfil y te han dado el puesto de ${job.title}.`);
+                } else {
+                    p.happiness = Utils.clamp(p.happiness - 10, 0, 100);
+                    p.logs.push(`❌ Has hecho la entrevista para ${job.title}, pero la empresa ha optado por otro candidato. ¡Rechazado!`);
+                    Storage.save(p);
+                    UI.render();
+                    UI.showAlert("Entrevista no superada", `Los nervios o la alta competencia jugaron en tu contra. Han descartado tu candidatura para ${job.title}. ¡Sigue intentándolo!`);
+                }
             },
 
             openManagerModal() {
@@ -1153,6 +1211,12 @@
                 case 'open-jobs':
                     Engine.openJobModal();
                     break;
+                case 'apply-job':
+                    Engine.selectJob(actionBtn.dataset.jobId);
+                    break;
+                case 'confirm-interview':
+                    Engine.processInterview(actionBtn.dataset.jobId);
+                    break;
                 case 'open-manager':
                     Engine.openManagerModal();
                     break;
@@ -1184,9 +1248,6 @@
                     break;
                 case 'select-study':
                     Engine.selectStudy(parseInt(actionBtn.dataset.studyIdx, 10));
-                    break;
-                case 'select-job':
-                    Engine.selectJob(parseInt(actionBtn.dataset.jobIdx, 10));
                     break;
                 case 'export-save':
                     Engine.exportSave();
