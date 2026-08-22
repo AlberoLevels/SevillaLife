@@ -514,7 +514,6 @@
             showChoiceModal(eventObj) {
                 const p = gameState.player;
                 
-                // Procesar placeholders en el título o mensaje si los hubiera
                 let resolvedMsg = eventObj.msg;
                 if (p.favoriteTeam && resolvedMsg.includes("{favoriteTeam}")) {
                     resolvedMsg = resolvedMsg.replace(/\{favoriteTeam\}/g, p.favoriteTeam);
@@ -739,7 +738,13 @@
                         const ev = availableEvents[Math.floor(Math.random() * availableEvents.length)];
                         p.health = Utils.clamp(p.health + ev.health, 0, 100);
                         p.happiness = Utils.clamp(p.happiness + ev.happiness, 0, 100);
-                        p.money += ev.money;
+                        
+                        // Si es menor de edad, impedimos que los eventos aleatorios le dejen dinero en negativo
+                        if (p.age < CONFIG.MIN_WORKING_AGE && ev.money < 0) {
+                            p.money = Math.max(0, p.money + ev.money);
+                        } else {
+                            p.money += ev.money;
+                        }
 
                         let msgText = ev.msg;
                         if (p.pet && msgText.includes("{petName}")) {
@@ -855,7 +860,9 @@
                     const isCompleted = p.completedStudies.includes(est.id);
                     const meetsAge = p.age >= est.minAge;
                     const meetsReq = !est.reqId || est.reqId.some(req => p.completedStudies.includes(req));
-                    const canAfford = p.money >= est.cost;
+                    
+                    // Si el estudio es gratuito (cost: 0), se puede permitir aunque el dinero esté en negativo
+                    const canAfford = est.cost === 0 || p.money >= est.cost;
 
                     let statusText = "";
                     let isDisabled = false;
@@ -924,7 +931,7 @@
                 const p = gameState.player;
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
                 if (p.age < CONFIG.MIN_WORKING_AGE) {
-                    UI.showAlert("Menor de edad", "No puedes trabajar hasta cumplir los 18 años. ¡Céntrate en tus estudios!");
+                    UI.showAlert("Menor de edad", "No puedes trabalhar hasta cumplir los 18 años. ¡Céntrate en tus estudios!");
                     return;
                 }
 
