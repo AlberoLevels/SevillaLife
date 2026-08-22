@@ -134,6 +134,7 @@
                 <div class="badge" id="player-age">Edad: 0 años</div>
                 <div class="badge" id="player-dni">DNI: ---</div>
                 <div class="badge" id="player-pet">🐾 Sin mascota</div>
+                <div class="badge" id="player-team">⚽ Sin equipo</div>
             </div>
             <div class="status-grid">
                 <div class="status-badge">📚 <span id="player-studies">Ninguno</span></div>
@@ -200,34 +201,69 @@
         ];
 
         const JOBS = [
-            { title: "Repartidor / Peón", minAge: 18, reqStudyRank: 0, salary: 12000 }, 
-            { title: "Camarero / Reponedor", minAge: 18, reqStudyRank: 1, salary: 14500 }, 
-            { title: "Dependiente de Comercio", minAge: 18, reqStudyRank: 2, salary: 17000 }, 
-            { title: "Operario Lipasam", minAge: 18, reqStudyRank: 2, salary: 22500 },
-            { title: "Técnico Administrativo", minAge: 18, reqStudyRank: 3, salary: 26000 },
-            { title: "Programador / Técnico Especializado", minAge: 19, reqStudyRank: 4, salary: 36000 },
-            { title: "Abogado / Ingeniero / Médico", minAge: 22, reqStudyRank: 4, salary: 48000 },
-            { title: "Director de Proyecto / Máster Exec.", minAge: 25, reqStudyRank: 5, salary: 65000 }
+            { title: "Repartidor de comida a domicilio", minAge: 18, reqStudyIds: [], salary: 14000 },
+            { title: "Camarero de bar de barrio", minAge: 18, reqStudyIds: [], salary: 15500 },
+            { title: "Peón agrícola temporal", minAge: 18, reqStudyIds: [], salary: 16000 },
+            { title: "Dependiente en tienda de centro comercial", minAge: 18, reqStudyIds: ['eso', 'bachillerato', 'fp_medio', 'fp_superior', 'universidad', 'master'], salary: 17500 },
+            { title: "Auxiliar administrativo junior", minAge: 18, reqStudyIds: ['bachillerato', 'fp_medio', 'fp_superior', 'universidad', 'master'], salary: 20000 },
+            { title: "Operario de Lipasam", minAge: 18, reqStudyIds: ['eso', 'bachillerato', 'fp_medio', 'fp_superior', 'universidad', 'master'], salary: 23000 },
+            { title: "Técnico de mantenimiento industrial", minAge: 19, reqStudyIds: ['fp_medio', 'fp_superior', 'universidad', 'master'], salary: 24500 },
+            { title: "Programador Junior / Soporte IT", minAge: 20, reqStudyIds: ['fp_superior', 'universidad', 'master'], salary: 28000 },
+            { title: "Enfermero/a (SAS)", minAge: 22, reqStudyIds: ['universidad', 'master'], salary: 33000 },
+            { title: "Técnico de Administración General (Ayuntamiento)", minAge: 21, reqStudyIds: ['fp_superior', 'universidad', 'master'], salary: 35000 },
+            { title: "Ingeniero / Arquitecto Senior", minAge: 23, reqStudyIds: ['universidad', 'master'], salary: 46000 },
+            { title: "Médico Especialista (SAS)", minAge: 25, reqStudyIds: ['universidad', 'master'], salary: 60000 },
+            { title: "Abogado / Consultor de Empresas", minAge: 23, reqStudyIds: ['universidad', 'master'], salary: 52000 },
+            { title: "Director de Proyectos / Ejecutivo", minAge: 26, reqStudyIds: ['master'], salary: 72000 }
         ];
 
         const RANDOM_EVENTS = [
+            // Infancia (3-11)
             { minAge: 3, maxAge: 11, msg: "Te has caído jugando en el parque de María Luisa y te has raspado la rodilla.", health: -5, happiness: -5, money: 0 },
             { minAge: 3, maxAge: 11, msg: "Tus padres te han llevado a tomar un helado en Los Italianos.", health: 0, happiness: 15, money: 0 },
             { minAge: 3, maxAge: 11, msg: "Te han regañado en el colegio por distraerte mirando por la ventana.", health: 0, happiness: -10, money: 0 },
             { minAge: 3, maxAge: 11, msg: "Has hecho un castillo de arena enorme durante un fin de semana en Matalascañas.", health: 5, happiness: 15, money: 0 },
+            { minAge: 3, maxAge: 11, msg: "Te compraste un tebeo en el quiosco de la esquina con tus ahorros infantiles.", health: 0, happiness: 10, money: -2 },
+            { minAge: 3, maxAge: 11, msg: "Jugaste una pachanga de fútbol en la plaza y metiste el gol de la victoria.", health: 5, happiness: 15, money: 0 },
+            { minAge: 3, maxAge: 11, msg: "Perdiste el autobús escolar y te tocó ir corriendo con prisa.", health: -3, happiness: -5, money: 0 },
+            { minAge: 3, maxAge: 11, msg: "Disfrutaste de una tarde de palomitas en el cine de verano.", health: 0, happiness: 12, money: -5 },
+            
+            // Adolescencia (12-17)
             { minAge: 12, maxAge: 17, msg: "Has quedado con tus amigos para dar una vuelta por Nervión.", health: 0, happiness: 10, money: -5 },
             { minAge: 12, maxAge: 17, msg: "Has suspendido un examen importante y te han castigado sin salir.", health: 0, happiness: -15, money: 0 },
             { minAge: 12, maxAge: 17, msg: "Tus padres te han subido un poco la paga semanal.", health: 0, happiness: 10, money: 10 },
             { minAge: 12, maxAge: 17, msg: "Has estado bailando y disfrutando en la velá de tu barrio.", health: 0, happiness: 15, money: -10 },
+            { minAge: 12, maxAge: 17, msg: "Fuiste al concierto de un grupo indie en el Cartuja Center.", health: 0, happiness: 18, money: -25 },
+            { minAge: 12, maxAge: 17, msg: "Hiciste una excursión con el instituto a las ruinas de Itálica.", health: 2, happiness: 8, money: -6 },
+            { minAge: 12, maxAge: 17, msg: "Te pilló una tormenta veraniega volviendo andando desde la orilla del río.", health: -5, happiness: -8, money: 0 },
+            { minAge: 12, maxAge: 17, msg: "Tuviste tu primer susto amoroso y pasaste la tarde escuchando música triste.", health: 0, happiness: -10, money: 0 },
+
+            // Adulto / Madurez (18-64)
             { minAge: 18, maxAge: 64, msg: "Has ido a la Feria de Abril y te has gastado un pico en la caseta.", health: 0, happiness: 15, money: -150 },
             { minAge: 18, maxAge: 64, msg: "Un golpe de calor en pleno julio en Sevilla te ha dejado totalmente derretido.", health: -15, happiness: -10, money: 0 },
             { minAge: 18, maxAge: 64, msg: "Fuiste al dentista a hacerte una revisión y una limpieza general.", health: 5, happiness: -5, money: -60 },
             { minAge: 18, maxAge: 64, msg: "Te ha tocado un pequeño premio en un rasca y gana del centro.", health: 0, happiness: 15, money: 100 },
             { minAge: 18, maxAge: 64, msg: "Comiste unos montaditos regulares y pasaste el fin de semana indispuesto.", health: -10, happiness: -10, money: 0 },
+            { minAge: 18, maxAge: 64, msg: "Un atasco monumental en la SE-30 te hizo llegar tardísimo a una reunión clave.", health: -2, happiness: -10, money: 0 },
+            { minAge: 18, maxAge: 64, msg: "Disfrutaste de una tarde de paseo relajante por el Muelle de la Sal.", health: 5, happiness: 12, money: 0 },
+            { minAge: 18, maxAge: 64, msg: "Te rompiste levemente un dedo jugando al pádel con los compañeros de trabajo.", health: -12, happiness: -8, money: -30 },
+            { minAge: 18, maxAge: 64, msg: "Hiciste una escapada de fin de semana a la Sierra Norte de Sevilla.", health: 8, happiness: 15, money: -90 },
+            { minAge: 18, maxAge: 64, msg: "El recibo de la luz subió de forma imprevista y tocó apretarse el cinturón.", health: 0, happiness: -8, money: -75 },
+            { minAge: 18, maxAge: 64, msg: "Te invitaron a una boda por todo lo alto que vació parte de tus ahorros.", health: 0, happiness: 10, money: -250 },
+            { minAge: 18, maxAge: 64, requiresTeam: "Real Betis", msg: "Te cruzaste con varios jugadores del Real Betis tomando café por Heliópolis y te desearon un buen día.", health: 0, happiness: 12, money: 0 },
+            { minAge: 18, maxAge: 64, requiresTeam: "Sevilla FC", msg: "Coincidiste con un exfutbolista del Sevilla FC en el centro y te hizo gracia charlar un momento con él.", health: 0, happiness: 12, money: 0 },
+
+            // Vejez (65+)
             { minAge: 65, maxAge: 120, msg: "Te has sentado en un banco a comentar las obras del barrio con otros vecinos.", health: 5, happiness: 10, money: 0 },
             { minAge: 65, maxAge: 120, msg: "Te duele la espalda por la humedad matutina del río Guadalquivir.", health: -10, happiness: -10, money: 0 },
             { minAge: 65, maxAge: 120, msg: "Tus nietos te han visitado y les has dado un pequeño aguinaldo.", health: 5, happiness: 20, money: -20 },
             { minAge: 65, maxAge: 120, msg: "Has ido al centro de salud a hacerte el chequeo anual y todo está correcto.", health: 10, happiness: 5, money: 0 },
+            { minAge: 65, maxAge: 120, msg: "Te apuntaste a un taller de memoria y manualidades en el centro cívico.", health: 3, happiness: 12, money: -10 },
+            { minAge: 65, maxAge: 120, msg: "Pasaste la mañana preparando rosquillas caseras para toda la familia.", health: 2, happiness: 15, money: -15 },
+            { minAge: 65, maxAge: 120, msg: "Te sentaste al sol de invierno en un banco de la Plaza de España.", health: 6, happiness: 10, money: 0 },
+            { minAge: 65, maxAge: 120, msg: "Tuviste que armarte de paciencia en una larga lista de espera del especialista médico.", health: -5, happiness: -10, money: 0 },
+
+            // Generales
             { minAge: 3, maxAge: 120, msg: "Te has encontrado un billete de 10€ tirado en la Alameda.", health: 0, happiness: 10, money: 10 },
             { minAge: 3, maxAge: 120, msg: "Paseaste tranquilamente por el Parque María Luisa y desconectaste por completo.", health: 5, happiness: 10, money: 0 },
             { minAge: 3, maxAge: 120, msg: "Has pillado una gripe fuerte durante el invierno.", health: -20, happiness: -15, money: 0 },
@@ -239,6 +275,35 @@
 
         const CHOICE_EVENTS = [
             {
+                minAge: 8, maxAge: 16,
+                title: "⚽ Pasión en la ciudad",
+                msg: "En Sevilla la rivalidad futbolística se vive desde chico. ¿De qué equipo vas a ser?",
+                options: [
+                    { text: "¡Del Real Betis Balompié!", cost: 0, health: 0, happiness: 15, money: 0, setsTeam: "Real Betis", resultMsg: "¡Has elegido el verdiblanco! Vives cada partido con pasión y alegría." },
+                    { text: "¡Del Sevilla FC!", cost: 0, health: 0, happiness: 15, money: 0, setsTeam: "Sevilla FC", resultMsg: "¡Has elegido el blanquirrojo! Orgullo de Nervión y de Europa." }
+                ]
+            },
+            {
+                minAge: 18, maxAge: 32,
+                requiresAnyTeam: true,
+                title: "🎫 El carnet de abonado",
+                msg: "Ahora que ya eres mayor de edad, te planteas dar el paso definitivo y sacarte el abono anual para no perderte ningún partido del {favoriteTeam}.",
+                options: [
+                    { text: "Sacarse el abono (250€)", cost: 250, health: 0, happiness: 22, money: 0, resultMsg: "¡Ya tienes tu asiento en el estadio! Vives cada jornada con una ilusión tremenda." },
+                    { text: "Seguir viéndolo desde casa o el bar", cost: 0, health: 0, happiness: 4, money: 0, resultMsg: "Preferiste ahorrarte el dinero y disfrutar de los partidos con los amigos." }
+                ]
+            },
+            {
+                minAge: 18, maxAge: 65,
+                requiresAnyTeam: true,
+                title: "🏟️ ¡Llega el Gran Derbi!",
+                msg: "Se acerca el partido más esperado del año en la ciudad. Tu {favoriteTeam} se juega los tres puntos contra el eterno rival.",
+                options: [
+                    { text: "Comprar entrada para ir al campo (90€)", cost: 90, health: 0, happiness: 28, money: 0, resultMsg: "¡Ambiente imborrable en el estadio! La tensión y la alegría tras el pitido final fueron indescriptibles." },
+                    { text: "Verlo en la peña o bar con los amigos", cost: 12, health: 0, happiness: 15, money: 0, resultMsg: "Tarde de nervios, cañas, tapas y emoción compartida frente al televisor." }
+                ]
+            },
+            {
                 minAge: 6, maxAge: 11,
                 title: "🐾 Perro callejero",
                 msg: "Te encuentras a un perro pequeño abandonado cerca de Triana. ¿Qué haces?",
@@ -249,9 +314,18 @@
                 ]
             },
             {
+                minAge: 6, maxAge: 11,
+                title: "🚲 ¿Capricho infantil?",
+                msg: "Tus padres te dan a elegir entre comprarte una bicicleta nueva o ir una semana a un campamento de verano.",
+                options: [
+                    { text: "Pedir la bicicleta nueva", cost: 0, health: 5, happiness: 15, money: 0, resultMsg: "¡Te lo pasaste genial pedaleando por el barrio con tus amigos!" },
+                    { text: "Ir al campamento de verano", cost: 0, health: 3, happiness: 18, money: 0, resultMsg: "Hiciste grandes amigos y aprendiste autonomía personal." }
+                ]
+            },
+            {
                 minAge: 13, maxAge: 17,
                 title: "🐱 Gato en el callejón",
-                msg: "Un gato mimoso te sigue por el barrio de Santa Cruz y busca mimos. ¿Qué haces?",
+                msg: "Un gato mimoso te sigue por el barrio de Santa Cruz y busca caricias. ¿Qué haces?",
                 petType: "Gato",
                 options: [
                     { text: "Adoptarlo y llevarlo a casa", cost: 0, health: 0, happiness: 20, money: 0, adoptsPet: true, resultMsg: "Te has llevado al gatito a casa." },
@@ -263,8 +337,8 @@
                 title: "📝 Examen de Secundaria",
                 msg: "Tienes un examen muy difícil mañana y no has estudiado nada.",
                 options: [
-                    { text: "Preparar chuletas e intentar copiar", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Aprobaste de milagro, pero el estrés te dejó un mal sabor de boca." },
-                    { text: "Ir a dormir e intentar responder lo que sepas", cost: 0, health: 0, happiness: 10, money: 0, resultMsg: "Suspendiste dignamente pero descansaste bien." }
+                    { text: "Preparar chuletas e intentar copiar", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Aprobaste de milagro, pero el estrés te dejó mal cuerpo." },
+                    { text: "Ir a dormir e intentar responder lo que sepas", cost: 0, health: 0, happiness: 10, money: 0, resultMsg: "Suspendiste dignamente pero descansaste bien por la noche." }
                 ]
             },
             {
@@ -272,17 +346,26 @@
                 title: "🎪 Puesto en la Feria",
                 msg: "Un amigo te propone invertir 300€ para montar un pequeño puesto de buñuelos en la Feria.",
                 options: [
-                    { text: "Invertir 300€", cost: 300, health: -5, happiness: 15, money: 700, resultMsg: "¡El puesto fue un éxito rotundo! Recuperaste la inversión y ganaste 400€ netos." },
-                    { text: "Rechazar la oferta", cost: 0, health: 0, happiness: 0, money: 0, resultMsg: "Decidiste no arriesgar tu dinero." }
+                    { text: "Invertir 300€", cost: 300, health: -5, happiness: 15, money: 700, resultMsg: "¡El puesto fue un éxito rotundo! Recuperaste la inversión y ganaste un buen pico." },
+                    { text: "Rechazar la oferta", cost: 0, health: 0, happiness: 0, money: 0, resultMsg: "Decidiste no arriesgar tu dinero y pasar de largo." }
                 ]
             },
             {
                 minAge: 20, maxAge: 65,
                 title: "💻 Curso de Capacitación",
-                msg: "Un centro privado ofrece un curso intensivo por 200€ que promete mejorar tus habilidades.",
+                msg: "Un centro privado ofrece un curso intensivo por 200€ que promete mejorar tus habilidades profesionales.",
                 options: [
                     { text: "Pagar la matrícula (200€)", cost: 200, health: 0, happiness: 10, money: 0, resultMsg: "Completaste el curso con éxito. Ahora estás mejor preparado." },
-                    { text: "Ahorrar el dinero", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Preferiste mantener tus ahorros intactos." }
+                    { text: "Ahorrar el dinero", cost: 0, health: 0, happiness: -5, money: 0, resultMsg: "Preferiste mantener tus ahorros intactos en el banco." }
+                ]
+            },
+            {
+                minAge: 22, maxAge: 55,
+                title: "✈️ Oferta de empleo fuera",
+                msg: "Te ha surgido la oportunidad de cambiar de aires e irte a trabajar a Madrid con un sueldo superior.",
+                options: [
+                    { text: "Aceptar el reto y mudarte", cost: 400, health: -5, happiness: 10, money: 1500, resultMsg: "Te mudaste a la capital. Echabas de menos el sur, pero la experiencia laboral valió la pena." },
+                    { text: "Quedarte en Sevilla junto a los tuyos", cost: 0, health: 0, happiness: 15, money: 0, resultMsg: "Preferiste la tranquilidad y el compás de tu tierra." }
                 ]
             },
             {
@@ -331,15 +414,9 @@
             clamp(val, min, max) {
                 return Math.max(min, Math.min(max, val));
             },
-            getRankName(rank) {
-                switch(rank) {
-                    case 1: return "Primaria";
-                    case 2: return "ESO";
-                    case 3: return "Bachillerato / FP Medio";
-                    case 4: return "FP Superior / Universidad";
-                    case 5: return "Máster";
-                    default: return "Sin estudios";
-                }
+            getStudyTitle(id) {
+                const st = STUDIES.find(s => s.id === id);
+                return st ? st.title : id;
             }
         };
 
@@ -356,6 +433,7 @@
                 age: document.getElementById('player-age'),
                 dni: document.getElementById('player-dni'),
                 pet: document.getElementById('player-pet'),
+                team: document.getElementById('player-team'),
                 studies: document.getElementById('player-studies'),
                 job: document.getElementById('player-job'),
                 health: document.getElementById('health-val'),
@@ -372,6 +450,7 @@
                 this.elements.age.innerText = `Edad: ${p.age} años`;
                 this.elements.dni.innerText = `DNI: ${p.dni}`;
                 this.elements.pet.innerText = p.pet ? `🐾 ${p.pet.name} (${p.pet.type})` : "🐾 Sin mascota";
+                this.elements.team.innerText = p.favoriteTeam ? `⚽ ${p.favoriteTeam}` : "⚽ Sin equipo";
                 this.elements.health.innerText = p.health;
                 this.elements.happiness.innerText = p.happiness;
                 this.elements.money.innerText = p.money;
@@ -421,6 +500,7 @@
                     <div style="text-align:center; font-size:0.85em; color:#555; padding: 10px; background:#f9f9f9; border-radius:8px;">
                         <p><strong>Estudios alcanzados:</strong> ${p.studies}</p>
                         <p><strong>Último empleo:</strong> ${p.job}</p>
+                        <p><strong>Equipo favorito:</strong> ${p.favoriteTeam || 'Ninguno'}</p>
                         <p><strong>Mascota:</strong> ${p.pet ? `${p.pet.name} (${p.pet.type})` : 'Ninguna'}</p>
                         <p><strong>Herencia final:</strong> ${p.money}€</p>
                     </div>
@@ -433,8 +513,15 @@
 
             showChoiceModal(eventObj) {
                 const p = gameState.player;
+                
+                // Procesar placeholders en el título o mensaje si los hubiera
+                let resolvedMsg = eventObj.msg;
+                if (p.favoriteTeam && resolvedMsg.includes("{favoriteTeam}")) {
+                    resolvedMsg = resolvedMsg.replace(/\{favoriteTeam\}/g, p.favoriteTeam);
+                }
+
                 this.elements.modalTitle.innerText = eventObj.title;
-                this.elements.modalMsg.innerText = eventObj.msg;
+                this.elements.modalMsg.innerText = resolvedMsg;
                 this.elements.modalDynamic.innerHTML = '';
                 this.elements.modalBtns.innerHTML = '';
 
@@ -526,19 +613,11 @@
                     completedStudies: completed,
                     job: raw.job || "En paro",
                     pet: raw.pet || null,
+                    favoriteTeam: raw.favoriteTeam || null,
                     pendingStudyAge: raw.pendingStudyAge !== undefined ? raw.pendingStudyAge : null,
                     isDead: !!raw.isDead,
                     logs: Array.isArray(raw.logs) ? raw.logs.map(l => (typeof l === 'string' ? l : (l.msg || JSON.stringify(l)))) : []
                 };
-            },
-
-            getPlayerStudyRank() {
-                const p = gameState.player;
-                if (!p || !p.completedStudies || p.completedStudies.length === 0) return 0;
-                return p.completedStudies.reduce((max, id) => {
-                    const st = STUDIES.find(s => s.id === id);
-                    return st ? Math.max(max, st.rank) : max;
-                }, 0);
             },
 
             startGame() {
@@ -569,6 +648,7 @@
                     completedStudies: [],
                     job: "En paro",
                     pet: null,
+                    favoriteTeam: null,
                     pendingStudyAge: null,
                     isDead: false,
                     logs: [`Has nacido en ${hospital}. ¡Recién llegado y listo para dar guerra!`]
@@ -636,6 +716,7 @@
                     const availableChoices = CHOICE_EVENTS.filter(ev => {
                         if (p.age < ev.minAge || p.age > ev.maxAge) return false;
                         if (ev.petType && p.pet) return false;
+                        if (ev.requiresAnyTeam && !p.favoriteTeam) return false;
                         return true;
                     });
 
@@ -650,6 +731,7 @@
                     const availableEvents = RANDOM_EVENTS.filter(ev => {
                         if (p.age < ev.minAge || p.age > ev.maxAge) return false;
                         if (ev.requiresPet && !p.pet) return false;
+                        if (ev.requiresTeam && p.favoriteTeam !== ev.requiresTeam) return false;
                         return true;
                     });
 
@@ -662,6 +744,9 @@
                         let msgText = ev.msg;
                         if (p.pet && msgText.includes("{petName}")) {
                             msgText = msgText.replace(/\{petName\}/g, p.pet.name);
+                        }
+                        if (p.favoriteTeam && msgText.includes("{favoriteTeam}")) {
+                            msgText = msgText.replace(/\{favoriteTeam\}/g, p.favoriteTeam);
                         }
                         p.logs.push(`⚡ Evento: ${msgText}`);
                     }
@@ -718,6 +803,10 @@
                             age: 0
                         };
                         logResultMsg += ` Le has puesto de nombre ${p.pet.name}.`;
+                    }
+
+                    if (opt.setsTeam) {
+                        p.favoriteTeam = opt.setsTeam;
                     }
 
                     p.money -= opt.cost;
@@ -839,22 +928,21 @@
                     return;
                 }
 
-                const playerRank = this.getPlayerStudyRank();
+                const playerCompleted = p.completedStudies || [];
 
                 UI.elements.modalTitle.innerText = "Búsqueda de Empleo";
-                UI.elements.modalMsg.innerText = "Ofertas de trabajo disponibles según tu nivel académico:";
+                UI.elements.modalMsg.innerText = "Ofertas de trabajo disponibles según tus estudios:";
 
                 let listHTML = `<div class="modal-scrollable-content">`;
                 
                 JOBS.forEach((job, idx) => {
-                    const meetsRank = playerRank >= job.reqStudyRank;
-                    const reqTitle = Utils.getRankName(job.reqStudyRank);
-
+                    const meetsReq = job.reqStudyIds.length === 0 || job.reqStudyIds.some(id => playerCompleted.includes(id));
                     let statusText = "";
                     let isDisabled = false;
 
-                    if (!meetsRank) {
-                        statusText = `🔒 Requiere estudios: ${reqTitle}`;
+                    if (!meetsReq) {
+                        const reqNames = job.reqStudyIds.map(id => Utils.getStudyTitle(id)).join(' o ');
+                        statusText = `🔒 Requiere: ${reqNames}`;
                         isDisabled = true;
                     } else {
                         statusText = `Sueldo: ${job.salary}€/año`;
@@ -883,8 +971,9 @@
                 const job = JOBS[idx];
                 if (!job) return;
 
-                const playerRank = this.getPlayerStudyRank();
-                if (playerRank < job.reqStudyRank) return;
+                const playerCompleted = p.completedStudies || [];
+                const meetsReq = job.reqStudyIds.length === 0 || job.reqStudyIds.some(id => playerCompleted.includes(id));
+                if (!meetsReq) return;
 
                 p.job = job.title;
                 p.salary = job.salary;
