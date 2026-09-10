@@ -1275,7 +1275,7 @@
                     const meetsAge = p.age >= opt.minAge;
                     const hasJob = p.job !== "En paro";
                     const meetsJobReq = !opt.reqJob || hasJob;
-                    const canAfford = opt.type === 'rent' ? true : p.money >= opt.buyPrice;
+                    const canAfford = opt.type === 'rent' ? p.money >= opt.annualCost : p.money >= opt.buyPrice;
                     const isCurrent = p.housing.id === opt.id;
 
                     let statusText = "";
@@ -1291,7 +1291,8 @@
                         statusText = "🔒 Necesitas tener trabajo";
                         isDisabled = true;
                     } else if (!canAfford) {
-                        statusText = `💰 Necesitas ${opt.buyPrice}€ (tienes ${p.money}€)`;
+                        const neededMoney = opt.type === 'rent' ? opt.annualCost : opt.buyPrice;
+                        statusText = `💰 Necesitas ${neededMoney}€ (tienes ${p.money}€)`;
                         isDisabled = true;
                     } else {
                         statusText = opt.type === 'rent' ? `${opt.annualCost}€/año` : `Compra: ${opt.buyPrice}€`;
@@ -1322,6 +1323,7 @@
                 if (p.age < housing.minAge) return;
                 if (housing.reqJob && p.job === "En paro") return;
                 if (housing.type === 'owned' && p.money < housing.buyPrice) return;
+                if (housing.type === 'rent' && p.money < housing.annualCost) return;
 
                 if (housing.type === 'owned') {
                     p.money -= housing.buyPrice;
