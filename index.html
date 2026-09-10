@@ -260,7 +260,7 @@
             },
             {
                 id: 'perro_callejero', unique: true, minAge: 6, maxAge: 17, petType: "Perro",
-                title: "🐾 Perro callejero",
+                title: "🐶 Perro callejero",
                 msg: "Te encuentras a un perro pequeño abandonado cerca de Triana. ¿Qué haces?",
                 options: [
                     { text: "Llevártelo a casa y ponerle un nombre", cost: 0, health: 0, happiness: 20, money: 0, adoptsPet: true, resultMsg: "Decidiste llevarte al perrito a casa." },
@@ -596,6 +596,11 @@
             clampMoney(val) {
                 return Math.max(CONFIG.OVERDRAFT_LIMIT, val);
             },
+            petEmoji(type) {
+                if (type === 'Perro') return '🐶';
+                if (type === 'Gato') return '🐱';
+                return '🐾';
+            },
             calculateTax(salary) {
                 let rate;
                 if (salary <= 15000) rate = 0.10;
@@ -654,7 +659,7 @@
                 this.elements.name.innerText = p.name;
                 this.elements.age.innerText = `Edad: ${p.age} años`;
                 this.elements.dni.innerText = `DNI: ${p.dni}`;
-                this.elements.pet.innerText = p.pet ? `🐾 ${p.pet.name} (${p.pet.type})` : "🐾 Sin mascota";
+                this.elements.pet.innerText = p.pet ? `${Utils.petEmoji(p.pet.type)} ${p.pet.name} (${p.pet.type})` : "🐾 Sin mascota";
                 this.elements.team.innerText = p.favoriteTeam ? `⚽ ${p.favoriteTeam}` : "⚽ Sin equipo";
                 this.elements.housing.innerText = p.housing ? `🏠 ${p.housing.zone}` : "🏠 Con tus padres";
                 this.elements.health.innerText = p.health;
@@ -778,7 +783,7 @@
             },
 
             showPetNameModal(petType, defaultName, callback) {
-                this.elements.modalTitle.innerText = `🐾 Nombre de tu ${petType.toLowerCase()}`;
+                this.elements.modalTitle.innerText = `${Utils.petEmoji(petType)} Nombre de tu ${petType.toLowerCase()}`;
                 this.elements.modalMsg.innerText = `¿Qué nombre quieres ponerle a tu ${petType.toLowerCase()}?`;
                 this.elements.modalDynamic.innerHTML = `
                     <input type="text" id="pet-name-input" value="${defaultName}" maxlength="15" style="text-align: center; font-weight: bold; margin-bottom: 4px;" autocomplete="off" />
