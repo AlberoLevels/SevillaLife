@@ -184,7 +184,8 @@
             PET_MAINTENANCE_COST: 60,
             PET_DEATH_MIN_AGE: 12,
             PET_DEATH_MAX_AGE: 16,
-            ANNUAL_LIVING_COST: 4000
+            ANNUAL_LIVING_COST: 4000,
+            OVERDRAFT_LIMIT: -500
         });
 
         const HOSPITALS = [
@@ -588,6 +589,9 @@
             clamp(val, min, max) {
                 return Math.max(min, Math.min(max, val));
             },
+            clampMoney(val) {
+                return Math.max(CONFIG.OVERDRAFT_LIMIT, val);
+            },
             generateJobOffers(age, completedStudies) {
                 const validJobs = JOBS.filter(job => {
                     if (age < job.minAge) return false;
@@ -710,22 +714,36 @@
                 this.elements.modalDynamic.innerHTML = '';
                 this.elements.modalBtns.innerHTML = '';
 
+                let anyEnabled = false;
+
                 eventObj.options.forEach((opt, idx) => {
                     const btn = document.createElement('button');
                     btn.className = 'modal-btn modal-btn-confirm';
                     btn.style.marginBottom = '4px';
                     btn.innerText = opt.text;
 
-                    if (opt.cost > 0 && p.money < opt.cost) {
+                    if (opt.cost > 0 && (p.money - opt.cost) < CONFIG.OVERDRAFT_LIMIT) {
                         btn.disabled = true;
                         btn.style.opacity = '0.5';
                         btn.innerText += ` (Sin fondos: ${opt.cost}€)`;
+                    } else {
+                        anyEnabled = true;
                     }
 
                     btn.dataset.action = 'select-choice-option';
                     btn.dataset.choiceIdx = idx;
                     this.elements.modalBtns.appendChild(btn);
                 });
+
+                // Salvaguarda: si ninguna opción es pagable, añadir botón de cierre
+                if (!anyEnabled) {
+                    const closeBtn = document.createElement('button');
+                    closeBtn.className = 'modal-btn modal-btn-cancel';
+                    closeBtn.style.marginTop = '6px';
+                    closeBtn.innerText = 'Cerrar (sin fondos suficientes)';
+                    closeBtn.dataset.action = 'close-choice-modal';
+                    this.elements.modalBtns.appendChild(closeBtn);
+                }
 
                 this._currentChoiceEvent = eventObj;
                 this.openModal();
@@ -946,7 +964,7 @@
                     p.happiness = Utils.clamp(p.happiness + 5, 0, 100);
 
                     if (p.age >= CONFIG.MIN_WORKING_AGE) {
-                        p.money -= CONFIG.PET_MAINTENANCE_COST;
+                        p.money = Utils.clampMoney(p.money - CONFIG.PET_MAINTENANCE_COST);
                         p.logs.push(`🐾 Mantenimiento anual de tu ${p.pet.type.toLowerCase()} ${p.pet.name} (-${CONFIG.PET_MAINTENANCE_COST}€, +5% felicidad).`);
                     } else {
                         p.logs.push(`🐾 Tu ${p.pet.type.toLowerCase()} ${p.pet.name} te da mucho cariño (+5% felicidad, gastos asumidos por tus padres).`);
@@ -1008,8 +1026,8 @@
                         p.health = Utils.clamp(p.health + ev.health, 0, 100);
                         p.happiness = Utils.clamp(p.happiness + ev.happiness, 0, 100);
                         
-                        if (p.age < CONFIG.MIN_WORKING_AGE && ev.money < 0) {
-                            p.money = Math.max(0, p.money + ev.money);
+                        if (ev.money < 0) {
+                            p.money = Utils.clampMoney(p.money + ev.money);
                         } else {
                             p.money += ev.money;
                         }
@@ -1107,6 +1125,7 @@
                     p.health = Utils.clamp(p.health + finalHealth, 0, 100);
                     p.happiness = Utils.clamp(p.happiness + finalHappiness, 0, 100);
                     p.money += finalMoney;
+                    p.money = Utils.clampMoney(p.money);
 
                     p.logs.push(`🤔 Decisión: ${logResultMsg}`);
                     Storage.save(p);
@@ -1520,6 +1539,14 @@
                 case 'select-choice-option':
                     Engine.handleChoiceOption(parseInt(actionBtn.dataset.choiceIdx, 10));
                     break;
+                case 'close-choice-modal':
+                    UI.closeModal();
+                    if (gameState.player) {
+                        gameState.player.logs.push(`💸 No tenías fondos suficientes para tomar ninguna decisión. La situación pasó sin más.`);
+                        Storage.save(gameState.player);
+                        UI.render();
+                    }
+                    break;
                 case 'select-study':
                     Engine.selectStudy(parseInt(actionBtn.dataset.studyIdx, 10));
                     break;
@@ -1536,7 +1563,8 @@
         window.addEventListener('DOMContentLoaded', () => {
             Engine.init();
         });
+
+        // Acceso para pruebas desde consola
+        window._debug = { gameState, Engine, Utils, Storage, CONFIG, UI };
     })();
     </script>
-</body>
-</html>
