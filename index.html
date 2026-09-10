@@ -599,7 +599,12 @@
                     return meetsReq;
                 });
 
-                const shuffled = [...validJobs].sort(() => 0.5 - Math.random());
+                // Barajado Fisher-Yates: reparto justo y uniforme
+                const shuffled = [...validJobs];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
                 return shuffled.slice(0, 4);
             },
             getDefaultHousing() {
@@ -1564,7 +1569,9 @@
             Engine.init();
         });
 
-        // Acceso para pruebas desde consola
+        // Acceso para pruebas desde consola (quitar en la versión final)
         window._debug = { gameState, Engine, Utils, Storage, CONFIG, UI };
     })();
     </script>
+</body>
+</html>
