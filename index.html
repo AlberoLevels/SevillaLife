@@ -184,7 +184,7 @@
             PET_MAINTENANCE_COST: 60,
             PET_DEATH_MIN_AGE: 12,
             PET_DEATH_MAX_AGE: 16,
-            ANNUAL_LIVING_COST: 4000,
+            ANNUAL_LIVING_COST: 7000,
             OVERDRAFT_LIMIT: -500,
             MAX_LOGS: 100
         });
@@ -228,9 +228,9 @@
             { id: 'flat_nervion', title: "Piso de alquiler", zone: "Nervión / Los Remedios", minAge: 18, type: 'rent', annualCost: 5200, buyPrice: 0, happinessBonus: 3, reqJob: true },
             { id: 'flat_triana', title: "Piso de alquiler", zone: "Triana", minAge: 20, type: 'rent', annualCost: 5800, buyPrice: 0, happinessBonus: 3, reqJob: true },
             { id: 'flat_centro', title: "Piso de alquiler", zone: "Centro / Casco Antiguo", minAge: 20, type: 'rent', annualCost: 6500, buyPrice: 0, happinessBonus: 4, reqJob: true },
-            { id: 'own_nervion', title: "Piso en propiedad", zone: "Nervión / Los Remedios", minAge: 25, type: 'owned', annualCost: 0, buyPrice: 15000, happinessBonus: 4, reqJob: true },
-            { id: 'own_centro', title: "Piso reformado", zone: "Centro / Casco Antiguo", minAge: 28, type: 'owned', annualCost: 0, buyPrice: 22000, happinessBonus: 5, reqJob: true },
-            { id: 'own_aljarafe', title: "Chalet adosado", zone: "Pueblos del Aljarafe", minAge: 30, type: 'owned', annualCost: 0, buyPrice: 30000, happinessBonus: 5, reqJob: true }
+            { id: 'own_nervion', title: "Piso en propiedad", zone: "Nervión / Los Remedios", minAge: 25, type: 'owned', annualCost: 0, buyPrice: 60000, happinessBonus: 4, reqJob: true },
+            { id: 'own_centro', title: "Piso reformado", zone: "Centro / Casco Antiguo", minAge: 28, type: 'owned', annualCost: 0, buyPrice: 90000, happinessBonus: 5, reqJob: true },
+            { id: 'own_aljarafe', title: "Chalet adosado", zone: "Pueblos del Aljarafe", minAge: 30, type: 'owned', annualCost: 0, buyPrice: 120000, happinessBonus: 5, reqJob: true }
         ];
 
         const RANDOM_EVENTS = [
@@ -452,7 +452,7 @@
                 title: "🚗 Vehículo nuevo de ocasión",
                 msg: "Necesitas un medio de transporte más cómodo para desplazarte fuera de la ciudad.",
                 options: [
-                    { text: "Comprar utilitario de segunda mano (3500€)", cost: 3500, health: 5, happiness: 20, money: 0, resultMsg: "¡Te da una libertad tremenda para hacer viajes y excursiones!" },
+                    { text: "Comprar utilitario de segunda mano (3500€)", cost: 3500, health: 5, happiness: 20, money: 0, resultMsg: "¡Te da una libertad tremunda para hacer viajes y excursiones!" },
                     { text: "Seguir usando transporte público", cost: 0, health: 0, happiness: -2, money: 0, resultMsg: "Evitaste gastos de seguro, gasolina e ITV." }
                 ]
             },
@@ -595,6 +595,15 @@
             },
             clampMoney(val) {
                 return Math.max(CONFIG.OVERDRAFT_LIMIT, val);
+            },
+            calculateTax(salary) {
+                let rate;
+                if (salary <= 15000) rate = 0.10;
+                else if (salary <= 25000) rate = 0.18;
+                else if (salary <= 40000) rate = 0.25;
+                else if (salary <= 60000) rate = 0.32;
+                else rate = 0.40;
+                return Math.round(salary * rate);
             },
             generateJobOffers(age, completedStudies) {
                 const validJobs = JOBS.filter(job => {
@@ -936,8 +945,10 @@
                 }
 
                 if (p.job !== "En paro" && p.salary > 0) {
-                    p.money += p.salary;
-                    p.logs.push(`Has cobrado tu sueldo anual de ${p.salary}€. ¡Dinero ingresado!`);
+                    const tax = Utils.calculateTax(p.salary);
+                    const net = p.salary - tax;
+                    p.money += net;
+                    p.logs.push(`💼 Has cobrado tu sueldo anual: ${p.salary}€ brutos − ${tax}€ de IRPF = ${net}€ netos. ¡Dinero ingresado!`);
                 }
 
                 if (p.housing && p.housing.id !== 'parents') {
