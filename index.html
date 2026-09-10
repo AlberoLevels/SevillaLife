@@ -452,7 +452,7 @@
                 title: "🚗 Vehículo nuevo de ocasión",
                 msg: "Necesitas un medio de transporte más cómodo para desplazarte fuera de la ciudad.",
                 options: [
-                    { text: "Comprar utilitario de segunda mano (3500€)", cost: 3500, health: 5, happiness: 20, money: 0, resultMsg: "¡Te da una libertad tremunda para hacer viajes y excursiones!" },
+                    { text: "Comprar utilitario de segunda mano (3500€)", cost: 3500, health: 5, happiness: 20, money: 0, resultMsg: "¡Te da una libertad tremenda para hacer viajes y excursiones!" },
                     { text: "Seguir usando transporte público", cost: 0, health: 0, happiness: -2, money: 0, resultMsg: "Evitaste gastos de seguro, gasolina e ITV." }
                 ]
             },
@@ -603,7 +603,6 @@
                     return meetsReq;
                 });
 
-                // Barajado Fisher-Yates: reparto justo y uniforme
                 const shuffled = [...validJobs];
                 for (let i = shuffled.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -744,7 +743,6 @@
                     this.elements.modalBtns.appendChild(btn);
                 });
 
-                // Salvaguarda: si ninguna opción es pagable, añadir botón de cierre
                 if (!anyEnabled) {
                     const closeBtn = document.createElement('button');
                     closeBtn.className = 'modal-btn modal-btn-cancel';
@@ -942,7 +940,6 @@
                     p.logs.push(`Has cobrado tu sueldo anual de ${p.salary}€. ¡Dinero ingresado!`);
                 }
 
-                // --- VIVIENDA: coste anual ---
                 if (p.housing && p.housing.id !== 'parents') {
                     p.housing.yearsLivingHere++;
                     if (p.money >= p.housing.annualCost) {
@@ -955,7 +952,6 @@
                     }
                 }
 
-                // --- GASTOS DE VIDA (solo si no vives con tus padres) ---
                 if (p.age >= CONFIG.MIN_WORKING_AGE && p.housing && p.housing.id !== 'parents') {
                     if (p.money >= CONFIG.ANNUAL_LIVING_COST) {
                         p.money -= CONFIG.ANNUAL_LIVING_COST;
@@ -1252,10 +1248,6 @@
                     return;
                 }
 
-                if (!p.activeJobOffers || p.activeJobOffers.length === 0) {
-                    p.activeJobOffers = Utils.generateJobOffers(p.age, p.completedStudies);
-                }
-
                 UI.elements.modalTitle.innerText = "Bolsa de Empleo (SAE)";
                 UI.elements.modalMsg.innerText = "Ofertas disponibles este año según tu perfil y formación:";
 
@@ -1389,15 +1381,15 @@
                 const job = JOBS.find(j => j.id === jobId);
                 if (!job) return;
 
-                let successChance = 0.65;
+                let successChance = 0.50;
                 if (job.reqStudyIds.length > 0) {
                     const hasHigher = p.completedStudies.some(id => {
                         const sObj = STUDIES.find(st => st.id === id);
                         return sObj && sObj.rank > 2;
                     });
-                    if (hasHigher) successChance = 0.85;
+                    if (hasHigher) successChance = 0.70;
                 } else {
-                    successChance = 0.75;
+                    successChance = 0.60;
                 }
 
                 const roll = Math.random();
@@ -1411,10 +1403,11 @@
                     UI.showAlert("¡Contratado!", `¡Enhorabuena! El comité de selección ha valorado positivamente tu perfil y te han dado el puesto de ${job.title}.`);
                 } else {
                     p.happiness = Utils.clamp(p.happiness - 10, 0, 100);
-                    p.logs.push(`❌ Has hecho la entrevista para ${job.title}, pero la empresa ha optado por otro candidato. ¡Rechazado!`);
+                    p.activeJobOffers = p.activeJobOffers.filter(j => j.id !== jobId);
+                    p.logs.push(`❌ Has hecho la entrevista para ${job.title}, pero la empresa ha optado por otro candidato. ¡Rechazado! La oferta ya no está disponible este año.`);
                     Storage.save(p);
                     UI.render();
-                    UI.showAlert("Entrevista no superada", `Los nervios o la alta competencia jugaron en tu contra. Han descartado tu candidatura para ${job.title}. ¡Sigue intentándolo!`);
+                    UI.showAlert("Entrevista no superada", `Los nervios o la alta competencia jugaron en tu contra. Han descartado tu candidatura para ${job.title}. Esa oferta se ha agotado: vuelve a intentarlo el año que viene.`);
                 }
             },
 
