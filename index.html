@@ -178,15 +178,16 @@
     (() => {
         'use strict';
 
-        const CONFIG = Object.freeze({
-            STORAGE_KEY: 'sevillalife_save',
-            MIN_WORKING_AGE: 18,
-            PET_MAINTENANCE_COST: 60,
-            PET_DEATH_MIN_AGE: 12,
-            PET_DEATH_MAX_AGE: 16,
-            ANNUAL_LIVING_COST: 4000,
-            OVERDRAFT_LIMIT: -500
-        });
+const CONFIG = Object.freeze({
+    STORAGE_KEY: 'sevillalife_save',
+    MIN_WORKING_AGE: 18,
+    PET_MAINTENANCE_COST: 60,
+    PET_DEATH_MIN_AGE: 12,
+    PET_DEATH_MAX_AGE: 16,
+    ANNUAL_LIVING_COST: 4000,
+    OVERDRAFT_LIMIT: -500,
+    MAX_LOGS: 100
+});
 
         const HOSPITALS = [
             "el Hospital Virgen del Rocío",
