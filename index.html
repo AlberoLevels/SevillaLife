@@ -452,7 +452,7 @@
                 title: "🚗 Vehículo nuevo de ocasión",
                 msg: "Necesitas un medio de transporte más cómodo para desplazarte fuera de la ciudad.",
                 options: [
-                    { text: "Comprar utilitario de segunda mano (3500€)", cost: 3500, health: 5, happiness: 20, money: 0, resultMsg: "¡Te da una libertad tremunda para hacer viajes y excursiones!" },
+                    { text: "Comprar utilitario de segunda mano (3500€)", cost: 3500, health: 5, happiness: 20, money: 0, resultMsg: "¡Te da una libertad tremenda para hacer viajes y excursiones!" },
                     { text: "Seguir usando transporte público", cost: 0, health: 0, happiness: -2, money: 0, resultMsg: "Evitaste gastos de seguro, gasolina e ITV." }
                 ]
             },
@@ -840,8 +840,8 @@
                 }
 
                 const age = raw.age || 0;
-                const activeOffers = Array.isArray(raw.activeJobOffers) && raw.activeJobOffers.length > 0 
-                    ? raw.activeJobOffers 
+                const activeOffers = Array.isArray(raw.activeJobOffers)
+                    ? raw.activeJobOffers
                     : Utils.generateJobOffers(age, completed);
 
                 return {
@@ -953,18 +953,20 @@
                     const tax = Utils.calculateTax(p.salary);
                     const net = p.salary - tax;
                     p.money += net;
-                    p.logs.push(`💼 Has cobrado tu sueldo anual: ${p.salary}€ brutos − ${tax}€ de IRPF = ${net}€ netos. ¡Dinero ingresado!`);
+                    p.logs.push(`💼 Has cobrado tu sueldo anual: ${p.salary}€ brutos - ${tax}€ de IRPF = ${net}€ netos. ¡Dinero ingresado!`);
                 }
 
                 if (p.housing && p.housing.id !== 'parents') {
                     p.housing.yearsLivingHere++;
-                    if (p.money >= p.housing.annualCost) {
-                        p.money -= p.housing.annualCost;
-                        p.logs.push(`🏠 Pagas tu ${p.housing.type === 'rent' ? 'alquiler' : 'cuota'} anual de ${p.housing.annualCost}€ (${p.housing.zone}).`);
-                    } else {
-                        p.logs.push(`🚪 No has podido pagar tu vivienda en ${p.housing.zone}. Te han desahuciado y has tenido que volver con tus padres.`);
-                        p.housing = Utils.getDefaultHousing();
-                        p.happiness = Utils.clamp(p.happiness - 20, 0, 100);
+                    if (p.housing.type === 'rent') {
+                        if (p.money >= p.housing.annualCost) {
+                            p.money -= p.housing.annualCost;
+                            p.logs.push(`🏠 Pagas tu alquiler anual de ${p.housing.annualCost}€ (${p.housing.zone}).`);
+                        } else {
+                            p.logs.push(`🚪 No has podido pagar tu alquiler en ${p.housing.zone}. Te han desahuciado y has tenido que volver con tus padres.`);
+                            p.housing = Utils.getDefaultHousing();
+                            p.happiness = Utils.clamp(p.happiness - 20, 0, 100);
+                        }
                     }
                 }
 
@@ -973,7 +975,7 @@
                         p.money -= CONFIG.ANNUAL_LIVING_COST;
                         p.logs.push(`🛒 Gastos anuales de comida y suministros (-${CONFIG.ANNUAL_LIVING_COST}€).`);
                     } else {
-                        p.money = 0;
+                        if (p.money > 0) p.money = 0;
                         p.health = Utils.clamp(p.health - 5, 0, 100);
                         p.happiness = Utils.clamp(p.happiness - 15, 0, 100);
                         p.logs.push(`🛒 Apuros económicos: no llegas a fin de año para los gastos básicos (${CONFIG.ANNUAL_LIVING_COST}€). ¡Estrés y salud resentida!`);
