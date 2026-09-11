@@ -314,7 +314,7 @@
                 ]
             },
             {
-                id: 'move_madrid', unique: true, minAge: 22, maxAge: 55,
+                id: 'move_madrid', unique: true, minAge: 22, maxAge: 55, requiresJob: true,
                 title: "✈️ Oferta de empleo fuera",
                 msg: "Te ha surgido la oportunidad de cambiar de aires e irte a trabajar a Madrid con un sueldo superior.",
                 options: [
@@ -681,7 +681,7 @@
                 this.elements.happiness.innerText = p.happiness;
                 this.elements.money.innerText = p.money;
                 this.elements.studies.innerText = p.studies;
-                this.elements.job.innerText = p.job;
+                this.elements.job.innerText = p.residenceCity === 'Madrid' ? `${p.job} (en Madrid)` : p.job;
 
                 this.renderLogs();
             },
@@ -989,14 +989,20 @@
                             p.logs.push(`🏠 Pagas tu alquiler anual de ${p.housing.annualCost}€ (${p.housing.zone}).`);
                         } else {
                             if (p.residenceCity === 'Madrid') {
-                                p.logs.push(`🚪 No has podido pagar el alquiler en Madrid. Sin dinero para sostenerte, vuelves a Sevilla con tus padres.`);
                                 p.residenceCity = 'Sevilla';
                                 p.madridYearsLeft = 0;
+                                if (p.sevillaHouseStored) {
+                                    p.logs.push(`🚪 No has podido pagar el alquiler en Madrid. Vuelves a Sevilla y te refugias en tu casa de ${p.sevillaHouseStored.zone}.`);
+                                    p.housing = p.sevillaHouseStored;
+                                } else {
+                                    p.logs.push(`🚪 No has podido pagar el alquiler en Madrid. Sin dinero para sostenerte, vuelves a Sevilla con tus padres.`);
+                                    p.housing = Utils.getDefaultHousing();
+                                }
                                 p.sevillaHouseStored = null;
                             } else {
                                 p.logs.push(`🚪 No has podido pagar tu alquiler en ${p.housing.zone}. Te han desahuciado y has tenido que volver con tus padres.`);
+                                p.housing = Utils.getDefaultHousing();
                             }
-                            p.housing = Utils.getDefaultHousing();
                             p.happiness = Utils.clamp(p.happiness - 20, 0, 100);
                         }
                     }
@@ -1071,6 +1077,7 @@
                         if (ev.petType && p.pet) return false;
                         if (ev.requiresAnyTeam && !p.favoriteTeam) return false;
                         if (ev.requiresTeam && p.favoriteTeam !== ev.requiresTeam) return false;
+                        if (ev.requiresJob && p.job === "En paro") return false;
 
                         if (ev.unique) {
                             if (p.completedChoices.includes(ev.id)) return false;
