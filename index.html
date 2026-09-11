@@ -988,7 +988,14 @@
                             p.money -= p.housing.annualCost;
                             p.logs.push(`🏠 Pagas tu alquiler anual de ${p.housing.annualCost}€ (${p.housing.zone}).`);
                         } else {
-                            p.logs.push(`🚪 No has podido pagar tu alquiler en ${p.housing.zone}. Te han desahuciado y has tenido que volver con tus padres.`);
+                            if (p.residenceCity === 'Madrid') {
+                                p.logs.push(`🚪 No has podido pagar el alquiler en Madrid. Sin dinero para sostenerte, vuelves a Sevilla con tus padres.`);
+                                p.residenceCity = 'Sevilla';
+                                p.madridYearsLeft = 0;
+                                p.sevillaHouseStored = null;
+                            } else {
+                                p.logs.push(`🚪 No has podido pagar tu alquiler en ${p.housing.zone}. Te han desahuciado y has tenido que volver con tus padres.`);
+                            }
                             p.housing = Utils.getDefaultHousing();
                             p.happiness = Utils.clamp(p.happiness - 20, 0, 100);
                         }
@@ -1326,6 +1333,11 @@
                     return;
                 }
 
+                if (p.residenceCity === 'Madrid') {
+                    UI.showAlert("Bolsa de Empleo", "Estás trabajando en Madrid con un contrato vigente. No puedes optar a ofertas de Sevilla hasta que regreses.");
+                    return;
+                }
+
                 UI.elements.modalTitle.innerText = "Bolsa de Empleo (SAE)";
                 UI.elements.modalMsg.innerText = "Ofertas disponibles este año según tu perfil y formación:";
 
@@ -1454,6 +1466,7 @@
 
             selectJob(jobId) {
                 const p = gameState.player;
+                if (p.residenceCity === 'Madrid') return;
                 const job = JOBS.find(j => j.id === jobId);
                 if (!job) return;
 
