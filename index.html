@@ -255,6 +255,14 @@
             { minAge: 6, maxAge: 120, requiresPet: true, msg: "Tu mascota {petName} ha estado jugando contigo todo el día y te ha transmitido mucha alegría.", health: 2, happiness: 12, money: 0 }
         ];
 
+        const MADRID_EVENTS = [
+            { msg: "El tráfico de la M-30 te tiene frito.", health: -2, happiness: -3, money: 0 },
+            { msg: "Encuentras un bar sevillano en Lavapiés; por un rato, vuelves a casa.", health: 0, happiness: 8, money: 0 },
+            { msg: "Curras hasta tarde en la oficina; el ritmo de Madrid no perdona.", health: -3, happiness: -4, money: 300 },
+            { msg: "Coges el AVE un fin de semana para ver a los tuyos en Sevilla.", health: 0, happiness: 12, money: -120 },
+            { msg: "Te cruzas con otro sevillano por la Gran Vía y os dais un abrazo de paisanos.", health: 0, happiness: 6, money: 0 }
+        ];
+
         const CHOICE_EVENTS = [
             {
                 id: 'team_selection', unique: true, minAge: 8, maxAge: 16,
@@ -312,8 +320,8 @@
                 options: [
                     { 
                         text: "Aceptar el reto y mudarte", cost: 400, successChance: 0.75,
-                        success: { health: -5, happiness: 15, money: 1800, resultMsg: "Te adaptaste de maravilla a la capital y el impulso económico mereció la pena." },
-                        failure: { health: -10, happiness: -22, money: 400, resultMsg: "La morriña de Sevilla y el alto coste de vida te machacaron; tuviste que volver." }
+                        success: { health: -5, happiness: 5, money: 0, movesToMadrid: true, resultMsg: "¡Triunfas en Madrid! Te instalas en la capital con un contrato superior. Tu corazón sigue en Sevilla, pero tu nómina ya no." },
+                        failure: { health: -10, happiness: -22, money: 0, resultMsg: "La morriña de Sevilla y el alto coste de vida te machacaron; tuviste que volver." }
                     },
                     { text: "Quedarte en Sevilla junto a los tuyos", cost: 0, health: 0, happiness: 15, money: 0, resultMsg: "Preferiste la tranquilidad y el compás de tu tierra." }
                 ]
@@ -867,6 +875,9 @@
                     activeJobOffers: activeOffers,
                     pet: raw.pet || null,
                     favoriteTeam: raw.favoriteTeam || null,
+                    residenceCity: raw.residenceCity || 'Sevilla',
+                    madridYearsLeft: raw.madridYearsLeft || 0,
+                    sevillaHouseStored: raw.sevillaHouseStored || null,
                     housing: raw.housing || Utils.getDefaultHousing(),
                     pendingStudyAge: raw.pendingStudyAge !== undefined ? raw.pendingStudyAge : null,
                     isDead: !!raw.isDead,
@@ -906,6 +917,9 @@
                     activeJobOffers: Utils.generateJobOffers(0, []),
                     pet: null,
                     favoriteTeam: null,
+                    residenceCity: 'Sevilla',
+                    madridYearsLeft: 0,
+                    sevillaHouseStored: null,
                     housing: Utils.getDefaultHousing(),
                     pendingStudyAge: null,
                     isDead: false,
@@ -957,10 +971,14 @@
                 }
 
                 if (p.job !== "En paro" && p.salary > 0) {
-                    const tax = Utils.calculateTax(p.salary);
-                    const net = p.salary - tax;
+                    let gross = p.salary;
+                    if (p.residenceCity === 'Madrid') {
+                        gross = Math.round(p.salary * 1.2);
+                    }
+                    const tax = Utils.calculateTax(gross);
+                    const net = gross - tax;
                     p.money += net;
-                    p.logs.push(`💼 Has cobrado tu sueldo anual: ${p.salary}€ brutos - ${tax}€ de IRPF = ${net}€ netos. ¡Dinero ingresado!`);
+                    p.logs.push(`💼 Has cobrado tu sueldo anual: ${gross}€ brutos - ${tax}€ de IRPF = ${net}€ netos.${p.residenceCity === 'Madrid' ? ' (incluye el plus de Madrid)' : ''} ¡Dinero ingresado!`);
                 }
 
                 if (p.housing && p.housing.id !== 'parents') {
@@ -989,6 +1007,25 @@
                     }
                 }
 
+                if (p.residenceCity === 'Madrid' && p.madridYearsLeft > 0) {
+                    p.happiness = Utils.clamp(p.happiness - 3, 0, 100);
+                    p.logs.push(`🌆 Morriña sevillana: otro año lejos de tu tierra (-3% felicidad).`);
+                    p.madridYearsLeft--;
+                    if (p.madridYearsLeft === 0) {
+                        p.residenceCity = 'Sevilla';
+                        if (p.sevillaHouseStored) {
+                            p.housing = p.sevillaHouseStored;
+                            p.logs.push(`🏠 Vuelves a Sevilla y recuperas tu casa de ${p.housing.zone}.`);
+                        } else {
+                            p.housing = Utils.getDefaultHousing();
+                            p.logs.push(`🏠 Vuelves a Sevilla y te instalas de nuevo con tus padres.`);
+                        }
+                        p.sevillaHouseStored = null;
+                        p.happiness = Utils.clamp(p.happiness + 10, 0, 100);
+                        p.logs.push(`🌇 Tras 5 años fuera, regresas a Sevilla. Volver a casa sienta como un abrazo (+10% felicidad).`);
+                    }
+                }
+
                 if (p.pet) {
                     p.pet.age++;
                     p.happiness = Utils.clamp(p.happiness + 5, 0, 100);
@@ -1010,9 +1047,18 @@
                     }
                 }
 
+                if (p.residenceCity === 'Madrid') {
+                    const mv = MADRID_EVENTS[Math.floor(Math.random() * MADRID_EVENTS.length)];
+                    p.health = Utils.clamp(p.health + mv.health, 0, 100);
+                    p.happiness = Utils.clamp(p.happiness + mv.happiness, 0, 100);
+                    if (mv.money < 0) { p.money = Utils.clampMoney(p.money + mv.money); }
+                    else { p.money += mv.money; }
+                    p.logs.push(`🌆 ${mv.msg}`);
+                }
+
                 let triggeredChoice = false;
 
-                if (p.age >= 3 && Math.random() < 0.35) {
+                if (p.residenceCity !== 'Madrid' && p.age >= 3 && Math.random() < 0.35) {
                     const availableChoices = CHOICE_EVENTS.filter(ev => {
                         if (p.age < ev.minAge || p.age > ev.maxAge) return false;
                         if (ev.petType && p.pet) return false;
@@ -1036,7 +1082,7 @@
                     }
                 }
 
-                if (!triggeredChoice && p.age >= 3) {
+                if (!triggeredChoice && p.residenceCity !== 'Madrid' && p.age >= 3) {
                     const availableEvents = RANDOM_EVENTS.filter(ev => {
                         if (p.age < ev.minAge || p.age > ev.maxAge) return false;
                         if (ev.requiresPet && !p.pet) return false;
@@ -1114,19 +1160,26 @@
                     let finalHappiness = opt.happiness || 0;
                     let finalMoney = opt.money || 0;
 
+                    let branch = opt;
                     if (opt.successChance !== undefined) {
                         const roll = Math.random();
-                        if (roll < opt.successChance) {
-                            logResultMsg = opt.success.resultMsg;
-                            finalHealth += (opt.success.health || 0);
-                            finalHappiness += (opt.success.happiness || 0);
-                            finalMoney += (opt.success.money || 0);
+                        branch = (roll < opt.successChance) ? opt.success : opt.failure;
+                        logResultMsg = branch.resultMsg;
+                        finalHealth = branch.health || 0;
+                        finalHappiness = branch.happiness || 0;
+                        finalMoney = branch.money || 0;
+                    }
+
+                    if (branch.movesToMadrid) {
+                        if (p.housing.type === 'owned') {
+                            p.sevillaHouseStored = p.housing;
                         } else {
-                            logResultMsg = opt.failure.resultMsg;
-                            finalHealth += (opt.failure.health || 0);
-                            finalHappiness += (opt.failure.happiness || 0);
-                            finalMoney += (opt.failure.money || 0);
+                            p.sevillaHouseStored = null;
                         }
+                        p.housing = { id: 'madrid', title: 'Piso alquilado en Madrid', zone: 'Madrid', type: 'rent', annualCost: 9000, yearsLivingHere: 0 };
+                        p.residenceCity = 'Madrid';
+                        p.madridYearsLeft = 5;
+                        logResultMsg += ' Estarás fuera 5 años.';
                     }
 
                     if (opt.adoptsPet && petName) {
@@ -1309,6 +1362,11 @@
                     return;
                 }
 
+                if (p.residenceCity === 'Madrid') {
+                    UI.showAlert("Vivienda", "Estás viviendo en Madrid por trabajo. No puedes mudarte en Sevilla hasta que regreses.");
+                    return;
+                }
+
                 UI.elements.modalTitle.innerText = "🏠 Tu Vivienda";
                 UI.elements.modalMsg.innerText = `Actualmente vives en: ${p.housing.title} (${p.housing.zone}). ¿Quieres mudarte?`;
 
@@ -1362,6 +1420,7 @@
 
             selectHousing(idx) {
                 const p = gameState.player;
+                if (p.residenceCity === 'Madrid') return;
                 const housing = HOUSING_OPTIONS[idx];
                 if (!housing) return;
 
