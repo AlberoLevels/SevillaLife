@@ -111,6 +111,55 @@
         .modal-btn-cancel { background: #ecf0f1; color: #555; }
         .footer-copyright { text-align: center; font-size: 0.55em; color: #7f8c8d; margin-top: 1px; }
         .start-copyright { text-align: center; font-size: 0.6em; color: #7f8c8d; margin-top: 10px; }
+
+        /* Toast de logros (estilo crema/dorado) */
+        #achievement-toast {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-150px);
+            background: #FDFBF7;
+            border-top: 5px solid #E5A54A;
+            color: #2c3e50;
+            padding: 14px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 300;
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.4s ease;
+            min-width: 280px;
+            max-width: 380px;
+        }
+        #achievement-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        #achievement-toast.hide {
+            transform: translateX(-50%) translateY(-150px);
+            opacity: 0;
+        }
+        .toast-icon {
+            font-size: 2.5em;
+            flex-shrink: 0;
+        }
+        .toast-content {
+            flex-grow: 1;
+        }
+        .toast-title {
+            font-size: 0.75em;
+            font-weight: 600;
+            color: #C0392B;
+            margin-bottom: 2px;
+        }
+        .toast-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1em;
+            font-weight: 800;
+            color: #2c3e50;
+        }
     </style>
 </head>
 <body>
@@ -166,6 +215,13 @@
                 <button class="action-btn" data-action="open-jobs">Buscar trabajo</button>
                 <button class="action-btn" data-action="open-housing">Vivienda</button>
             </div>
+            <div class="action-row">
+                <button class="action-btn" data-action="open-vida">❤️ Vida</button>
+                <button class="action-btn" data-action="open-logros">🏆 Logros</button>
+            </div>
+            <div class="action-row">
+                <button class="action-btn" data-action="open-summary">📊 Resumen del año</button>
+            </div>
             <button class="reset-btn" data-action="open-manager">Gestión de Partida (Guardar / Cargar)</button>
             <button class="reset-btn" data-action="confirm-reset">Reiniciar partida</button>
             <div class="footer-copyright">&copy; 2026 AlberoLevels.</div>
@@ -177,6 +233,14 @@
                 <div class="modal-message" id="modal-msg-text">Mensaje aquí</div>
                 <div id="modal-dynamic-content"></div>
                 <div class="modal-buttons" id="modal-buttons-container"></div>
+            </div>
+        </div>
+
+        <div id="achievement-toast">
+            <div class="toast-icon" id="toast-icon">🏆</div>
+            <div class="toast-content">
+                <div class="toast-title">¡Logro desbloqueado!</div>
+                <div class="toast-name" id="toast-name">Nombre del logro</div>
             </div>
         </div>
     </div>
@@ -261,6 +325,27 @@
             { msg: "Curras hasta tarde en la oficina; el ritmo de Madrid no perdona.", health: -3, happiness: -4, money: 300 },
             { msg: "Coges el AVE un fin de semana para ver a los tuyos en Sevilla.", health: 0, happiness: 12, money: -120 },
             { msg: "Te cruzas con otro sevillano por la Gran Vía y os dais un abrazo de paisanos.", health: 0, happiness: 6, money: 0 }
+        ];
+
+        const LIFE_ACTIONS = [
+            { id: 'deporte', title: "🏃 Hacer deporte", minAge: 6, cost: 0, health: 6, happiness: 3, msg: "Sales a correr por el río y te sientes renovado." },
+            { id: 'social', title: "🍻 Salir con amigos", minAge: 16, cost: 20, health: -1, happiness: 8, msg: "Tarde de cañas y risas con la cuadrilla." },
+            { id: 'familia', title: "👨‍👩‍ Tiempo en familia", minAge: 0, cost: 0, health: 2, happiness: 6, msg: "Comida en casa de tus padres, de esas que curan." },
+            { id: 'cultura', title: "🎭 Ocio y cultura", minAge: 6, cost: 15, health: 0, happiness: 7, msg: "Teatro, museos o un concierto: alma alimentada." },
+            { id: 'descanso', title: "😴 Día de descanso", minAge: 0, cost: 0, health: 5, happiness: 2, msg: "Un día sin planes, solo sofá y siesta." }
+        ];
+
+        const ACHIEVEMENTS = [
+            { id: 'graduado', icon: "🎓", title: "Titulado universitario", desc: "Completa la Universidad o un Máster." },
+            { id: 'primer_empleo', icon: "💼", title: "Primer empleo", desc: "Consigue tu primer trabajo." },
+            { id: 'techo_propio', icon: "🏠", title: "Techo propio", desc: "Compra una vivienda en propiedad." },
+            { id: 'amigo_fiel', icon: "🐾", title: "Amigo fiel", desc: "Adopta una mascota." },
+            { id: 'corazon_equipo', icon: "⚽", title: "Corazón de un equipo", desc: "Elige tu equipo de fútbol." },
+            { id: 'emigrante', icon: "🌆", title: "Emigrante", desc: "Vete a vivir a Madrid por trabajo." },
+            { id: 'de_vuelta', icon: "🌇", title: "De vuelta a casa", desc: "Regresa a Sevilla tras tu etapa en Madrid." },
+            { id: 'ahorrador', icon: "💰", title: "Gran ahorrador", desc: "Acumula 50.000€." },
+            { id: 'veterano', icon: "👴", title: "Veterano de Sevilla", desc: "Llega a los 65 años." },
+            { id: 'centenario', icon: "🎂", title: "Centenario", desc: "Llega a los 100 años." }
         ];
 
         const CHOICE_EVENTS = [
@@ -418,7 +503,7 @@
                     { text: "Pagar con pronto pago (60€)", cost: 60, health: 0, happiness: -8, money: 0, resultMsg: "Abonaste la multa rápido para evitar recargos mayores." },
                     { text: "Recurrir por vía administrativa", cost: 15, successChance: 0.40,
                         success: { health: 0, happiness: 10, money: 0, resultMsg: "¡Ganaste el recurso! Te libraste de pagar la sanción gorda." },
-                        failure: { health: 0, happiness: -15, money: 120, resultMsg: "El recurso fue desestimado y el recargo aumentó considerablemente." }
+                        failure: { health: 0, happiness: -15, money: -120, resultMsg: "El recurso fue desestimado y el recargo aumentó considerablemente." }
                     }
                 ]
             },
@@ -537,7 +622,7 @@
                     { text: "Llamar a fontanero urgente (250€)", cost: 250, health: -2, happiness: -10, money: 0, resultMsg: "Reparación rápida y eficiente; problema solucionado." },
                     { text: "Intentar apañarlo provisionalmente", cost: 40, successChance: 0.50,
                         success: { health: 0, happiness: 5, money: 0, resultMsg: "¡Avería apañada con maña!" },
-                        failure: { health: -3, happiness: -15, money: 180, resultMsg: "La chapuza empeoró y tuviste que pagar el doble de urgencia." }
+                        failure: { health: -3, happiness: -15, money: -180, resultMsg: "La chapuza empeoró y tuviste que pagar el doble de urgencia." }
                     }
                 ]
             },
@@ -664,8 +749,14 @@
                 health: document.getElementById('health-val'),
                 happiness: document.getElementById('happiness-val'),
                 money: document.getElementById('money-val'),
-                fileSelector: document.getElementById('file-selector')
+                fileSelector: document.getElementById('file-selector'),
+                achievementToast: document.getElementById('achievement-toast'),
+                toastIcon: document.getElementById('toast-icon'),
+                toastName: document.getElementById('toast-name')
             },
+
+            _toastQueue: [],
+            _toastShowing: false,
 
             render() {
                 const p = gameState.player;
@@ -817,6 +908,32 @@
                         input.select();
                     }
                 }, 50);
+            },
+
+            showAchievementToast(achievement) {
+                this._toastQueue.push(achievement);
+                if (!this._toastShowing) {
+                    this._nextToast();
+                }
+            },
+
+            _nextToast() {
+                const ach = this._toastQueue.shift();
+                if (!ach) {
+                    this._toastShowing = false;
+                    return;
+                }
+                this._toastShowing = true;
+                this.elements.toastIcon.innerText = ach.icon;
+                this.elements.toastName.innerText = ach.title;
+                this.elements.achievementToast.classList.remove('hide');
+                this.elements.achievementToast.classList.add('show');
+
+                setTimeout(() => {
+                    this.elements.achievementToast.classList.remove('show');
+                    this.elements.achievementToast.classList.add('hide');
+                    setTimeout(() => this._nextToast(), 450);
+                }, 4000);
             }
         };
 
@@ -838,6 +955,35 @@
                 }
 
                 this.bindFileInput();
+            },
+
+            trackMoney(p, label, amount) {
+                if (!p.yearTracker) p.yearTracker = { ingresos: 0, gastos: 0, items: [] };
+                if (amount > 0) { p.yearTracker.ingresos += amount; }
+                else if (amount < 0) { p.yearTracker.gastos += (-amount); }
+                if (amount !== 0) { p.yearTracker.items.push({ label: label, amount: amount }); }
+            },
+
+            checkAchievements(p) {
+                const unlock = (id) => {
+                    if (p.achievements.includes(id)) return;
+                    const ach = ACHIEVEMENTS.find(a => a.id === id);
+                    if (!ach) return;
+                    p.achievements.push(id);
+                    p.happiness = Utils.clamp(p.happiness + 5, 0, 100);
+                    p.logs.push(`🏆 Logro desbloqueado: ${ach.icon} ${ach.title}. (+5% felicidad)`);
+                    UI.showAchievementToast(ach);
+                };
+                if (p.completedStudies.includes('universidad') || p.completedStudies.includes('master')) unlock('graduado');
+                if (p.job !== 'En paro') unlock('primer_empleo');
+                if (p.housing && p.housing.type === 'owned') unlock('techo_propio');
+                if (p.pet) unlock('amigo_fiel');
+                if (p.favoriteTeam) unlock('corazon_equipo');
+                if (p.everLivedMadrid) unlock('emigrante');
+                if (p.everLivedMadrid && p.residenceCity === 'Sevilla' && p.madridYearsLeft === 0) unlock('de_vuelta');
+                if (p.money >= 50000) unlock('ahorrador');
+                if (p.age >= 65) unlock('veterano');
+                if (p.age >= 100) unlock('centenario');
             },
 
             normalizeState(raw) {
@@ -879,6 +1025,11 @@
                     madridYearsLeft: raw.madridYearsLeft || 0,
                     sevillaHouseStored: raw.sevillaHouseStored || null,
                     housing: raw.housing || Utils.getDefaultHousing(),
+                    yearTracker: raw.yearTracker || { ingresos: 0, gastos: 0, items: [] },
+                    lastYearSummary: raw.lastYearSummary || null,
+                    achievements: Array.isArray(raw.achievements) ? raw.achievements : [],
+                    everLivedMadrid: !!raw.everLivedMadrid,
+                    lifeActionsUsed: (raw.lifeActionsUsed && typeof raw.lifeActionsUsed === 'object') ? raw.lifeActionsUsed : {},
                     pendingStudyAge: raw.pendingStudyAge !== undefined ? raw.pendingStudyAge : null,
                     isDead: !!raw.isDead,
                     logs: Array.isArray(raw.logs) ? raw.logs.map(l => (typeof l === 'string' ? l : (l.msg || JSON.stringify(l)))) : []
@@ -921,6 +1072,11 @@
                     madridYearsLeft: 0,
                     sevillaHouseStored: null,
                     housing: Utils.getDefaultHousing(),
+                    yearTracker: { ingresos: 0, gastos: 0, items: [] },
+                    lastYearSummary: null,
+                    achievements: [],
+                    everLivedMadrid: false,
+                    lifeActionsUsed: {},
                     pendingStudyAge: null,
                     isDead: false,
                     logs: [`Has nacido en ${hospital}. ¡Recién llegado y listo para dar guerra!`]
@@ -958,6 +1114,19 @@
                     return;
                 }
 
+                if (p.yearTracker && (p.yearTracker.ingresos > 0 || p.yearTracker.gastos > 0)) {
+                    const balance = p.yearTracker.ingresos - p.yearTracker.gastos;
+                    p.lastYearSummary = {
+                        year: p.age,
+                        ingresos: p.yearTracker.ingresos,
+                        gastos: p.yearTracker.gastos,
+                        balance: balance,
+                        items: p.yearTracker.items
+                    };
+                    p.logs.push(`📊 Balance del año ${p.age}: ${balance >= 0 ? '+' : ''}${balance}€ (ingresos ${p.yearTracker.ingresos}€ / gastos ${p.yearTracker.gastos}€).`);
+                }
+                p.yearTracker = { ingresos: 0, gastos: 0, items: [] };
+
                 p.age++;
                 p.logs.push(`Has cumplido ${p.age} años.`);
 
@@ -978,6 +1147,7 @@
                     const tax = Utils.calculateTax(gross);
                     const net = gross - tax;
                     p.money += net;
+                    this.trackMoney(p, 'Sueldo neto', net);
                     p.logs.push(`💼 Has cobrado tu sueldo anual: ${gross}€ brutos - ${tax}€ de IRPF = ${net}€ netos.${p.residenceCity === 'Madrid' ? ' (incluye el plus de Madrid)' : ''} ¡Dinero ingresado!`);
                 }
 
@@ -986,6 +1156,7 @@
                     if (p.housing.type === 'rent') {
                         if (p.money >= p.housing.annualCost) {
                             p.money -= p.housing.annualCost;
+                            this.trackMoney(p, `Alquiler (${p.housing.zone})`, -p.housing.annualCost);
                             p.logs.push(`🏠 Pagas tu alquiler anual de ${p.housing.annualCost}€ (${p.housing.zone}).`);
                         } else {
                             if (p.residenceCity === 'Madrid') {
@@ -1011,9 +1182,14 @@
                 if (p.age >= CONFIG.MIN_WORKING_AGE && p.housing && p.housing.id !== 'parents') {
                     if (p.money >= CONFIG.ANNUAL_LIVING_COST) {
                         p.money -= CONFIG.ANNUAL_LIVING_COST;
+                        this.trackMoney(p, 'Comida y suministros', -CONFIG.ANNUAL_LIVING_COST);
                         p.logs.push(`🛒 Gastos anuales de comida y suministros (-${CONFIG.ANNUAL_LIVING_COST}€).`);
                     } else {
-                        if (p.money > 0) p.money = 0;
+                        const lost = p.money > 0 ? p.money : 0;
+                        if (lost > 0) {
+                            p.money = 0;
+                            this.trackMoney(p, 'Apuros económicos', -lost);
+                        }
                         p.health = Utils.clamp(p.health - 5, 0, 100);
                         p.happiness = Utils.clamp(p.happiness - 15, 0, 100);
                         p.logs.push(`🛒 Apuros económicos: no llegas a fin de año para los gastos básicos (${CONFIG.ANNUAL_LIVING_COST}€). ¡Estrés y salud resentida!`);
@@ -1044,7 +1220,9 @@
                     p.happiness = Utils.clamp(p.happiness + 5, 0, 100);
 
                     if (p.age >= CONFIG.MIN_WORKING_AGE) {
+                        const before = p.money;
                         p.money = Utils.clampMoney(p.money - CONFIG.PET_MAINTENANCE_COST);
+                        this.trackMoney(p, `Mascota (${p.pet.name})`, p.money - before);
                         p.logs.push(`🐾 Mantenimiento anual de tu ${p.pet.type.toLowerCase()} ${p.pet.name} (-${CONFIG.PET_MAINTENANCE_COST}€, +5% felicidad).`);
                     } else {
                         p.logs.push(`🐾 Tu ${p.pet.type.toLowerCase()} ${p.pet.name} te da mucho cariño (+5% felicidad, gastos asumidos por tus padres).`);
@@ -1064,8 +1242,10 @@
                     const mv = MADRID_EVENTS[Math.floor(Math.random() * MADRID_EVENTS.length)];
                     p.health = Utils.clamp(p.health + mv.health, 0, 100);
                     p.happiness = Utils.clamp(p.happiness + mv.happiness, 0, 100);
+                    const beforeMv = p.money;
                     if (mv.money < 0) { p.money = Utils.clampMoney(p.money + mv.money); }
                     else { p.money += mv.money; }
+                    this.trackMoney(p, 'Vida en Madrid', p.money - beforeMv);
                     p.logs.push(`🌆 ${mv.msg}`);
                 }
 
@@ -1116,11 +1296,13 @@
                         p.health = Utils.clamp(p.health + ev.health, 0, 100);
                         p.happiness = Utils.clamp(p.happiness + ev.happiness, 0, 100);
                         
+                        const beforeEv = p.money;
                         if (ev.money < 0) {
                             p.money = Utils.clampMoney(p.money + ev.money);
                         } else {
                             p.money += ev.money;
                         }
+                        this.trackMoney(p, 'Evento', p.money - beforeEv);
 
                         let msgText = ev.msg;
                         if (p.pet && msgText.includes("{petName}")) {
@@ -1138,6 +1320,7 @@
                     if (deathInfo.dead) {
                         p.isDead = true;
                         p.logs.push(`💀 Has fallecido a los ${p.age} años por: ${deathInfo.cause}.`);
+                        this.checkAchievements(p);
                         Storage.save(p);
                         UI.render();
                         UI.showDeathModal(deathInfo.cause);
@@ -1150,6 +1333,7 @@
                     if (mandatoryStudy && !p.completedStudies.includes(mandatoryStudy.id)) {
                         p.pendingStudyAge = p.age;
                         p.logs.push(`¡Has cumplido ${p.age} años! Debes elegir tus nuevos estudios obligatoriamente.`);
+                        this.checkAchievements(p);
                         Storage.save(p);
                         UI.render();
                         this.openStudyModal();
@@ -1157,6 +1341,7 @@
                     }
                 }
 
+                this.checkAchievements(p);
                 Storage.save(p);
                 UI.render();
             },
@@ -1193,6 +1378,7 @@
                         p.housing = { id: 'madrid', title: 'Piso alquilado en Madrid', zone: 'Madrid', type: 'rent', annualCost: 9000, yearsLivingHere: 0 };
                         p.residenceCity = 'Madrid';
                         p.madridYearsLeft = 5;
+                        p.everLivedMadrid = true;
                         logResultMsg += ' Estarás fuera 5 años.';
                     }
 
@@ -1218,13 +1404,16 @@
                         p.lastChoices[eventObj.id] = p.age;
                     }
 
+                    const beforeDec = p.money;
                     p.money -= opt.cost;
                     p.health = Utils.clamp(p.health + finalHealth, 0, 100);
                     p.happiness = Utils.clamp(p.happiness + finalHappiness, 0, 100);
                     p.money += finalMoney;
                     p.money = Utils.clampMoney(p.money);
+                    this.trackMoney(p, 'Decisión', p.money - beforeDec);
 
                     p.logs.push(`🤔 Decisión: ${logResultMsg}`);
+                    this.checkAchievements(p);
                     Storage.save(p);
                     UI.render();
                     UI.closeModal();
@@ -1233,6 +1422,7 @@
                     if (deathInfo.dead) {
                         p.isDead = true;
                         p.logs.push(`💀 Has fallecido a los ${p.age} años por: ${deathInfo.cause}.`);
+                        this.checkAchievements(p);
                         Storage.save(p);
                         UI.render();
                         UI.showDeathModal(deathInfo.cause);
@@ -1248,6 +1438,107 @@
                 } else {
                     processOptionResult();
                 }
+            },
+
+            openSummaryModal() {
+                const p = gameState.player;
+                if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
+
+                const s = p.lastYearSummary;
+                UI.elements.modalTitle.innerText = "📊 Resumen económico";
+
+                if (!s) {
+                    UI.elements.modalMsg.innerText = "Aún no hay ningún año cerrado que resumir.\nCumple al menos un año para ver tu balance.";
+                    UI.elements.modalDynamic.innerHTML = '';
+                } else {
+                    UI.elements.modalMsg.innerText = `Balance del año ${s.year}: ${s.balance >= 0 ? '+' : ''}${s.balance}€`;
+                    let html = `<div class="modal-scrollable-content">`;
+                    html += `<div class="log-entry">💶 Ingresos totales: +${s.ingresos}€</div>`;
+                    html += `<div class="log-entry">💸 Gastos totales: -${s.gastos}€</div>`;
+                    if (s.items.length === 0) {
+                        html += `<div class="log-entry">Sin movimientos registrados este año.</div>`;
+                    } else {
+                        s.items.forEach(it => {
+                            html += `<div class="log-entry">${it.amount >= 0 ? '+' : ''}${it.amount}€ · ${it.label}</div>`;
+                        });
+                    }
+                    html += `</div>`;
+                    UI.elements.modalDynamic.innerHTML = html;
+                }
+
+                UI.elements.modalBtns.innerHTML = `<button class="modal-btn modal-btn-cancel" data-action="close-modal">Cerrar</button>`;
+                UI.openModal();
+            },
+
+            openVidaModal() {
+                const p = gameState.player;
+                if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
+                UI.elements.modalTitle.innerText = "❤️ Vida y bienestar";
+                UI.elements.modalMsg.innerText = "Cuida tu cuerpo, tu mente y tu gente. Cada acción, una vez al año.";
+                let listHTML = `<div class="modal-scrollable-content">`;
+                LIFE_ACTIONS.forEach((act) => {
+                    const usedThisYear = p.lifeActionsUsed[act.id] === p.age;
+                    const cantAfford = p.money < act.cost;
+                    const tooYoung = p.age < act.minAge;
+                    const disabled = usedThisYear || cantAfford || tooYoung;
+                    let status = act.cost > 0 ? `${act.cost}€` : 'Gratis';
+                    if (tooYoung) status = `🔒 Mínimo ${act.minAge} años`;
+                    else if (usedThisYear) status = '✅ Hecho este año';
+                    else if (cantAfford) status = '💰 Sin fondos';
+                    listHTML += `
+                        <button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;"
+                                ${disabled ? 'disabled' : ''}
+                                data-action="do-life"
+                                data-life-id="${act.id}">
+                            ${act.title}
+                            <div style="font-size:0.75em; opacity:0.85; font-weight:normal;">${status} · ${act.health >= 0 ? '+' : ''}${act.health}❤️ ${act.happiness >= 0 ? '+' : ''}${act.happiness}😊</div>
+                        </button>`;
+                });
+                listHTML += `</div>`;
+                UI.elements.modalDynamic.innerHTML = listHTML;
+                UI.elements.modalBtns.innerHTML = `<button class="modal-btn modal-btn-cancel" data-action="close-modal">Cerrar</button>`;
+                UI.openModal();
+            },
+
+            doLife(id) {
+                const p = gameState.player;
+                const act = LIFE_ACTIONS.find(a => a.id === id);
+                if (!act) return;
+                if (p.age < act.minAge) return;
+                if (p.lifeActionsUsed[id] === p.age) return;
+                if (p.money < act.cost) return;
+                const before = p.money;
+                p.money -= act.cost;
+                p.money = Utils.clampMoney(p.money);
+                this.trackMoney(p, `Vida: ${act.title}`, p.money - before);
+                p.health = Utils.clamp(p.health + act.health, 0, 100);
+                p.happiness = Utils.clamp(p.happiness + act.happiness, 0, 100);
+                p.lifeActionsUsed[id] = p.age;
+                p.logs.push(`❤️ ${act.msg}`);
+                this.checkAchievements(p);
+                Storage.save(p);
+                UI.render();
+                UI.closeModal();
+            },
+
+            openLogrosModal() {
+                const p = gameState.player;
+                if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
+                UI.elements.modalTitle.innerText = "🏆 Logros";
+                UI.elements.modalMsg.innerText = `Has desbloqueado ${p.achievements.length} de ${ACHIEVEMENTS.length} logros.`;
+                let listHTML = `<div class="modal-scrollable-content">`;
+                ACHIEVEMENTS.forEach((a) => {
+                    const got = p.achievements.includes(a.id);
+                    listHTML += `
+                        <div class="log-entry" style="${got ? '' : 'opacity:0.5;'}">
+                            ${got ? a.icon : '🔒'} <strong>${a.title}</strong><br>
+                            <span style="font-size:0.85em;">${a.desc}</span>
+                        </div>`;
+                });
+                listHTML += `</div>`;
+                UI.elements.modalDynamic.innerHTML = listHTML;
+                UI.elements.modalBtns.innerHTML = `<button class="modal-btn modal-btn-cancel" data-action="close-modal">Cerrar</button>`;
+                UI.openModal();
             },
 
             openStudyModal() {
@@ -1318,6 +1609,7 @@
                 if (study.cost > 0 && p.money < study.cost) return;
 
                 p.money -= study.cost;
+                this.trackMoney(p, `Matrícula: ${study.title}`, -study.cost);
                 p.completedStudies.push(study.id);
                 p.studies = study.title;
                 p.happiness = Utils.clamp(p.happiness + 15, 0, 100);
@@ -1327,6 +1619,7 @@
 
                 p.logs.push(`🎓 ¡Has completado con éxito: ${study.title}! ${study.cost > 0 ? `(-${study.cost}€)` : ''}`);
                 
+                this.checkAchievements(p);
                 Storage.save(p);
                 UI.render();
                 UI.closeModal();
@@ -1450,6 +1743,7 @@
 
                 if (housing.type === 'owned') {
                     p.money -= housing.buyPrice;
+                    this.trackMoney(p, `Compra de vivienda (${housing.zone})`, -housing.buyPrice);
                     p.logs.push(`🎉 ¡Has comprado ${housing.title} en ${housing.zone} por ${housing.buyPrice}€! Ya es totalmente tuya.`);
                 } else {
                     p.logs.push(`🔑 Te has mudado a ${housing.title} en ${housing.zone}. Pagarás ${housing.annualCost}€/año de alquiler.`);
@@ -1466,6 +1760,7 @@
 
                 p.happiness = Utils.clamp(p.happiness + housing.happinessBonus, 0, 100);
 
+                this.checkAchievements(p);
                 Storage.save(p);
                 UI.render();
                 UI.closeModal();
@@ -1502,6 +1797,7 @@
                     p.salary = job.salary;
                     p.happiness = Utils.clamp(p.happiness + 10, 0, 100);
                     p.logs.push(`💼 ¡Entrevista superada con éxito! Has conseguido el puesto de ${job.title} (${job.salary}€/año).`);
+                    this.checkAchievements(p);
                     Storage.save(p);
                     UI.render();
                     UI.showAlert("¡Contratado!", `¡Enhorabuena! El comité de selección ha valorado positivamente tu perfil y te han dado el puesto de ${job.title}.`);
@@ -1509,6 +1805,7 @@
                     p.happiness = Utils.clamp(p.happiness - 10, 0, 100);
                     p.activeJobOffers = p.activeJobOffers.filter(j => j.id !== jobId);
                     p.logs.push(`❌ Has hecho la entrevista para ${job.title}, pero la empresa ha optado por otro candidato. ¡Rechazado! La oferta ya no está disponible este año.`);
+                    this.checkAchievements(p);
                     Storage.save(p);
                     UI.render();
                     UI.showAlert("Entrevista no superada", `Los nervios o la alta competencia jugaron en tu contra. Han descartado tu candidatura para ${job.title}. Esa oferta se ha agotado: vuelve a intentarlo el año que viene.`);
@@ -1606,6 +1903,18 @@
                     break;
                 case 'open-housing':
                     Engine.openHousingModal();
+                    break;
+                case 'open-summary':
+                    Engine.openSummaryModal();
+                    break;
+                case 'open-vida':
+                    Engine.openVidaModal();
+                    break;
+                case 'do-life':
+                    Engine.doLife(actionBtn.dataset.lifeId);
+                    break;
+                case 'open-logros':
+                    Engine.openLogrosModal();
                     break;
                 case 'select-housing':
                     Engine.selectHousing(parseInt(actionBtn.dataset.housingIdx, 10));
