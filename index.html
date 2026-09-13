@@ -1214,6 +1214,9 @@
                 p.age++;
                 p.logs.push(`Has cumplido ${p.age} años.`);
 
+                // ✨ NUEVO: Regeneración pasiva de salud (+2 por año)
+                p.health = Utils.clamp(p.health + 2, 0, 100);
+
                 if (p.age >= CONFIG.MIN_WORKING_AGE) {
                     p.activeJobOffers = Utils.generateJobOffers(p.age, p.completedStudies);
                     if (p.age === CONFIG.MIN_WORKING_AGE) {
