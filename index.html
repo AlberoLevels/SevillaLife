@@ -139,6 +139,45 @@
         .footer-copyright { text-align: center; font-size: 0.55em; color: #7f8c8d; margin-top: 1px; }
         .start-copyright { text-align: center; font-size: 0.6em; color: #7f8c8d; margin-top: 10px; }
 
+        /* ✨ TUTORIAL v2: tarjeta de consejo persistente dentro de los modales */
+        .tip-card {
+            background: #fdf8f0;
+            border: 1px solid #f3e5d0;
+            border-left: 4px solid #E5A54A;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 0.78em;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+
+        /* ✨ TUTORIAL v2: tour guiado con foco (spotlight) */
+        #tutorial-tour {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 400; display: none;
+        }
+        #tutorial-tour.is-active { display: block; }
+        #tour-spotlight {
+            position: absolute;
+            border-radius: 10px;
+            border: 2px solid #E5A54A;
+            background: rgba(228, 165, 74, 0.15);
+            box-shadow: 0 0 0 9999px rgba(44, 62, 80, 0.72);
+            transition: left 0.3s ease, top 0.3s ease, width 0.3s ease, height 0.3s ease;
+            pointer-events: none;
+        }
+        #tour-bubble {
+            position: absolute;
+            background: #FDFBF7;
+            border-top: 5px solid #E5A54A;
+            border-radius: 12px;
+            padding: 14px;
+            width: 260px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        }
+        #tour-text { font-size: 0.85em; color: #2c3e50; line-height: 1.4; margin-bottom: 10px; }
+        .tour-buttons { display: flex; gap: 6px; }
+
         /* Toast de logros (crema/dorado) */
         #achievement-toast {
             position: absolute;
@@ -278,7 +317,7 @@
         <div id="achievement-toast">
             <div class="toast-icon" id="toast-icon">🏆</div>
             <div class="toast-content">
-                <div class="toast-title">¡Logro desbloqueado!</div>
+                <div class="toast-title" id="toast-title">¡Logro desbloqueado!</div>
                 <div class="toast-name" id="toast-name">Nombre del logro</div>
             </div>
         </div>
@@ -288,6 +327,18 @@
             <div class="toast-content">
                 <div class="ttoast-title" id="team-toast-title">¡Equipo elegido!</div>
                 <div class="ttoast-msg" id="team-toast-msg"></div>
+            </div>
+        </div>
+
+        <!-- ✨ TUTORIAL v2: overlay del tour guiado -->
+        <div id="tutorial-tour">
+            <div id="tour-spotlight"></div>
+            <div id="tour-bubble">
+                <div id="tour-text"></div>
+                <div class="tour-buttons">
+                    <button class="modal-btn modal-btn-confirm" data-action="tour-next">Siguiente</button>
+                    <button class="modal-btn modal-btn-cancel" data-action="tour-skip">Saltar tour</button>
+                </div>
             </div>
         </div>
     </div>
@@ -304,7 +355,8 @@
             PET_DEATH_MAX_AGE: 16,
             ANNUAL_LIVING_COST: 7000,
             OVERDRAFT_LIMIT: -500,
-            MAX_LOGS: 100
+            MAX_LOGS: 100,
+            MAX_LIFE_ACTIONS_PER_YEAR: 3
         });
 
         const HOSPITALS = [
@@ -374,12 +426,23 @@
             { msg: "Te cruzas con otro sevillano por la Gran Vía y os dais un abrazo de paisanos.", health: 0, happiness: 6, money: 0 }
         ];
 
+        // ✨ VIDA v2: acciones por tramos de edad + sabor sevillano + tercera edad
         const LIFE_ACTIONS = [
-            { id: 'deporte', title: "🏃 Hacer deporte", minAge: 6, cost: 0, health: 6, happiness: 3, msg: "Sales a correr por el río y te sientes renovado." },
-            { id: 'social', title: "🍻 Salir con amigos", minAge: 16, cost: 20, health: -1, happiness: 8, msg: "Tarde de cañas y risas con la cuadrilla." },
-            { id: 'familia', title: "👨‍👩‍ Tiempo en familia", minAge: 0, cost: 0, health: 2, happiness: 6, msg: "Comida en casa de tus padres, de esas que curan." },
-            { id: 'cultura', title: "🎭 Ocio y cultura", minAge: 6, cost: 15, health: 0, happiness: 7, msg: "Teatro, museos o un concierto: alma alimentada." },
-            { id: 'descanso', title: "😴 Día de descanso", minAge: 0, cost: 0, health: 5, happiness: 2, msg: "Un día sin planes, solo sofá y siesta." }
+            { id: 'siesta_peque', title: "😴 Siesta de peque", minAge: 0, maxAge: 5, cost: 0, health: 5, happiness: 3, msg: "Siesta buena de guardería: te despiertas nuevo." },
+            { id: 'juegos_parque', title: "🛝 Juegos en el parque", minAge: 0, maxAge: 11, cost: 0, health: 4, happiness: 6, msg: "Columpios, tobogán y perseguir palomas en el parque de María Luisa." },
+            { id: 'familia', title: "👪 Tiempo en familia", minAge: 0, maxAge: 100, cost: 0, health: 2, happiness: 6, msg: "Tiempo de calidad con los tuyos, de ese que cura." },
+            { id: 'semana_santa', title: "🕯️ Semana Santa", minAge: 0, maxAge: 100, cost: 0, health: 0, happiness: 12, msg: "Madrugá entre saetas e incienso: Sevilla en estado puro." },
+            { id: 'descanso', title: "😴 Día de descanso", minAge: 6, maxAge: 100, cost: 0, health: 5, happiness: 2, msg: "Un día sin planes: sofá, siesta y cero prisas." },
+            { id: 'bici_barrio', title: "🚲 Bici por el barrio", minAge: 6, maxAge: 17, cost: 0, health: 5, happiness: 7, msg: "Carreras con los colegas en la plaza hasta que se encienden las farolas." },
+            { id: 'deporte', title: "🏃 Hacer deporte", minAge: 6, maxAge: 100, cost: 0, health: 6, happiness: 3, msg: "Sales a correr por el río y te sientes renovado." },
+            { id: 'cultura', title: "🎭 Ocio y cultura", minAge: 6, maxAge: 100, cost: 15, health: 0, happiness: 7, msg: "Teatro, museos o un concierto: alma alimentada." },
+            { id: 'paseo_guadalquivir', title: "🚶 Paseo por el Guadalquivir", minAge: 6, maxAge: 100, cost: 0, health: 4, happiness: 6, msg: "De la Torre del Oro al puente de Triana: río y aire fresco." },
+            { id: 'social', title: "🍻 Salir con amigos", minAge: 18, maxAge: 100, cost: 20, health: -1, happiness: 8, msg: "Tarde de cañas y risas con la cuadrilla." },
+            { id: 'terraza_fresquita', title: "🍺 Terraza y fresquita", minAge: 18, maxAge: 90, cost: 12, health: -1, happiness: 10, msg: "Cruzcampo fría a la sombra: terapia pura." },
+            { id: 'feria_abril', title: "💃 Feria de Abril", minAge: 18, maxAge: 80, cost: 60, health: -2, happiness: 18, msg: "Noche de rebujito y sevillanas: el cuerpo lo nota, el alma no." },
+            { id: 'mercado_triana', title: "🍅 Mercado de Triana", minAge: 18, maxAge: 100, cost: 25, health: 3, happiness: 5, msg: "Producto fresco y chismes de las placeras: comes mejor toda la semana." },
+            { id: 'sevillanas_mayores', title: "💃 Clase de sevillanas en el centro de mayores", minAge: 60, maxAge: 100, cost: 10, health: 4, happiness: 9, msg: "Pasos, palmas y risas: el cuerpo se mantiene joven." },
+            { id: 'domino_bar', title: "🁣 Dominó en el bar", minAge: 65, maxAge: 100, cost: 5, health: 1, happiness: 8, msg: "Partida con los de siempre: el que pierde paga la ronda." }
         ];
 
         const ACHIEVEMENTS = [
@@ -393,6 +456,15 @@
             { id: 'ahorrador', icon: "💰", title: "Gran ahorrador", desc: "Acumula 50.000€." },
             { id: 'veterano', icon: "👴", title: "Veterano de Sevilla", desc: "Llega a los 65 años." },
             { id: 'centenario', icon: "🎂", title: "Centenario", desc: "Llega a los 100 años." }
+        ];
+
+        // ✨ TUTORIAL v2: pasos del tour guiado con foco
+        const TOUR_STEPS = [
+            { selector: '#actions-panel [data-action="next-year"]', text: "Aquí late tu vida: cada clic, un año con su sueldo, sus gastos y sus sorpresas." },
+            { selector: '#actions-panel [data-action="open-studies"]', text: "Tu formación abre puertas. A los 6, 12 y 16 es obligatorio: el juego te avisará." },
+            { selector: '#actions-panel [data-action="open-jobs"]', text: "Desde los 18, la bolsa de empleo. Cada entrevista es una tirada: tu formación es el boleto." },
+            { selector: '#actions-panel [data-action="open-vida"]', text: "El corazón del juego: máximo 3 acciones al año para cuidar cuerpo y alma." },
+            { selector: '#actions-panel [data-action="open-manager"]', text: "Exporta tu historia a archivo de vez en cuando: tu seguro de vida digital." }
         ];
 
         const CHOICE_EVENTS = [
@@ -446,12 +518,12 @@
                 ]
             },
             {
-                id: 'move_madrid', unique: true, minAge: 22, maxAge: 55, requiresJob: true,
+                id: 'move_madrid', unique: true, minAge: 22, maxAge: 55, requiresJob: true, requiresMinSalary: 20000,
                 title: "✈️ Oferta de empleo fuera",
-                msg: "Te ha surgido la oportunidad de cambiar de aires e irte a trabajar a Madrid con un sueldo superior.",
+                msg: "Te ha surgido la oportunidad de cambiar de aires e irte a trabajar a Madrid con un sueldo un 20% superior.\n\n⚠️ Antes de aceptar, ten claro lo que supone: estarás 5 años fuera de Sevilla. Pagarás alquiler y vida madrileña (más caros que en tu tierra) y cada año notarás la morriña (-3% felicidad). Si tu casa es en propiedad, la conservarás hasta tu vuelta; si no puedes pagar el alquiler, volverás a Sevilla antes de tiempo. Pasados los 5 años, regresarás a casa (+10% felicidad).",
                 options: [
                     { 
-                        text: "Aceptar el reto y mudarte", cost: 400, successChance: 0.75,
+                        text: "Aceptar el reto y mudarte (400€ de mudanza)", cost: 400, successChance: 0.75,
                         success: { health: -5, happiness: 5, money: 0, movesToMadrid: true, resultMsg: "¡Triunfas en Madrid! Te instalas en la capital con un contrato superior. Tu corazón sigue en Sevilla, pero tu nómina ya no." },
                         failure: { health: -10, happiness: -22, money: 0, resultMsg: "La morriña de Sevilla y el alto coste de vida te machacaron; tuviste que volver." }
                     },
@@ -743,6 +815,11 @@
             clampMoney(val) {
                 return Math.max(CONFIG.OVERDRAFT_LIMIT, val);
             },
+            // ✨ Limpieza fina: formato de dinero sin signos raros en cero (+0€ / -0€ → 0€)
+            fmtMoney(val) {
+                if (val === 0) return '0€';
+                return val > 0 ? `+${val}€` : `${val}€`;
+            },
             petEmoji(type) {
                 if (type === 'Perro') return '🐶';
                 if (type === 'Gato') return '🐱';
@@ -799,11 +876,13 @@
                 fileSelector: document.getElementById('file-selector'),
                 achievementToast: document.getElementById('achievement-toast'),
                 toastIcon: document.getElementById('toast-icon'),
+                toastTitle: document.getElementById('toast-title'),
                 toastName: document.getElementById('toast-name')
             },
 
             _toastQueue: [],
             _toastShowing: false,
+            _currentChoiceEvent: null,
 
             render() {
                 const p = gameState.player;
@@ -857,6 +936,15 @@
 
             closeModal() {
                 this.elements.modal.classList.remove('is-active');
+                // ✨ TUTORIAL v2: al cerrar el modal, el consejo visto se marca como leído
+                if (Engine._pendingTip) {
+                    const p = gameState.player;
+                    if (p && p.tutorial && p.tutorial.mode !== 'off' && !p.tutorial.seen[Engine._pendingTip]) {
+                        p.tutorial.seen[Engine._pendingTip] = true;
+                        Storage.save(p);
+                    }
+                    Engine._pendingTip = null;
+                }
             },
 
             showAlert(title, message, callback) {
@@ -866,6 +954,18 @@
                 this.elements.modalBtns.innerHTML = `<button class="modal-btn modal-btn-confirm" data-action="close-alert-modal">Aceptar</button>`;
                 
                 this._modalCallback = callback;
+                this.openModal();
+            },
+
+            // ✨ TUTORIAL: modal de bienvenida al crear partida nueva
+            showWelcomeModal() {
+                this.elements.modalTitle.innerText = "Bienvenido a Sevillalife";
+                this.elements.modalMsg.innerText = "· Tu vida avanza año a año con \"Cumplir año\".\n· Lo que decidas marca tu historia: algunas decisiones llevan riesgo y no hay vuelta atrás.\n· Cuida cuerpo y alma: si la salud llega a 0, mueres; y a partir de los 70 llama la vejez.";
+                this.elements.modalDynamic.innerHTML = '';
+                this.elements.modalBtns.innerHTML = `
+                    <button class="modal-btn modal-btn-confirm" data-action="tutorial-accept">Jugar con consejos</button>
+                    <button class="modal-btn modal-btn-cancel" data-action="tutorial-skip">Soy veterano: saltar consejos</button>
+                `;
                 this.openModal();
             },
 
@@ -938,6 +1038,7 @@
 
             showInterviewModal(job) {
                 const p = gameState.player;
+                Engine._pendingTip = null; // ✨ FIX: este modal no muestra tarjeta; no marques consejos ajenos como leídos
                 this.elements.modalTitle.innerText = "👔 Entrevista de Trabajo";
                 this.elements.modalMsg.innerText = `Has concertado una entrevista para el puesto de:\n"${job.title}" (${job.salary}€/año).\n\nEl departamento de recursos humanos va a evaluar tu perfil y experiencia. ¿Te preparas para la entrevista?`;
                 this.elements.modalDynamic.innerHTML = '';
@@ -971,32 +1072,51 @@
             },
 
             showAchievementToast(achievement) {
-                this._toastQueue.push(achievement);
+                this._toastQueue.push({ type: 'ach', data: achievement });
+                if (!this._toastShowing) {
+                    this._nextToast();
+                }
+            },
+
+            // ✨ FIX buzón: el toast de equipo entra en la MISMA cola que el de logros (nunca solapados)
+            showTeamToast(team) {
+                this._toastQueue.push({ type: 'team', data: team });
                 if (!this._toastShowing) {
                     this._nextToast();
                 }
             },
 
             _nextToast() {
-                const ach = this._toastQueue.shift();
-                if (!ach) {
+                const item = this._toastQueue.shift();
+                if (!item) {
                     this._toastShowing = false;
                     return;
                 }
                 this._toastShowing = true;
-                this.elements.toastIcon.innerText = ach.icon;
-                this.elements.toastName.innerText = ach.title;
-                this.elements.achievementToast.classList.remove('hide');
-                this.elements.achievementToast.classList.add('show');
+
+                let duration = 4000;
+                if (item.type === 'team') {
+                    this._renderTeamToast(item.data);
+                    duration = 4500;
+                } else {
+                    this.elements.toastIcon.innerText = item.data.icon;
+                    this.elements.toastTitle.innerText = '¡Logro desbloqueado!';
+                    this.elements.toastName.innerText = item.data.title;
+                    this.elements.achievementToast.classList.remove('hide');
+                    this.elements.achievementToast.classList.add('show');
+                }
 
                 setTimeout(() => {
                     this.elements.achievementToast.classList.remove('show');
                     this.elements.achievementToast.classList.add('hide');
+                    const teamEl = document.getElementById('team-toast');
+                    teamEl.classList.remove('show');
+                    teamEl.classList.add('hide');
                     setTimeout(() => this._nextToast(), 450);
-                }, 4000);
+                }, duration);
             },
 
-            showTeamToast(team) {
+            _renderTeamToast(team) {
                 const el = document.getElementById('team-toast');
                 const icon = document.getElementById('team-toast-icon');
                 const title = document.getElementById('team-toast-title');
@@ -1014,31 +1134,148 @@
                     msg.textContent = '¡Orgullo blanquirrojo! De Nervión para el mundo.';
                 }
                 el.classList.add('show');
-                setTimeout(() => {
-                    el.classList.remove('show');
-                    el.classList.add('hide');
-                }, 4500);
             }
         };
 
         const Engine = {
+            _pendingTip: null,
+            _tourStep: 0,
+            _tourRepositionBound: false,
+
             init() {
                 const savedData = Storage.load();
                 if (savedData) {
                     gameState.player = this.normalizeState(savedData);
                     UI.elements.startScreen.classList.add('hidden');
                     UI.render();
+                    this.resumePendingModals();
 
-                    if (gameState.player.isDead) {
-                        UI.showDeathModal("Fallecido");
-                    } else if (gameState.player.pendingStudyAge !== null) {
-                        this.openStudyModal();
+                    // ✨ TUTORIAL v2: si el tour quedó a medias en una partida recién creada, se retoma
+                    const pl = gameState.player;
+                    if (pl && pl.tutorial && pl.tutorial.mode === 'tips' && !pl.tutorial.tourDone && pl.age === 0 &&
+                        !UI.elements.modal.classList.contains('is-active')) {
+                        // ✨ FIX: espera un frame para medir con el layout asentado
+                        requestAnimationFrame(() => this.startTour());
                     }
                 } else {
                     UI.elements.startScreen.classList.remove('hidden');
                 }
 
                 this.bindFileInput();
+            },
+
+            // ✨ FIX: reabre modales que quedaron pendientes en el guardado (muerte, estudio obligatorio o decisión)
+            resumePendingModals() {
+                const p = gameState.player;
+                if (!p) return;
+                if (p.isDead) {
+                    UI.showDeathModal("Fallecido");
+                    return;
+                }
+                if (p.pendingStudyAge !== null) {
+                    this.openStudyModal();
+                    return;
+                }
+                if (p.pendingChoiceId) {
+                    const ev = CHOICE_EVENTS.find(e => e.id === p.pendingChoiceId);
+                    if (ev) {
+                        UI.showChoiceModal(ev);
+                    } else {
+                        p.pendingChoiceId = null;
+                        Storage.save(p);
+                    }
+                }
+            },
+
+            // ✨ TUTORIAL v2: tarjeta de consejo persistente dentro del modal (se marca al cerrar)
+            tipCardHTML(id, text) {
+                const p = gameState.player;
+                if (!p || !p.tutorial || p.tutorial.mode === 'off' || p.tutorial.seen[id]) return '';
+                this._pendingTip = id;
+                return `<div class="tip-card">💡 ${text}</div>`;
+            },
+
+            // ✨ TUTORIAL v2: tour guiado con foco (spotlight)
+            startTour() {
+                const p = gameState.player;
+                if (!p || !p.tutorial || p.tutorial.mode === 'off' || p.tutorial.tourDone) return;
+                this._tourStep = 0;
+                this.bindTourReposition();
+                this.renderTourStep();
+            },
+
+            // ✨ FIX: recentra el foco si el layout cambia después de medir (fuentes web, load, resize)
+            bindTourReposition() {
+                if (this._tourRepositionBound) return;
+                this._tourRepositionBound = true;
+                const reposition = () => {
+                    if (document.getElementById('tutorial-tour').classList.contains('is-active')) {
+                        this.renderTourStep();
+                    }
+                };
+                window.addEventListener('resize', reposition);
+                window.addEventListener('load', reposition);
+                if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+                    document.fonts.ready.then(reposition).catch(() => {});
+                }
+            },
+
+            renderTourStep() {
+                const overlay = document.getElementById('tutorial-tour');
+                const spot = document.getElementById('tour-spotlight');
+                const bubble = document.getElementById('tour-bubble');
+                const text = document.getElementById('tour-text');
+                const step = TOUR_STEPS[this._tourStep];
+
+                if (!step) { this.endTour(); return; }
+                const target = document.querySelector(step.selector);
+                if (!target) { this.endTour(); return; }
+
+                const containerRect = document.getElementById('game-container').getBoundingClientRect();
+                const r = target.getBoundingClientRect();
+                const pad = 4;
+
+                overlay.classList.add('is-active');
+
+                spot.style.left = (r.left - containerRect.left - pad) + 'px';
+                spot.style.top = (r.top - containerRect.top - pad) + 'px';
+                spot.style.width = (r.width + pad * 2) + 'px';
+                spot.style.height = (r.height + pad * 2) + 'px';
+
+                text.innerText = step.text;
+
+                const nextBtn = bubble.querySelector('[data-action="tour-next"]');
+                if (nextBtn) nextBtn.innerText = (this._tourStep === TOUR_STEPS.length - 1) ? 'Entendido' : 'Siguiente';
+
+                // Colocación de la burbuja: debajo del foco si hay sitio, si no, encima
+                const bubbleWidth = 260;
+                let bx = r.left - containerRect.left;
+                bx = Math.max(10, Math.min(bx, containerRect.width - bubbleWidth - 10));
+                const bh = bubble.offsetHeight;
+                let by = r.bottom - containerRect.top + 12;
+                if (by + bh > containerRect.height - 10) {
+                    by = r.top - containerRect.top - bh - 12;
+                }
+                bubble.style.left = bx + 'px';
+                bubble.style.top = Math.max(10, by) + 'px';
+            },
+
+            nextTourStep() {
+                this._tourStep++;
+                if (this._tourStep >= TOUR_STEPS.length) {
+                    this.endTour();
+                } else {
+                    this.renderTourStep();
+                }
+            },
+
+            endTour() {
+                const p = gameState.player;
+                if (p && p.tutorial) {
+                    p.tutorial.tourDone = true;
+                    Storage.save(p);
+                }
+                document.getElementById('tutorial-tour').classList.remove('is-active');
             },
 
             trackMoney(p, label, amount) {
@@ -1115,6 +1352,10 @@
                     everLivedMadrid: !!raw.everLivedMadrid,
                     lifeActionsUsed: (raw.lifeActionsUsed && typeof raw.lifeActionsUsed === 'object') ? raw.lifeActionsUsed : {},
                     pendingStudyAge: raw.pendingStudyAge !== undefined ? raw.pendingStudyAge : null,
+                    pendingChoiceId: raw.pendingChoiceId || null,
+                    tutorial: (raw.tutorial && typeof raw.tutorial === 'object')
+                        ? { mode: raw.tutorial.mode === 'off' ? 'off' : 'tips', seen: (raw.tutorial.seen && typeof raw.tutorial.seen === 'object') ? raw.tutorial.seen : {}, tourDone: !!raw.tutorial.tourDone }
+                        : { mode: 'tips', seen: {}, tourDone: false },
                     isDead: !!raw.isDead,
                     logs: Array.isArray(raw.logs) ? raw.logs.map(l => (typeof l === 'string' ? l : (l.msg || JSON.stringify(l)))) : []
                 };
@@ -1162,6 +1403,8 @@
                     everLivedMadrid: false,
                     lifeActionsUsed: {},
                     pendingStudyAge: null,
+                    pendingChoiceId: null,
+                    tutorial: { mode: 'tips', seen: {}, tourDone: false },
                     isDead: false,
                     logs: [`Has nacido en ${hospital}. ¡Recién llegado y listo para dar guerra!`]
                 };
@@ -1169,6 +1412,7 @@
                 Storage.save(gameState.player);
                 UI.elements.startScreen.classList.add('hidden');
                 UI.render();
+                UI.showWelcomeModal();
             },
 
             checkMortality() {
@@ -1198,24 +1442,39 @@
                     return;
                 }
 
-                if (p.yearTracker && (p.yearTracker.ingresos > 0 || p.yearTracker.gastos > 0)) {
-                    const balance = p.yearTracker.ingresos - p.yearTracker.gastos;
-                    p.lastYearSummary = {
-                        year: p.age,
-                        ingresos: p.yearTracker.ingresos,
-                        gastos: p.yearTracker.gastos,
-                        balance: balance,
-                        items: p.yearTracker.items
-                    };
-                    p.logs.push(`📊 Balance del año ${p.age}: ${balance >= 0 ? '+' : ''}${balance}€ (ingresos ${p.yearTracker.ingresos}€ / gastos ${p.yearTracker.gastos}€).`);
+                // ✨ FIX TC-30: Refrescar SIEMPRE el resumen al cerrar año, haya o no movimientos
+                const ingresosAnuales = p.yearTracker ? p.yearTracker.ingresos : 0;
+                const gastosAnuales = p.yearTracker ? p.yearTracker.gastos : 0;
+                const itemsAnuales = p.yearTracker ? p.yearTracker.items : [];
+                const balance = ingresosAnuales - gastosAnuales;
+
+                // Guardamos el resumen SIEMPRE
+                p.lastYearSummary = {
+                    year: p.age,
+                    ingresos: ingresosAnuales,
+                    gastos: gastosAnuales,
+                    balance: balance,
+                    items: itemsAnuales
+                };
+
+                // Solo cambiamos el mensaje del log según si hubo movimientos o no
+                if (ingresosAnuales > 0 || gastosAnuales > 0) {
+                    p.logs.push(`📊 Balance del año ${p.age}: ${Utils.fmtMoney(balance)} (ingresos ${ingresosAnuales}€ / gastos ${gastosAnuales}€).`);
+                } else {
+                    p.logs.push(`📊 Balance del año ${p.age}: Sin movimientos económicos.`);
                 }
+
                 p.yearTracker = { ingresos: 0, gastos: 0, items: [] };
 
                 p.age++;
                 p.logs.push(`Has cumplido ${p.age} años.`);
 
-                // ✨ NUEVO: Regeneración pasiva de salud (+2 por año)
+                // ✨ Regeneración pasiva de salud (+2 por año)
                 p.health = Utils.clamp(p.health + 2, 0, 100);
+
+                // ✨ FIX: detectar si este año toca estudio obligatorio (evita que el modal de decisión sea pisado)
+                const esAnioEstudioObligatorio = p.age < CONFIG.MIN_WORKING_AGE &&
+                    STUDIES.some(est => est.minAge === p.age && !p.completedStudies.includes(est.id));
 
                 if (p.age >= CONFIG.MIN_WORKING_AGE) {
                     p.activeJobOffers = Utils.generateJobOffers(p.age, p.completedStudies);
@@ -1338,13 +1597,14 @@
 
                 let triggeredChoice = false;
 
-                if (p.residenceCity !== 'Madrid' && p.age >= 3 && Math.random() < 0.35) {
+                if (!esAnioEstudioObligatorio && p.residenceCity !== 'Madrid' && p.age >= 3 && Math.random() < 0.35) {
                     const availableChoices = CHOICE_EVENTS.filter(ev => {
                         if (p.age < ev.minAge || p.age > ev.maxAge) return false;
                         if (ev.petType && p.pet) return false;
                         if (ev.requiresAnyTeam && !p.favoriteTeam) return false;
                         if (ev.requiresTeam && p.favoriteTeam !== ev.requiresTeam) return false;
                         if (ev.requiresJob && p.job === "En paro") return false;
+                        if (ev.requiresMinSalary && p.salary < ev.requiresMinSalary) return false;
 
                         if (ev.unique) {
                             if (p.completedChoices.includes(ev.id)) return false;
@@ -1359,6 +1619,7 @@
                     if (availableChoices.length > 0) {
                         const choiceEv = availableChoices[Math.floor(Math.random() * availableChoices.length)];
                         triggeredChoice = true;
+                        p.pendingChoiceId = choiceEv.id; // ✨ FIX: la decisión queda persistida por si recargas
                         UI.showChoiceModal(choiceEv);
                     }
                 }
@@ -1491,6 +1752,7 @@
                     } else if (eventObj.cooldown) {
                         p.lastChoices[eventObj.id] = p.age;
                     }
+                    p.pendingChoiceId = null; // ✨ FIX: decisión resuelta, ya no queda pendiente
 
                     const beforeDec = p.money;
                     p.money -= opt.cost;
@@ -1532,22 +1794,25 @@
                 const p = gameState.player;
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
 
+                // ✨ TUTORIAL v2: consejo como tarjeta persistente
+                const card = this.tipCardHTML('tips_resumen', "Aquí ves en qué se fue cada euro del año. Sin movimientos raros ni letras pequeñas.");
+
                 const s = p.lastYearSummary;
                 UI.elements.modalTitle.innerText = "📊 Resumen económico";
 
                 if (!s) {
                     UI.elements.modalMsg.innerText = "Aún no hay ningún año cerrado que resumir.\nCumple al menos un año para ver tu balance.";
-                    UI.elements.modalDynamic.innerHTML = '';
+                    UI.elements.modalDynamic.innerHTML = card;
                 } else {
-                    UI.elements.modalMsg.innerText = `Balance del año ${s.year}: ${s.balance >= 0 ? '+' : ''}${s.balance}€`;
-                    let html = `<div class="modal-scrollable-content">`;
-                    html += `<div class="log-entry">💶 Ingresos totales: +${s.ingresos}€</div>`;
-                    html += `<div class="log-entry">💸 Gastos totales: -${s.gastos}€</div>`;
+                    UI.elements.modalMsg.innerText = `Balance del año ${s.year}: ${Utils.fmtMoney(s.balance)}`;
+                    let html = `<div class="modal-scrollable-content">` + card;
+                    html += `<div class="log-entry">💶 Ingresos totales: ${Utils.fmtMoney(s.ingresos)}</div>`;
+                    html += `<div class="log-entry">💸 Gastos totales: ${Utils.fmtMoney(-s.gastos)}</div>`;
                     if (s.items.length === 0) {
                         html += `<div class="log-entry">Sin movimientos registrados este año.</div>`;
                     } else {
                         s.items.forEach(it => {
-                            html += `<div class="log-entry">${it.amount >= 0 ? '+' : ''}${it.amount}€ · ${it.label}</div>`;
+                            html += `<div class="log-entry">${Utils.fmtMoney(it.amount)} · ${it.label}</div>`;
                         });
                     }
                     html += `</div>`;
@@ -1561,25 +1826,42 @@
             openVidaModal() {
                 const p = gameState.player;
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
-                UI.elements.modalTitle.innerText = "❤️ Vida y bienestar";
-                UI.elements.modalMsg.innerText = "Cuida tu cuerpo, tu mente y tu gente. Cada acción, una vez al año.";
+
+                // ✨ VIDA v2: contador visible de acciones usadas este año
+                const usedCount = Object.values(p.lifeActionsUsed).filter(v => v === p.age).length;
+                const capReached = usedCount >= CONFIG.MAX_LIFE_ACTIONS_PER_YEAR;
+
+                UI.elements.modalTitle.innerText = `❤️ Vida · Este año ${usedCount}/${CONFIG.MAX_LIFE_ACTIONS_PER_YEAR}`;
+                UI.elements.modalMsg.innerText = `Cuida tu cuerpo, tu mente y tu gente. Cada acción, una vez al año, y máximo ${CONFIG.MAX_LIFE_ACTIONS_PER_YEAR} al año: elige bien cómo cuidarte.`;
+
                 let listHTML = `<div class="modal-scrollable-content">`;
+                listHTML += this.tipCardHTML('tips_vida', "Máximo 3 acciones al año para tener el cuerpo y el alma a punto. Lo que no uses, se pierde.");
                 LIFE_ACTIONS.forEach((act) => {
                     const usedThisYear = p.lifeActionsUsed[act.id] === p.age;
                     const cantAfford = p.money < act.cost;
                     const tooYoung = p.age < act.minAge;
-                    const disabled = usedThisYear || cantAfford || tooYoung;
+                    const tooOld = act.maxAge !== undefined && p.age > act.maxAge;
+                    const disabled = usedThisYear || cantAfford || tooYoung || tooOld || capReached;
+
                     let status = act.cost > 0 ? `${act.cost}€` : 'Gratis';
                     if (tooYoung) status = `🔒 Mínimo ${act.minAge} años`;
+                    else if (tooOld) status = `🔒 Etapa superada (hasta ${act.maxAge} años)`;
                     else if (usedThisYear) status = '✅ Hecho este año';
+                    else if (capReached) status = `🔒 Máximo ${CONFIG.MAX_LIFE_ACTIONS_PER_YEAR} al año`;
                     else if (cantAfford) status = '💰 Sin fondos';
+
+                    const effParts = [];
+                    if (act.health !== 0) effParts.push(`${act.health > 0 ? '+' : ''}${act.health}❤️`);
+                    if (act.happiness !== 0) effParts.push(`${act.happiness > 0 ? '+' : ''}${act.happiness}😊`);
+                    const effText = effParts.length > 0 ? effParts.join(' ') : 'Puro sabor sevillano';
+
                     listHTML += `
                         <button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;"
                                 ${disabled ? 'disabled' : ''}
                                 data-action="do-life"
                                 data-life-id="${act.id}">
                             ${act.title}
-                            <div style="font-size:0.75em; opacity:0.85; font-weight:normal;">${status} · ${act.health >= 0 ? '+' : ''}${act.health}❤️ ${act.happiness >= 0 ? '+' : ''}${act.happiness}😊</div>
+                            <div style="font-size:0.75em; opacity:0.85; font-weight:normal;">${status} · ${effText}</div>
                         </button>`;
                 });
                 listHTML += `</div>`;
@@ -1593,7 +1875,11 @@
                 const act = LIFE_ACTIONS.find(a => a.id === id);
                 if (!act) return;
                 if (p.age < act.minAge) return;
+                if (act.maxAge !== undefined && p.age > act.maxAge) return;
                 if (p.lifeActionsUsed[id] === p.age) return;
+                // ✨ VIDA v2: tope de acciones al año también validado en el motor (no solo en la UI)
+                const usedCount = Object.values(p.lifeActionsUsed).filter(v => v === p.age).length;
+                if (usedCount >= CONFIG.MAX_LIFE_ACTIONS_PER_YEAR) return;
                 if (p.money < act.cost) return;
                 const before = p.money;
                 p.money -= act.cost;
@@ -1633,12 +1919,22 @@
                 const p = gameState.player;
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
 
+                // ✨ FIX: matar cualquier evento de decisión fantasma al abrir estudios
+                UI._currentChoiceEvent = null;
+
+                // ✨ FIX buzón: bloquear estudios mientras vives en Madrid (coherencia)
+                if (p.residenceCity === 'Madrid') {
+                    UI.showAlert("Centro de Estudios", "Estás viviendo en Madrid por trabajo. No puedes matricularte en centros de Sevilla hasta que regreses a casa.");
+                    return;
+                }
+
                 UI.elements.modalTitle.innerText = "Centro de Estudios";
                 UI.elements.modalMsg.innerText = p.pendingStudyAge !== null ?
                     "¡Has alcanzado una edad clave! Debes continuar tu formación académica:" :
                     "Selecciona una titulación para ampliar tus oportunidades laborales:";
 
                 let listHTML = `<div class="modal-scrollable-content">`;
+                listHTML += this.tipCardHTML('tips_estudios', "Los estudios abren mejores curros. A los 6, 12 y 16 toca estudiar sí o sí: no te vas a escaquear.");
                 
                 STUDIES.forEach((est, idx) => {
                     const isCompleted = p.completedStudies.includes(est.id);
@@ -1730,6 +2026,7 @@
                 UI.elements.modalMsg.innerText = "Ofertas disponibles este año según tu perfil y formación:";
 
                 let listHTML = `<div class="modal-scrollable-content">`;
+                listHTML += this.tipCardHTML('tips_trabajo', "Cada entrevista es una tirada: con más estudios, más boleto. Si te rechazan, esa oferta se acaba este año.");
                 
                 if (p.activeJobOffers.length === 0) {
                     listHTML += `<p style="text-align:center; font-size:0.8em; color:#777; padding: 10px;">No hay ofertas disponibles en este momento. Prueba a cumplir año para renovar la bolsa de empleo.</p>`;
@@ -1771,6 +2068,7 @@
                 UI.elements.modalMsg.innerText = `Actualmente vives en: ${p.housing.title} (${p.housing.zone}). ¿Quieres mudarte?`;
 
                 let listHTML = `<div class="modal-scrollable-content">`;
+                listHTML += this.tipCardHTML('tips_vivienda', "El alquiler se paga cada año; comprar, una sola vez. Fuera de casa de tus padres también pagas suministros (7.000€/año).");
 
                 HOUSING_OPTIONS.forEach((opt, idx) => {
                     if (opt.id === 'parents') return;
@@ -1901,9 +2199,10 @@
             },
 
             openManagerModal() {
+                // ✨ TUTORIAL v2: consejo como tarjeta persistente
                 UI.elements.modalTitle.innerText = "Gestión de Partida";
                 UI.elements.modalMsg.innerText = "¿Qué deseas hacer con los datos de tu partida?";
-                UI.elements.modalDynamic.innerHTML = '';
+                UI.elements.modalDynamic.innerHTML = this.tipCardHTML('tips_gestion', "Exporta tu partida a archivo de vez en cuando: así tu historia sobrevive a cualquier percance.");
 
                 UI.elements.modalBtns.innerHTML = `
                     <button class="modal-btn modal-btn-cancel" data-action="close-modal">Cerrar</button>
@@ -1948,9 +2247,10 @@
 
                                 if (gameState.player.isDead) {
                                     UI.showDeathModal("Partida anterior finalizada");
+                                } else if (gameState.player.pendingStudyAge !== null || gameState.player.pendingChoiceId) {
+                                    this.resumePendingModals();
                                 } else {
                                     UI.showAlert("Gestión completa", "Partida cargada con éxito.");
-                                    if (gameState.player.pendingStudyAge !== null) this.openStudyModal();
                                 }
                             } else {
                                 UI.showAlert("Error", "El archivo no contiene una partida válida.");
@@ -2030,7 +2330,32 @@
                         cb();
                     }
                     break;
-                case 'confirm-pet-name':
+                case 'tutorial-accept': {
+                    const p = gameState.player;
+                    if (p && p.tutorial) {
+                        p.tutorial.mode = 'tips';
+                        Storage.save(p);
+                    }
+                    UI.closeModal();
+                    Engine.startTour();
+                    break;
+                }
+                case 'tutorial-skip': {
+                    const p = gameState.player;
+                    if (p && p.tutorial) {
+                        p.tutorial.mode = 'off';
+                        Storage.save(p);
+                    }
+                    UI.closeModal();
+                    break;
+                }
+                case 'tour-next':
+                    Engine.nextTourStep();
+                    break;
+                case 'tour-skip':
+                    Engine.endTour();
+                    break;
+                case 'confirm-pet-name': {
                     const input = document.getElementById('pet-name-input');
                     const chosenName = (input && input.value.trim()) ? input.value.trim() : "Toby";
                     if (typeof UI._petNameCallback === 'function') {
@@ -2039,17 +2364,29 @@
                         cb(chosenName);
                     }
                     break;
+                }
                 case 'select-choice-option':
                     Engine.handleChoiceOption(parseInt(actionBtn.dataset.choiceIdx, 10));
                     break;
-                case 'close-choice-modal':
+                case 'close-choice-modal': {
                     UI.closeModal();
-                    if (gameState.player) {
-                        gameState.player.logs.push(`💸 No tenías fondos suficientes para tomar ninguna decisión. La situación pasó sin más.`);
-                        Storage.save(gameState.player);
+                    const p = gameState.player;
+                    if (p) {
+                        p.pendingChoiceId = null; // ✨ FIX: decisión descartada (sin fondos)
+                        p.logs.push(`💸 No tenías fondos suficientes para tomar ninguna decisión. La situación pasó sin más.`);
+                        // ✨ FIX arista: comprobar mortalidad también al cerrar sin fondos
+                        const deathInfo = Engine.checkMortality();
+                        if (deathInfo.dead) {
+                            p.isDead = true;
+                            p.logs.push(`💀 Has fallecido a los ${p.age} años por: ${deathInfo.cause}.`);
+                        }
+                        Engine.checkAchievements(p);
+                        Storage.save(p);
                         UI.render();
+                        if (p.isDead) UI.showDeathModal(deathInfo.cause);
                     }
                     break;
+                }
                 case 'select-study':
                     Engine.selectStudy(parseInt(actionBtn.dataset.studyIdx, 10));
                     break;
@@ -2068,13 +2405,13 @@
         });
 
         // Acceso para pruebas desde consola (quitar en la versión final)
-        window._debug = { gameState, Engine, Utils, Storage, CONFIG, UI, CHOICE_EVENTS, RANDOM_EVENTS, ACHIEVEMENTS, LIFE_ACTIONS, STUDIES, JOBS };
+        window._debug = { gameState, Engine, Utils, Storage, CONFIG, UI, CHOICE_EVENTS, RANDOM_EVENTS, ACHIEVEMENTS, LIFE_ACTIONS, STUDIES, JOBS, TOUR_STEPS };
     })();
     </script>
 
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
         }
     </script>
 </body>
