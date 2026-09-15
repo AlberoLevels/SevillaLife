@@ -1,0 +1,15 @@
+# Basurilla de sistemas operativos
+.DS_Store
+Thumbs.db
+
+# Basurilla de editores
+.vscode/
+.idea/
+*.swp
+
+# Exports de partidas de prueba (no son código)
+sevillalife_*.json
+
+# Por si algún día hay tooling de build
+node_modules/
+*.log
