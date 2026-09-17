@@ -178,19 +178,20 @@
             z-index: 400; display: none;
         }
         #tutorial-tour.is-active { display: block; }
+        /* ✨ FIX PWA v2: foco y burbuja en coordenadas de pantalla (fixed):
+           inmunes al dvh tardío y al offset del contenedor en la app instalada */
         #tour-spotlight {
-            position: absolute;
+            position: fixed;
             border-radius: 10px;
             border: 2px solid #E5A54A;
             background: rgba(228, 165, 74, 0.15);
             box-shadow: 0 0 0 9999px rgba(44, 62, 80, 0.72);
             transition: left 0.3s ease, top 0.3s ease, width 0.3s ease, height 0.3s ease;
             pointer-events: none;
-            /* ✨ FIX PWA: capa de composición propia; evita repintados colgados en la app instalada */
             transform: translateZ(0);
         }
         #tour-bubble {
-            position: absolute;
+            position: fixed;
             background: #FDFBF7;
             border-top: 5px solid #E5A54A;
             border-radius: 12px;
@@ -1439,14 +1440,15 @@
                     return;
                 }
 
-                const containerRect = document.getElementById('game-container').getBoundingClientRect();
                 const r = target.getBoundingClientRect();
                 const pad = 4;
 
                 overlay.classList.add('is-active');
 
-                spot.style.left = (r.left - containerRect.left - pad) + 'px';
-                spot.style.top = (r.top - containerRect.top - pad) + 'px';
+                // ✨ FIX PWA v2: foco en coordenadas de pantalla (position: fixed):
+                //    inmune al dvh tardío y al offset del contenedor en la app instalada
+                spot.style.left = (r.left - pad) + 'px';
+                spot.style.top = (r.top - pad) + 'px';
                 spot.style.width = (r.width + pad * 2) + 'px';
                 spot.style.height = (r.height + pad * 2) + 'px';
 
@@ -1455,14 +1457,14 @@
                 const nextBtn = bubble.querySelector('[data-action="tour-next"]');
                 if (nextBtn) nextBtn.innerText = (this._tourStep === TOUR_STEPS.length - 1) ? 'Entendido' : 'Siguiente';
 
-                // Colocación de la burbuja: debajo del foco si hay sitio, si no, encima
+                // Colocación de la burbuja en coordenadas de pantalla: debajo del foco si hay sitio, si no, encima
                 const bubbleWidth = 260;
-                let bx = r.left - containerRect.left;
-                bx = Math.max(10, Math.min(bx, containerRect.width - bubbleWidth - 10));
+                let bx = r.left;
+                bx = Math.max(10, Math.min(bx, window.innerWidth - bubbleWidth - 10));
                 const bh = bubble.offsetHeight;
-                let by = r.bottom - containerRect.top + 12;
-                if (by + bh > containerRect.height - 10) {
-                    by = r.top - containerRect.top - bh - 12;
+                let by = r.bottom + 12;
+                if (by + bh > window.innerHeight - 10) {
+                    by = r.top - bh - 12;
                 }
                 bubble.style.left = bx + 'px';
                 bubble.style.top = Math.max(10, by) + 'px';
