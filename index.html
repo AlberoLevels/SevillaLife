@@ -105,7 +105,6 @@
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         .status-badge span { font-weight: 700; color: #1a252f; }
-        /* ✨ MEJORA: badge de empleo con estado (paro rojizo, jubilado albero) */
         #player-job.job-paro { color: #c0392b; }
         #player-job.job-jubilado { color: #b07d2b; }
         .stats { 
@@ -115,10 +114,8 @@
         .stats div { color: #555; }
         .stats span { font-weight: 700; color: #2c3e50; }
 
-        /* Identidad de equipo: borde + anillo interior + texto del club (misma caja que el resto) */
         #player-team.team-betis{background:#fff;border-color:#00954C;color:#00683A;box-shadow:inset 0 0 0 1px #00954C;}
         #player-team.team-sevilla{background:#fff;border-color:#D8121E;color:#A00E18;box-shadow:inset 0 0 0 1px #D8121E;}
-        /* Bufanda fina bajo las stats */
         #team-scarf{height:0;transition:height .3s;margin-top:4px;border-radius:3px;}
         #team-scarf.on-betis{height:5px;background:repeating-linear-gradient(90deg,#00954C 0 10px,#ffffff 10px 20px);}
         #team-scarf.on-sevilla{height:5px;background:repeating-linear-gradient(90deg,#D8121E 0 10px,#ffffff 10px 20px);}
@@ -160,7 +157,6 @@
         .footer-copyright { text-align: center; font-size: 0.55em; color: #7f8c8d; margin-top: 1px; }
         .start-copyright { text-align: center; font-size: 0.6em; color: #7f8c8d; margin-top: 10px; }
 
-        /* ✨ TUTORIAL v2: tarjeta de consejo persistente dentro de los modales */
         .tip-card {
             background: #fdf8f0;
             border: 1px solid #f3e5d0;
@@ -172,7 +168,6 @@
             line-height: 1.4;
         }
 
-        /* ✨ TUTORIAL v2: tour guiado con foco (spotlight) */
         #tutorial-tour {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 400; display: none;
@@ -199,7 +194,6 @@
         #tour-text { font-size: 0.85em; color: #2c3e50; line-height: 1.4; margin-bottom: 10px; }
         .tour-buttons { display: flex; gap: 6px; }
 
-        /* Toast de logros (crema/dorado) */
         #achievement-toast {
             position: absolute;
             top: 20px;
@@ -227,7 +221,6 @@
         .toast-title { font-size: 0.75em; font-weight: 600; color: #C0392B; margin-bottom: 2px; }
         .toast-name { font-family: 'Montserrat', sans-serif; font-size: 1em; font-weight: 800; color: #2c3e50; }
 
-        /* Toast de celebración de equipo (colores del club, misma altura que los logros) */
         #team-toast {
             position: absolute;
             top: 20px;
@@ -259,7 +252,6 @@
         .ttoast-title { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 0.95em; }
         .ttoast-msg { font-size: 0.78em; opacity: 0.95; margin-top: 2px; }
 
-        /* ✨ POLISH: placeholder de historia aún corta */
         .log-placeholder {
             flex-grow: 1;
             display: flex;
@@ -273,7 +265,6 @@
             opacity: 0.75;
         }
 
-        /* ✨ POLISH: en pantalla grande, columna más ancha y modales/toasts acompasados */
         @media (min-width: 700px) {
             #game-container { max-width: 560px; }
             .modal-card { max-width: 420px; }
@@ -343,7 +334,8 @@
                 <button class="action-btn" data-action="open-logros">🏆 Logros</button>
             </div>
             <div class="action-row">
-                <button class="action-btn" data-action="open-summary">📊 Resumen del año</button>
+                <button class="action-btn" data-action="open-summary">📊 Resumen</button>
+                <button class="action-btn" data-action="open-market">🛒 Mercado</button>
             </div>
             <button class="reset-btn" data-action="open-manager">Gestión de Partida (Guardar / Cargar)</button>
             <button class="reset-btn" data-action="confirm-reset">Reiniciar partida</button>
@@ -375,7 +367,6 @@
             </div>
         </div>
 
-        <!-- ✨ TUTORIAL v2: overlay del tour guiado -->
         <div id="tutorial-tour">
             <div id="tour-spotlight"></div>
             <div id="tour-bubble">
@@ -394,6 +385,7 @@
 
         const CONFIG = Object.freeze({
             STORAGE_KEY: 'sevillalife_save',
+            META_KEY: 'sevillalife_meta',
             MIN_WORKING_AGE: 18,
             RETIREMENT_AGE: 67,
             PENSION_RATE: 0.8,
@@ -413,7 +405,6 @@
             "el Hospital de Valme"
         ];
 
-        // ✨ CUMPLEAÑOS: nombres de mes para la fecha de nacimiento
         const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
         const STUDIES = [
@@ -454,6 +445,22 @@
             { id: 'own_aljarafe', title: "Chalet adosado", zone: "Pueblos del Aljarafe", minAge: 30, type: 'owned', annualCost: 0, buyPrice: 120000, happinessBonus: 5, reqJob: true }
         ];
 
+        // ✨ FASE 2: Mercado de Sevilla. reqOwnHome en los objetos de hogar:
+        //    equipar la casa solo tiene sentido cuando tienes tu propia casa.
+        const MARKET_ITEMS = [
+            { id: 'patinete', title: "Patinete eléctrico", category: "movilidad", minAge: 18, price: 350, annualCost: 30, happiness: 6 },
+            { id: 'bici', title: "Bici de ciudad", category: "movilidad", minAge: 18, price: 1200, annualCost: 80, happiness: 8 },
+            { id: 'moto_usada', title: "Moto usada", category: "moto", minAge: 18, price: 2000, annualCost: 350, happiness: 12 },
+            { id: 'coche_usado', title: "Coche usado", category: "coche", minAge: 18, price: 3500, annualCost: 700, happiness: 10 },
+            { id: 'coche_nuevo', title: "Coche nuevo", category: "coche", minAge: 25, price: 12000, annualCost: 1100, happiness: 15 },
+            { id: 'movil', title: "Móvil de gama alta", category: "tecnologia", minAge: 18, price: 800, annualCost: 0, happiness: 8 },
+            { id: 'pc_gaming', title: "PC gaming", category: "tecnologia", minAge: 18, price: 1500, annualCost: 60, happiness: 10 },
+            { id: 'traje_feria', title: "Traje de Feria", category: "feria", minAge: 18, price: 300, annualCost: 0, happiness: 8, synergy: 'feria_abril' },
+            { id: 'televisor', title: "Televisor grande", category: "hogar", minAge: 18, price: 600, annualCost: 20, happiness: 6, reqOwnHome: true },
+            { id: 'mueble_vintage', title: "Mueble vintage", category: "hogar", minAge: 25, price: 900, annualCost: 0, happiness: 8, reqOwnHome: true },
+            { id: 'cocina', title: "Cocina equipada", category: "hogar", minAge: 25, price: 2500, annualCost: 50, happiness: 10, reqOwnHome: true }
+        ];
+
         const RANDOM_EVENTS = [
             { minAge: 3, maxAge: 11, msg: "Te has caído jugando en el parque de María Luisa y te has raspado la rodilla.", health: -5, happiness: -5, money: 0 },
             { minAge: 3, maxAge: 11, msg: "Tus padres te han llevado a tomar un helado en Los Italianos.", health: 0, happiness: 15, money: 0 },
@@ -463,7 +470,6 @@
             { minAge: 12, maxAge: 17, msg: "Has suspendido un examen importante y te han castigado sin salir.", health: 0, happiness: -15, money: 0 },
             { minAge: 18, maxAge: 64, msg: "Has ido a la Feria de Abril y te has gastado un pico en la caseta.", health: 0, happiness: 15, money: -150 },
             { minAge: 18, maxAge: 64, msg: "Un golpe de calor en pleno julio en Sevilla te ha dejado totalmente derretido.", health: -15, happiness: -10, money: 0 },
-            // ✨ BALANCE: despido con probabilidad propia y enfriado (gancho para la Fase 6: economía viva lo hará dinámico)
             { minAge: 18, maxAge: 64, requiresJob: true, id: 'despido', chance: 0.35, cooldown: 5, msg: "La empresa ha sufrido recortes y reestructuración. ¡Te han despedido y te quedas en el paro!", health: -3, happiness: -22, money: 0, losesJob: true },
             { minAge: 65, maxAge: 120, msg: "Te has sentado en un banco a comentar las obras del barrio con otros vecinos.", health: 5, happiness: 10, money: 0 },
             { minAge: 3, maxAge: 120, msg: "Te has encontrado un billete de 10€ tirado en la Alameda.", health: 0, happiness: 10, money: 10 },
@@ -478,7 +484,6 @@
             { msg: "Te cruzas con otro sevillano por la Gran Vía y os dais un abrazo de paisanos.", health: 0, happiness: 6, money: 0 }
         ];
 
-        // ✨ VIDA v2: acciones por tramos de edad + sabor sevillano + tercera edad
         const LIFE_ACTIONS = [
             { id: 'siesta_peque', title: "😴 Siesta de peque", minAge: 0, maxAge: 5, cost: 0, health: 5, happiness: 3, msg: "Siesta buena de guardería: te despiertas nuevo." },
             { id: 'juegos_parque', title: "🛝 Juegos en el parque", minAge: 0, maxAge: 11, cost: 0, health: 4, happiness: 6, msg: "Columpios, tobogán y perseguir palomas en el parque de María Luisa." },
@@ -508,21 +513,22 @@
             { id: 'ahorrador', icon: "💰", title: "Gran ahorrador", desc: "Acumula 50.000€." },
             { id: 'veterano', icon: "👴", title: "Veterano de Sevilla", desc: "Llega a los 65 años." },
             { id: 'centenario', icon: "🎂", title: "Centenario", desc: "Llega a los 100 años." },
-            // ✨ LOGROS DE VIDA: metas de constancia con contador acumulado
             { id: 'feria_venas', icon: "💃", title: "Feria en las venas", desc: "Vive la Feria de Abril 10 veces." },
             { id: 'saeta_interior', icon: "🕯️", title: "Saeta interior", desc: "Vive 20 Semanas Santa." },
             { id: 'corazon_corredor', icon: "🏃", title: "Corazón de corredor", desc: "Haz deporte 15 años." },
             { id: 'vida_bien_vivida', icon: "🧘", title: "Vida bien vivida", desc: "Usa todas las acciones de Vida al menos una vez en la misma vida." },
-            // ✨ ANDALUCÍA DIRECTO: logro oculto (??? hasta desbloquearse)
-            { id: 'andalucia_directo', icon: "📺", title: "Andalucía Directo", desc: "Cumple 105 años y deja que Canal Sur cuente tu historia.", hidden: true }
+            { id: 'andalucia_directo', icon: "📺", title: "Andalucía Directo", desc: "Cumple 105 años y deja que Canal Sur cuente tu historia.", hidden: true },
+            { id: 'llave_en_mano', icon: "🚗", title: "Llave en mano", desc: "Compra tu primer vehículo con motor (moto o coche)." },
+            { id: 'casa_vestida', icon: "🛋️", title: "Casa vestida", desc: "Ten 3 objetos de hogar a la vez." }
         ];
 
-        // ✨ TUTORIAL v2: pasos del tour guiado con foco
+        // ✨ TUTORIAL v2: tour con paso del Mercado añadido
         const TOUR_STEPS = [
             { selector: '#actions-panel [data-action="next-year"]', text: "Aquí late tu vida: cada clic, un año con su sueldo, sus gastos y sus sorpresas." },
             { selector: '#actions-panel [data-action="open-studies"]', text: "Tu formación abre puertas. A los 6, 12 y 16 es obligatorio: el juego te avisará." },
             { selector: '#actions-panel [data-action="open-jobs"]', text: "Desde los 18, la bolsa de empleo. Cada entrevista es una tirada: tu formación es el boleto." },
             { selector: '#actions-panel [data-action="open-vida"]', text: "El corazón del juego: máximo 3 acciones al año para cuidar cuerpo y alma." },
+            { selector: '#actions-panel [data-action="open-market"]', text: "El mercado: aquí tu dinero encuentra destinos. Ojo con la letra pequeña: lo que compres pedirá mantenimiento cada año." },
             { selector: '#actions-panel [data-action="open-manager"]', text: "Exporta tu historia a archivo de vez en cuando: tu seguro de vida digital." }
         ];
 
@@ -582,7 +588,6 @@
                 msg: "Te ha surgido la oportunidad de cambiar de aires e irte a trabajar a Madrid con un sueldo un 20% superior.\n\n⚠️ Antes de aceptar, ten claro lo que supone: estarás 5 años fuera de Sevilla. Pagarás alquiler y vida madrileña (más caros que en tu tierra) y cada año notarás la morriña (-3% felicidad). Si tu casa es en propiedad, la conservarás hasta tu vuelta; si no puedes pagar el alquiler, volverás a Sevilla antes de tiempo. Pasados los 5 años, regresarás a casa (+10% felicidad).",
                 options: [
                     { 
-                        // ✨ MADRID TRAMO B: frenada con modal de confirmación antes de tirar el dado
                         text: "Aceptar el reto y mudarte (400€ de mudanza)", cost: 400, successChance: 0.75, requiresConfirm: true,
                         success: { health: -5, happiness: 5, money: 0, movesToMadrid: true, resultMsg: "¡Triunfas en Madrid! Te instalas en la capital con un contrato superior. Tu corazón sigue en Sevilla, pero tu nómina ya no." },
                         failure: { health: -10, happiness: -22, money: 0, resultMsg: "La morriña de Sevilla y el alto coste de vida te machacaron; tuviste que volver." }
@@ -666,15 +671,6 @@
                 ]
             },
             {
-                id: 'comprar_patinete', cooldown: 6, minAge: 18, maxAge: 50,
-                title: "🛴 Movilidad urbana",
-                msg: "Te planteas comprar un patinete eléctrico para moverte con agilidad por los carriles bici de Sevilla.",
-                options: [
-                    { text: "Comprar patinete (350€)", cost: 350, health: 2, happiness: 15, money: 0, resultMsg: "¡Te ahorras muchísimos atascos y llegas rápido a todos lados!" },
-                    { text: "Seguir usando el autobús o caminar", cost: 0, health: 2, happiness: -2, money: 0, resultMsg: "Continuaste con tu rutina de transporte habitual." }
-                ]
-            },
-            {
                 id: 'multa_trafico', cooldown: 3, minAge: 18, maxAge: 75,
                 title: "🚨 Multa imprevista",
                 msg: "Te llega una notificación de tráfico a casa por un despiste aparcando en doble fila.",
@@ -724,15 +720,6 @@
                 options: [
                     { text: "Abonar la derrama (350€)", cost: 350, health: 0, happiness: -5, money: 0, resultMsg: "Pagaste tu parte y el edificio ha ganado bastante valor estético." },
                     { text: "Protestar en la reunión", cost: 0, health: 0, happiness: -10, money: 0, resultMsg: "Te ganaste una discusión vecinal tensa, pero al final tuviste que pagar igual." }
-                ]
-            },
-            {
-                id: 'comprar_coche', cooldown: 10, minAge: 18, maxAge: 65,
-                title: "🚗 Vehículo nuevo de ocasión",
-                msg: "Necesitas un medio de transporte más cómodo para desplazarte fuera de la ciudad.",
-                options: [
-                    { text: "Comprar utilitario de segunda mano (3500€)", cost: 3500, health: 5, happiness: 20, money: 0, resultMsg: "¡Te da una libertad tremenda para hacer viajes y excursiones!" },
-                    { text: "Seguir usando transporte público", cost: 0, health: 0, happiness: -2, money: 0, resultMsg: "Evitaste gastos de seguro, gasolina e ITV." }
                 ]
             },
             {
@@ -787,7 +774,6 @@
                 options: [
                     { 
                         text: "Comprar décimo (20€)", cost: 20, successChance: 0.15,
-                        // ✨ EL GORDO: rama legendaria oculta del décimo (0,5% por compra). Se tira antes que el pellizco.
                         gordoChance: 0.005,
                         gordo: {
                             health: 0, happiness: 40, money: 400000,
@@ -866,11 +852,38 @@
             },
             clear() {
                 localStorage.removeItem(CONFIG.STORAGE_KEY);
+            },
+            loadMeta() {
+                try {
+                    const raw = localStorage.getItem(CONFIG.META_KEY);
+                    const m = raw ? JSON.parse(raw) : null;
+                    if (m && typeof m === 'object') {
+                        return {
+                            achievements: Array.isArray(m.achievements) ? m.achievements : [],
+                            vidas: m.vidas || 0
+                        };
+                    }
+                    return { achievements: [], vidas: 0 };
+                } catch (e) {
+                    console.error('Meta load failed:', e);
+                    return { achievements: [], vidas: 0 };
+                }
+            },
+            saveMeta(m) {
+                try {
+                    localStorage.setItem(CONFIG.META_KEY, JSON.stringify(m));
+                } catch (e) {
+                    console.error('Meta save failed:', e);
+                }
+            },
+            clearMeta() {
+                localStorage.removeItem(CONFIG.META_KEY);
             }
         };
 
         const gameState = {
-            player: null
+            player: null,
+            meta: null
         };
 
         const Utils = {
@@ -885,7 +898,6 @@
             clampMoney(val) {
                 return Math.max(CONFIG.OVERDRAFT_LIMIT, val);
             },
-            // ✨ Limpieza fina: formato de dinero sin signos raros en cero (+0€ / -0€ → 0€)
             fmtMoney(val) {
                 if (val === 0) return '0€';
                 return val > 0 ? `+${val}€` : `${val}€`;
@@ -895,11 +907,19 @@
                 if (type === 'Gato') return '🐱';
                 return '🐾';
             },
-            // ✨ CUMPLEAÑOS: fecha legible a partir de día y mes guardados
             birthDate(p) {
                 const day = p.birthDay || 1;
                 const month = MESES[(p.birthMonth || 1) - 1];
                 return `${day} de ${month}`;
+            },
+            maxStudyTitle(p) {
+                const completed = p.completedStudies || [];
+                let best = null;
+                completed.forEach(id => {
+                    const s = STUDIES.find(st => st.id === id);
+                    if (s && (!best || s.rank > best.rank)) best = s;
+                });
+                return best ? best.title : (p.studies || "Ninguno");
             },
             calculateTax(salary) {
                 let rate;
@@ -970,7 +990,6 @@
                 this.elements.pet.innerText = p.pet ? `${Utils.petEmoji(p.pet.type)} ${p.pet.name} (${p.pet.type})` : "🐾 Sin mascota";
                 this.elements.team.innerText = p.favoriteTeam ? `⚽ ${p.favoriteTeam}` : "⚽ Sin equipo";
 
-                // Identidad visual del equipo (anillo + bufanda de cabecera)
                 this.elements.team.classList.remove('team-betis', 'team-sevilla');
                 const scarf = document.getElementById('team-scarf');
                 if (scarf) scarf.className = '';
@@ -986,10 +1005,9 @@
                 this.elements.health.innerText = p.health;
                 this.elements.happiness.innerText = p.happiness;
                 this.elements.money.innerText = p.money;
-                this.elements.studies.innerText = p.studies;
+                this.elements.studies.innerText = Utils.maxStudyTitle(p);
                 this.elements.job.innerText = p.residenceCity === 'Madrid' ? `${p.job} (en Madrid)` : p.job;
 
-                // ✨ MEJORA: badge de empleo con estado (paro rojizo, jubilado albero)
                 this.elements.job.classList.remove('job-paro', 'job-jubilado');
                 if (p.job === 'En paro') {
                     this.elements.job.classList.add('job-paro');
@@ -1012,7 +1030,6 @@
                     this.elements.eventLog.appendChild(div);
                 });
 
-                // ✨ POLISH: con la historia aún corta, un placeholder suave rellena el hueco
                 if (p.logs.length < 5) {
                     const ph = document.createElement('div');
                     ph.className = 'log-placeholder';
@@ -1029,7 +1046,6 @@
 
             closeModal() {
                 this.elements.modal.classList.remove('is-active');
-                // ✨ TUTORIAL v2: al cerrar el modal, el consejo visto se marca como leído
                 if (Engine._pendingTip) {
                     const p = gameState.player;
                     if (p && p.tutorial && p.tutorial.mode !== 'off' && !p.tutorial.seen[Engine._pendingTip]) {
@@ -1050,7 +1066,6 @@
                 this.openModal();
             },
 
-            // ✨ TUTORIAL: modal de bienvenida al crear partida nueva
             showWelcomeModal() {
                 this.elements.modalTitle.innerText = "Bienvenido a Sevillalife";
                 this.elements.modalMsg.innerText = "· Tu vida avanza año a año con \"Cumplir año\".\n· Lo que decidas marca tu historia: algunas decisiones llevan riesgo y no hay vuelta atrás.\n· Cuida cuerpo y alma: si la salud llega a 0, mueres; y a partir de los 70 llama la vejez.";
@@ -1062,7 +1077,6 @@
                 this.openModal();
             },
 
-            // ✨ MADRID TRAMO B: frenada con peso antes de tirar el dado del traslado
             showConfirmMadridModal(optionIdx) {
                 Engine._pendingTip = null;
                 this.elements.modalTitle.innerText = "✈️ ¿Seguro que te vas?";
@@ -1074,6 +1088,19 @@
                 `;
                 this.openModal();
             },
+            
+            // ✨ FIX: borrado total con cancelación real (abrir por curiosidad no borra tu vida)
+            showConfirmWipeModal() {
+                this._modalCallback = null;
+                this.elements.modalTitle.innerText = "⚠️ Borrado total";
+                this.elements.modalMsg.innerText = "Se borran la partida actual Y el álbum de la familia con todos sus logros y vidas contadas.\nEsta acción no se puede deshacer. ¿Seguro?";
+                this.elements.modalDynamic.innerHTML = '';
+                this.elements.modalBtns.innerHTML = `
+                    <button class="modal-btn modal-btn-confirm" data-action="confirm-wipe-yes">Sí, borrar todo</button>
+                    <button class="modal-btn modal-btn-cancel" data-action="close-modal">Cancelar</button>
+                `;
+                this.openModal();
+            },
 
             showDeathModal(cause) {
                 const p = gameState.player;
@@ -1082,7 +1109,7 @@
                 this.elements.modalDynamic.innerHTML = `
                     <div style="text-align:center; font-size:0.85em; color:#555; padding: 10px; background:#f9f9f9; border-radius:8px;">
                         <p><strong>Cumpleaños:</strong> ${Utils.birthDate(p)}</p>
-                        <p><strong>Estudios alcanzados:</strong> ${p.studies}</p>
+                        <p><strong>Estudios alcanzados:</strong> ${Utils.maxStudyTitle(p)}</p>
                         <p><strong>Último empleo:</strong> ${p.job === 'Jubilado' && p.lastJob ? `${p.lastJob} (jubilado)` : p.job}</p>
                         <p><strong>Equipo favorito:</strong> ${p.favoriteTeam || 'Ninguno'}</p>
                         <p><strong>Mascota:</strong> ${p.pet ? `${p.pet.name} (${p.pet.type})` : 'Ninguna'}</p>
@@ -1145,7 +1172,7 @@
 
             showInterviewModal(job) {
                 const p = gameState.player;
-                Engine._pendingTip = null; // ✨ FIX: este modal no muestra tarjeta; no marques consejos ajenos como leídos
+                Engine._pendingTip = null;
                 this.elements.modalTitle.innerText = "👔 Entrevista de Trabajo";
                 this.elements.modalMsg.innerText = `Has concertado una entrevista para el puesto de:\n"${job.title}" (${job.salary}€/año).\n\nEl departamento de recursos humanos va a evaluar tu perfil y experiencia. ¿Te preparas para la entrevista?`;
                 this.elements.modalDynamic.innerHTML = '';
@@ -1185,7 +1212,6 @@
                 }
             },
 
-            // ✨ FIX buzón: el toast de equipo entra en la MISMA cola que el de logros (nunca solapados)
             showTeamToast(team) {
                 this._toastQueue.push({ type: 'team', data: team });
                 if (!this._toastShowing) {
@@ -1250,18 +1276,19 @@
             _tourRepositionBound: false,
 
             init() {
+                gameState.meta = Storage.loadMeta();
+
                 const savedData = Storage.load();
                 if (savedData) {
                     gameState.player = this.normalizeState(savedData);
+                    this.mergeAlbum(gameState.player);
                     UI.elements.startScreen.classList.add('hidden');
                     UI.render();
                     this.resumePendingModals();
 
-                    // ✨ TUTORIAL v2: si el tour quedó a medias en una partida recién creada, se retoma
                     const pl = gameState.player;
                     if (pl && pl.tutorial && pl.tutorial.mode === 'tips' && !pl.tutorial.tourDone && pl.age === 0 &&
                         !UI.elements.modal.classList.contains('is-active')) {
-                        // ✨ FIX: espera un frame para medir con el layout asentado
                         requestAnimationFrame(() => this.startTour());
                     }
                 } else {
@@ -1271,7 +1298,18 @@
                 this.bindFileInput();
             },
 
-            // ✨ FIX: reabre modales que quedaron pendientes en el guardado (muerte, estudio obligatorio o decisión)
+            mergeAlbum(p) {
+                if (!p || !gameState.meta) return;
+                let changed = false;
+                (p.achievements || []).forEach(id => {
+                    if (!gameState.meta.achievements.includes(id)) {
+                        gameState.meta.achievements.push(id);
+                        changed = true;
+                    }
+                });
+                if (changed) Storage.saveMeta(gameState.meta);
+            },
+
             resumePendingModals() {
                 const p = gameState.player;
                 if (!p) return;
@@ -1294,7 +1332,6 @@
                 }
             },
 
-            // ✨ TUTORIAL v2: tarjeta de consejo persistente dentro del modal (se marca al cerrar)
             tipCardHTML(id, text) {
                 const p = gameState.player;
                 if (!p || !p.tutorial || p.tutorial.mode === 'off' || p.tutorial.seen[id]) return '';
@@ -1302,7 +1339,6 @@
                 return `<div class="tip-card">💡 ${text}</div>`;
             },
 
-            // ✨ TUTORIAL v2: tour guiado con foco (spotlight)
             startTour() {
                 const p = gameState.player;
                 if (!p || !p.tutorial || p.tutorial.mode === 'off' || p.tutorial.tourDone) return;
@@ -1311,7 +1347,6 @@
                 this.renderTourStep();
             },
 
-            // ✨ FIX: recentra el foco si el layout cambia después de medir (fuentes web, load, resize)
             bindTourReposition() {
                 if (this._tourRepositionBound) return;
                 this._tourRepositionBound = true;
@@ -1354,7 +1389,6 @@
                 const nextBtn = bubble.querySelector('[data-action="tour-next"]');
                 if (nextBtn) nextBtn.innerText = (this._tourStep === TOUR_STEPS.length - 1) ? 'Entendido' : 'Siguiente';
 
-                // Colocación de la burbuja: debajo del foco si hay sitio, si no, encima
                 const bubbleWidth = 260;
                 let bx = r.left - containerRect.left;
                 bx = Math.max(10, Math.min(bx, containerRect.width - bubbleWidth - 10));
@@ -1392,7 +1426,6 @@
                 if (amount !== 0) { p.yearTracker.items.push({ label: label, amount: amount }); }
             },
 
-            // ✨ LOGROS DE VIDA: progreso vivo para el modal de logros
             logroProgress(p, id) {
                 const counts = p.lifeActionCounts || {};
                 if (id === 'feria_venas') return `${Math.min(counts.feria_abril || 0, 10)}/10 Ferias`;
@@ -1411,12 +1444,15 @@
                     const ach = ACHIEVEMENTS.find(a => a.id === id);
                     if (!ach) return;
                     p.achievements.push(id);
+                    if (gameState.meta && !gameState.meta.achievements.includes(id)) {
+                        gameState.meta.achievements.push(id);
+                        Storage.saveMeta(gameState.meta);
+                    }
                     p.happiness = Utils.clamp(p.happiness + 5, 0, 100);
                     p.logs.push(`🏆 Logro desbloqueado: ${ach.icon} ${ach.title}. (+5% felicidad)`);
                     UI.showAchievementToast(ach);
                 };
                 if (p.completedStudies.includes('universidad') || p.completedStudies.includes('master')) unlock('graduado');
-                // ✨ JUBILACIÓN: 'Jubilado' no cuenta como primer empleo (evita desbloqueos falsos de vidas sin curro)
                 if (p.job !== 'En paro' && p.job !== 'Jubilado') unlock('primer_empleo');
                 if (p.housing && p.housing.type === 'owned') unlock('techo_propio');
                 if (p.pet) unlock('amigo_fiel');
@@ -1426,15 +1462,17 @@
                 if (p.money >= 50000) unlock('ahorrador');
                 if (p.age >= 65) unlock('veterano');
                 if (p.age >= 100) unlock('centenario');
-                // ✨ ANDALUCÍA DIRECTO: el easter egg de los 105
                 if (p.age >= 105) unlock('andalucia_directo');
 
-                // ✨ LOGROS DE VIDA: constancia que se premia en el instante
                 const counts = p.lifeActionCounts || {};
                 if ((counts.feria_abril || 0) >= 10) unlock('feria_venas');
                 if ((counts.semana_santa || 0) >= 20) unlock('saeta_interior');
                 if ((counts.deporte || 0) >= 15) unlock('corazon_corredor');
                 if (LIFE_ACTIONS.every(a => (counts[a.id] || 0) >= 1)) unlock('vida_bien_vivida');
+
+                const ownedItems = p.possessions || [];
+                if (ownedItems.some(it => it.category === 'coche' || it.category === 'moto')) unlock('llave_en_mano');
+                if (ownedItems.filter(it => it.category === 'hogar').length >= 3) unlock('casa_vestida');
             },
 
             normalizeState(raw) {
@@ -1460,7 +1498,6 @@
                     name: raw.name || "",
                     dni: raw.dni || Utils.generateDNI(),
                     age: age,
-                    // ✨ CUMPLEAÑOS: partidas viejas reciben una fecha al cargarse
                     birthDay: raw.birthDay || (1 + Math.floor(Math.random() * 28)),
                     birthMonth: raw.birthMonth || (1 + Math.floor(Math.random() * 12)),
                     health: raw.health !== undefined ? raw.health : 100,
@@ -1472,7 +1509,6 @@
                     completedChoices: completedChoices,
                     lastChoices: lastChoices,
                     job: raw.job || "En paro",
-                    // ✨ JUBILACIÓN: último empleo real y pensión
                     lastJob: raw.lastJob || null,
                     pension: raw.pension || 0,
                     activeJobOffers: activeOffers,
@@ -1482,6 +1518,7 @@
                     madridYearsLeft: raw.madridYearsLeft || 0,
                     sevillaHouseStored: raw.sevillaHouseStored || null,
                     housing: raw.housing || Utils.getDefaultHousing(),
+                    possessions: Array.isArray(raw.possessions) ? raw.possessions : [],
                     yearTracker: raw.yearTracker || { ingresos: 0, gastos: 0, items: [] },
                     lastYearSummary: raw.lastYearSummary || null,
                     achievements: Array.isArray(raw.achievements) ? raw.achievements : [],
@@ -1516,6 +1553,10 @@
                 const birthDay = 1 + Math.floor(Math.random() * 28);
                 const birthMonth = 1 + Math.floor(Math.random() * 12);
 
+                if (!gameState.meta) gameState.meta = Storage.loadMeta();
+                gameState.meta.vidas = (gameState.meta.vidas || 0) + 1;
+                Storage.saveMeta(gameState.meta);
+
                 gameState.player = {
                     name: `${n} ${s1} ${s2}`,
                     dni: Utils.generateDNI(),
@@ -1540,6 +1581,7 @@
                     madridYearsLeft: 0,
                     sevillaHouseStored: null,
                     housing: Utils.getDefaultHousing(),
+                    possessions: [],
                     yearTracker: { ingresos: 0, gastos: 0, items: [] },
                     lastYearSummary: null,
                     achievements: [],
@@ -1564,8 +1606,6 @@
                 if (p.health <= 0) {
                     return { dead: true, cause: "Complicaciones graves de salud" };
                 }
-                // ✨ CAMINO A: curva de vejez calibrada por Monte Carlo. Los 110 son el muro.
-                //    70-79: 4% · 80-89: 8% · 90-99: 14% · 100-109: 28% · 110: seguro.
                 if (p.age >= 110) {
                     return { dead: true, cause: "Causas naturales debido a la vejez" };
                 }
@@ -1594,13 +1634,11 @@
                     return;
                 }
 
-                // ✨ FIX TC-30: Refrescar SIEMPRE el resumen al cerrar año, haya o no movimientos
                 const ingresosAnuales = p.yearTracker ? p.yearTracker.ingresos : 0;
                 const gastosAnuales = p.yearTracker ? p.yearTracker.gastos : 0;
                 const itemsAnuales = p.yearTracker ? p.yearTracker.items : [];
                 const balance = ingresosAnuales - gastosAnuales;
 
-                // Guardamos el resumen SIEMPRE
                 p.lastYearSummary = {
                     year: p.age,
                     ingresos: ingresosAnuales,
@@ -1609,7 +1647,6 @@
                     items: itemsAnuales
                 };
 
-                // Solo cambiamos el mensaje del log según si hubo movimientos o no
                 if (ingresosAnuales > 0 || gastosAnuales > 0) {
                     p.logs.push(`📊 Balance del año ${p.age}: ${Utils.fmtMoney(balance)} (ingresos ${ingresosAnuales}€ / gastos ${gastosAnuales}€).`);
                 } else {
@@ -1619,14 +1656,11 @@
                 p.yearTracker = { ingresos: 0, gastos: 0, items: [] };
 
                 p.age++;
-                // ✨ CUMPLEAÑOS: cada año se celebra tu día, con su fecha y su alegría
                 p.logs.push(`🎂 Feliz cumpleaños: hoy ${Utils.birthDate(p)} cumples ${p.age} años. Tarta, abrazo y un año más de sevillanía.`);
                 p.happiness = Utils.clamp(p.happiness + 2, 0, 100);
 
-                // ✨ Regeneración pasiva de salud (+2 por año)
                 p.health = Utils.clamp(p.health + 2, 0, 100);
 
-                // ✨ JUBILACIÓN: a los 67 se cierra la vida laboral (también partidas viejas ya pasadas de edad)
                 let jubiladoEsteAnio = false;
                 if (p.age >= CONFIG.RETIREMENT_AGE && p.job !== 'Jubilado') {
                     if (p.job !== 'En paro' && p.salary > 0) {
@@ -1641,7 +1675,6 @@
                     jubiladoEsteAnio = true;
                 }
 
-                // ✨ ANDALUCÍA DIRECTO: el año de los 105, Canal Sur llama a tu puerta
                 let andaluciaDirectoEsteAnio = false;
                 if (p.age === 105) {
                     andaluciaDirectoEsteAnio = true;
@@ -1649,7 +1682,6 @@
                     p.logs.push(`📺 El equipo de Andalucía Directo graba en tu salón: Modesto Barragán te pregunta por la Sevilla de tu infancia y tu barrio entero se pega a la tele. (+20% felicidad)`);
                 }
 
-                // ✨ FIX: detectar si este año toca estudio obligatorio (evita que el modal de decisión sea pisado)
                 const esAnioEstudioObligatorio = p.age < CONFIG.MIN_WORKING_AGE &&
                     STUDIES.some(est => est.minAge === p.age && !p.completedStudies.includes(est.id));
 
@@ -1674,7 +1706,6 @@
                     p.logs.push(`💼 Has cobrado tu sueldo anual: ${gross}€ brutos - ${tax}€ de IRPF = ${net}€ netos.${p.residenceCity === 'Madrid' ? ' (incluye el plus de Madrid)' : ''} ¡Dinero ingresado!`);
                 }
 
-                // ✨ JUBILACIÓN: la pensión se cobra cada año, sin madrugones
                 if (p.job === 'Jubilado' && p.pension > 0) {
                     p.money += p.pension;
                     this.trackMoney(p, 'Pensión', p.pension);
@@ -1726,7 +1757,23 @@
                     }
                 }
 
-                // ✨ MADRID TRAMO B: bandera de regreso para la ceremonia de fin de año
+                const possessionsCopy = [...(p.possessions || [])];
+                for (const it of possessionsCopy) {
+                    if (!it.annualCost) continue;
+                    if (p.money >= it.annualCost) {
+                        p.money -= it.annualCost;
+                        this.trackMoney(p, `Mantenimiento (${it.title})`, -it.annualCost);
+                        p.logs.push(`🔧 Mantenimiento de ${it.title}: -${it.annualCost}€.`);
+                    } else {
+                        const salvage = Math.round(it.price * 0.3);
+                        p.possessions = (p.possessions || []).filter(o => o.id !== it.id);
+                        p.money += salvage;
+                        this.trackMoney(p, `Malventa forzosa (${it.title})`, salvage);
+                        p.happiness = Utils.clamp(p.happiness - 10, 0, 100);
+                        p.logs.push(`⚠️ No llegaste al mantenimiento de ${it.title}: se malvendió por ${salvage}€. (-10% felicidad)`);
+                    }
+                }
+
                 let regresoCasaEsteAnio = false;
 
                 if (p.residenceCity === 'Madrid' && p.madridYearsLeft > 0) {
@@ -1792,7 +1839,6 @@
                         if (ev.petType && p.pet) return false;
                         if (ev.requiresAnyTeam && !p.favoriteTeam) return false;
                         if (ev.requiresTeam && p.favoriteTeam !== ev.requiresTeam) return false;
-                        // ✨ JUBILACIÓN: los jubilados quedan fuera de las decisiones laborales
                         if (ev.requiresJob && (p.job === "En paro" || p.job === 'Jubilado')) return false;
                         if (ev.requiresMinSalary && p.salary < ev.requiresMinSalary) return false;
 
@@ -1809,7 +1855,7 @@
                     if (availableChoices.length > 0) {
                         const choiceEv = availableChoices[Math.floor(Math.random() * availableChoices.length)];
                         triggeredChoice = true;
-                        p.pendingChoiceId = choiceEv.id; // ✨ FIX: la decisión queda persistida por si recargas
+                        p.pendingChoiceId = choiceEv.id;
                         UI.showChoiceModal(choiceEv);
                     }
                 }
@@ -1819,12 +1865,8 @@
                         if (p.age < ev.minAge || p.age > ev.maxAge) return false;
                         if (ev.requiresPet && !p.pet) return false;
                         if (ev.requiresTeam && p.favoriteTeam !== ev.requiresTeam) return false;
-                        // ✨ JUBILACIÓN: los eventos de curro (despidos incluidos) no tocan a los jubilados
                         if (ev.requiresJob && (p.job === "En paro" || p.job === 'Jubilado')) return false;
-                        // ✨ BALANCE: eventos con probabilidad propia solo entran al bombo si superan su tirada
-                        //    (gancho Fase 6: la economía viva convertirá esta chance en dinámica)
                         if (ev.chance !== undefined && Math.random() >= ev.chance) return false;
-                        // ✨ BALANCE: enfriado entre repeticiones, reutilizando el registro de decisiones
                         if (ev.cooldown !== undefined && ev.id) {
                             const lastAge = p.lastChoices[ev.id];
                             if (lastAge !== undefined && (p.age - lastAge < ev.cooldown)) return false;
@@ -1835,7 +1877,6 @@
                     if (availableEvents.length > 0) {
                         const ev = availableEvents[Math.floor(Math.random() * availableEvents.length)];
 
-                        // ✨ BALANCE: deja constancia del año para eventos con enfriado
                         if (ev.id && ev.cooldown !== undefined) {
                             p.lastChoices[ev.id] = p.age;
                         }
@@ -1898,23 +1939,18 @@
                 Storage.save(p);
                 UI.render();
 
-                // ✨ MEJORA: el despido se anuncia a la cara, no entre líneas del log
-                //    (si ese mismo año vuelves de Madrid, el regreso se encadena al cerrar el aviso)
                 if (despedidoEsteAnio) {
                     UI.showAlert("💼 ¡Te has quedado en paro!", "La empresa ha sufrido recortes y reestructuración: de la oficina a la cola del SAE en un telediario. Tu cabecera ya lo dice bien claro: En paro. Cuando estés listo, la bolsa de empleo te espera para volver a la carga.", regresoCasaEsteAnio ? () => {
                         UI.showAlert("🌇 ¡Vuelves a casa!", "El AVE te deja en Santa Justa con cinco años de Madrid en la maleta y el corazón intacto. Primera parada: una tapita en el barrio. El azahar hace el resto. Estás en casa, y esta vez es para quedarte.");
                     } : undefined);
                 } else if (regresoCasaEsteAnio) {
-                    // ✨ MADRID TRAMO B: ceremonia de regreso tras los 5 años fuera
                     UI.showAlert("🌇 ¡Vuelves a casa!", "El AVE te deja en Santa Justa con cinco años de Madrid en la maleta y el corazón intacto. Primera parada: una tapita en el barrio. El azahar hace el resto. Estás en casa, y esta vez es para quedarte.");
                 }
 
-                // ✨ JUBILACIÓN: ceremonia propia para el cierre de la vida laboral
                 if (jubiladoEsteAnio) {
                     UI.showAlert("🧓 ¡Te jubilas!", `Cuarenta y tantos años de curro se cierran con un reloj de regalo y el banco de la plaza esperándote. Tu pensión: ${p.pension}€ al año. Desde hoy tu único jefe es el sol de Sevilla.`);
                 }
 
-                // ✨ ANDALUCÍA DIRECTO: la ceremonia del easter egg, si la vejez te deja vivirla
                 if (andaluciaDirectoEsteAnio) {
                     UI.showAlert("📺 ¡ANDALUCÍA DIRECTO EN TU CASA!", "Ciento cinco años cumplidos y el equipo de Canal Sur llama a tu puerta. Modesto Barragán entra en tu salón con la cámara, te pregunta por la Sevilla de tu infancia y tú le cuentas que la vida, si es en Sevilla, siempre merece la pena. Ramo de flores, cumpleaños feliz en directo para toda Andalucía y tu barrio pegado a la tele. Un día para enmarcar.");
                 }
@@ -1927,14 +1963,12 @@
 
                 const opt = eventObj.options[optionIdx];
 
-                // ✨ MADRID TRAMO B: frenada antes de tirar el dado del traslado
                 if (opt.requiresConfirm && !skipConfirm) {
                     UI.showConfirmMadridModal(optionIdx);
                     return;
                 }
 
                 const processOptionResult = (petName = null) => {
-                    // ✨ EL GORDO: la rama legendaria se tira antes que el pellizco
                     let branch = opt;
                     if (opt.gordoChance !== undefined && Math.random() < opt.gordoChance) {
                         branch = opt.gordo;
@@ -1982,7 +2016,7 @@
                     } else if (eventObj.cooldown) {
                         p.lastChoices[eventObj.id] = p.age;
                     }
-                    p.pendingChoiceId = null; // ✨ FIX: decisión resuelta, ya no queda pendiente
+                    p.pendingChoiceId = null;
 
                     const beforeDec = p.money;
                     p.money -= opt.cost;
@@ -2007,7 +2041,6 @@
                         UI.render();
                         UI.showDeathModal(deathInfo.cause);
                     } else if (branch.modal) {
-                        // ✨ EL GORDO: ceremonia propia para el momento más legendario del juego
                         UI.showAlert(branch.modal.title, branch.modal.msg);
                     }
                 };
@@ -2023,15 +2056,12 @@
                 }
             },
 
-            // ✨ MADRID TRAMO B: resolución del modal de confirmación del traslado
             processMadridDecision(optionIdx, go) {
                 const eventObj = UI._currentChoiceEvent;
                 if (!eventObj || !eventObj.options[optionIdx]) return;
                 if (go) {
-                    // Tira el dado del traslado (75% éxito) saltando la confirmación
                     this.handleChoiceOption(optionIdx, true);
                 } else {
-                    // "Quedarme en Sevilla": resuelve como la opción de quedarse (índice 1) y consume el evento único
                     this.handleChoiceOption(1, true);
                 }
             },
@@ -2040,7 +2070,6 @@
                 const p = gameState.player;
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
 
-                // ✨ TUTORIAL v2: consejo como tarjeta persistente
                 const card = this.tipCardHTML('tips_resumen', "Aquí ves en qué se fue cada euro del año. Sin movimientos raros ni letras pequeñas.");
 
                 const s = p.lastYearSummary;
@@ -2069,11 +2098,113 @@
                 UI.openModal();
             },
 
+            // ✨ FASE 2: Mercado con tarjeta de consejo y objetos de hogar bloqueados en casa de los padres
+            openMarketModal() {
+                const p = gameState.player;
+                if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
+                if (p.age < CONFIG.MIN_WORKING_AGE) {
+                    UI.showAlert("Mercado", "Eres menor de edad: el mercado abre cuando cumplas los 18.");
+                    return;
+                }
+                if (p.residenceCity === 'Madrid') {
+                    UI.showAlert("Mercado", "Estás en Madrid: el mercado sevillano te espera a la vuelta.");
+                    return;
+                }
+
+                const owned = p.possessions || [];
+                const totalMant = owned.reduce((s, it) => s + (it.annualCost || 0), 0);
+                const atParents = p.housing && p.housing.type === 'parents';
+                UI.elements.modalTitle.innerText = "🛒 Mercado de Sevilla";
+                UI.elements.modalMsg.innerText = `Tienes ${owned.length} objeto(s) con un mantenimiento de ${totalMant}€/año.\nEl dinero aquí se va, pero la vida se queda.`;
+
+                let html = `<div class="modal-scrollable-content">`;
+                html += this.tipCardHTML('tips_mercado', "Lo que compras pide mantenimiento cada año. Si no llegas, se malvende por las prisas. Compra con cabeza: aquí el dinero se va, pero la vida se queda.");
+
+                if (owned.length > 0) {
+                    html += `<div style="font-size:0.75em; font-weight:700; color:#7f8c8d; margin-top:4px;">TUS COSAS</div>`;
+                    owned.forEach(it => {
+                        const sale = Math.round(it.price * 0.5);
+                        html += `
+                            <button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px; background:#95a5a6;"
+                                    data-action="sell-item" data-item-id="${it.id}">
+                                ${it.title}
+                                <div style="font-size:0.75em; opacity:0.9; font-weight:normal;">Vender por ${sale}€ · Mant. ${it.annualCost}€/año</div>
+                            </button>`;
+                    });
+                    html += `<div style="font-size:0.75em; font-weight:700; color:#7f8c8d; margin-top:6px;">CATÁLOGO</div>`;
+                }
+
+                MARKET_ITEMS.forEach(item => {
+                    const isOwned = owned.some(o => o.id === item.id);
+                    const cantAfford = p.money < item.price;
+                    const tooYoung = p.age < item.minAge;
+                    // ✨ FASE 2: coherencia narrativa - equipar tu casa solo con tu propia casa
+                    const needsOwnHome = item.reqOwnHome && atParents;
+                    const disabled = isOwned || cantAfford || tooYoung || needsOwnHome;
+                    let status = `${item.price}€ · Mant. ${item.annualCost}€/año`;
+                    if (isOwned) status = '✅ Ya lo tienes';
+                    else if (tooYoung) status = `🔒 Mínimo ${item.minAge} años`;
+                    else if (needsOwnHome) status = '🔒 Necesitas tu propia vivienda';
+                    else if (cantAfford) status = `💰 Necesitas ${item.price}€ (tienes ${p.money}€)`;
+                    html += `
+                        <button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px;"
+                                ${disabled ? 'disabled' : ''}
+                                data-action="buy-item" data-item-id="${item.id}">
+                            ${item.title}
+                            <div style="font-size:0.75em; opacity:0.85; font-weight:normal;">${status}${item.happiness > 0 ? ` · +${item.happiness}😊` : ''}</div>
+                        </button>`;
+                });
+
+                html += `</div>`;
+                UI.elements.modalDynamic.innerHTML = html;
+                UI.elements.modalBtns.innerHTML = `<button class="modal-btn modal-btn-cancel" data-action="close-modal">Cerrar</button>`;
+                UI.openModal();
+            },
+
+            buyItem(itemId) {
+                const p = gameState.player;
+                const item = MARKET_ITEMS.find(i => i.id === itemId);
+                if (!item) return;
+                if (p.age < item.minAge) return;
+                if (p.money < item.price) return;
+                if (!p.possessions) p.possessions = [];
+                if (p.possessions.some(o => o.id === item.id)) return;
+                // ✨ FASE 2: defensa en profundidad - la UI ya lo bloquea, pero el motor también
+                if (item.reqOwnHome && p.housing && p.housing.type === 'parents') return;
+
+                p.money -= item.price;
+                this.trackMoney(p, `Compra: ${item.title}`, -item.price);
+                p.possessions.push({ id: item.id, title: item.title, price: item.price, annualCost: item.annualCost, category: item.category });
+                p.happiness = Utils.clamp(p.happiness + item.happiness, 0, 100);
+                p.logs.push(`🛒 Compras ${item.title} por ${item.price}€. (+${item.happiness}% felicidad)`);
+                this.checkAchievements(p);
+                Storage.save(p);
+                UI.render();
+                UI.closeModal();
+                this.openMarketModal();
+            },
+
+            sellItem(itemId) {
+                const p = gameState.player;
+                const idx = (p.possessions || []).findIndex(o => o.id === itemId);
+                if (idx === -1) return;
+                const it = p.possessions[idx];
+                const value = Math.round(it.price * 0.5);
+                p.possessions.splice(idx, 1);
+                p.money += value;
+                this.trackMoney(p, `Venta: ${it.title}`, value);
+                p.logs.push(`🛒 Vendes ${it.title} por ${value}€. La casa respira.`);
+                this.checkAchievements(p);
+                Storage.save(p);
+                UI.render();
+                UI.closeModal();
+                this.openMarketModal();
+            },
+
             openVidaModal() {
                 const p = gameState.player;
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
 
-                // ✨ VIDA v2: contador visible de acciones usadas este año
                 const usedCount = Object.values(p.lifeActionsUsed).filter(v => v === p.age).length;
                 const capReached = usedCount >= CONFIG.MAX_LIFE_ACTIONS_PER_YEAR;
 
@@ -2123,7 +2254,6 @@
                 if (p.age < act.minAge) return;
                 if (act.maxAge !== undefined && p.age > act.maxAge) return;
                 if (p.lifeActionsUsed[id] === p.age) return;
-                // ✨ VIDA v2: tope de acciones al año también validado en el motor (no solo en la UI)
                 const usedCount = Object.values(p.lifeActionsUsed).filter(v => v === p.age).length;
                 if (usedCount >= CONFIG.MAX_LIFE_ACTIONS_PER_YEAR) return;
                 if (p.money < act.cost) return;
@@ -2132,12 +2262,13 @@
                 p.money = Utils.clampMoney(p.money);
                 this.trackMoney(p, `Vida: ${act.title}`, p.money - before);
                 p.health = Utils.clamp(p.health + act.health, 0, 100);
-                p.happiness = Utils.clamp(p.happiness + act.happiness, 0, 100);
+                let bonusTraje = 0;
+                if (act.id === 'feria_abril' && (p.possessions || []).some(o => o.id === 'traje_feria')) bonusTraje = 4;
+                p.happiness = Utils.clamp(p.happiness + act.happiness + bonusTraje, 0, 100);
                 p.lifeActionsUsed[id] = p.age;
-                // ✨ LOGROS DE VIDA: el contador de por vida suma en cada uso
                 if (!p.lifeActionCounts) p.lifeActionCounts = {};
                 p.lifeActionCounts[id] = (p.lifeActionCounts[id] || 0) + 1;
-                p.logs.push(`❤️ ${act.msg}`);
+                p.logs.push(`❤️ ${act.msg}${bonusTraje ? ' Con tu traje de Feria brillas el doble (+4 extra).' : ''}`);
                 this.checkAchievements(p);
                 Storage.save(p);
                 UI.render();
@@ -2147,13 +2278,14 @@
             openLogrosModal() {
                 const p = gameState.player;
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
+                const album = (gameState.meta && gameState.meta.achievements) || [];
+                const vidas = (gameState.meta && gameState.meta.vidas) || 0;
                 UI.elements.modalTitle.innerText = "🏆 Logros";
-                UI.elements.modalMsg.innerText = `Has desbloqueado ${p.achievements.length} de ${ACHIEVEMENTS.length} logros.`;
+                UI.elements.modalMsg.innerText = `El álbum de la familia: ${album.length} de ${ACHIEVEMENTS.length} · En esta vida: ${p.achievements.length}\n${vidas} vida(s) escritas en esta casa.`;
                 let listHTML = `<div class="modal-scrollable-content">`;
                 ACHIEVEMENTS.forEach((a) => {
-                    const got = p.achievements.includes(a.id);
-                    // ✨ ANDALUCÍA DIRECTO: los logros ocultos se muestran como ??? hasta desbloquearse
-                    if (a.hidden && !got) {
+                    const inAlbum = album.includes(a.id);
+                    if (a.hidden && !inAlbum) {
                         listHTML += `
                             <div class="log-entry" style="opacity:0.5;">
                                 🔒 <strong>???</strong><br>
@@ -2163,8 +2295,8 @@
                     }
                     const prog = this.logroProgress(p, a.id);
                     listHTML += `
-                        <div class="log-entry" style="${got ? '' : 'opacity:0.5;'}">
-                            ${got ? a.icon : '🔒'} <strong>${a.title}</strong>${prog && !got ? ` <span style="font-size:0.85em; color:#b07d2b;">· ${prog}</span>` : ''}<br>
+                        <div class="log-entry" style="${inAlbum ? '' : 'opacity:0.5;'}">
+                            ${inAlbum ? a.icon : '🔒'} <strong>${a.title}</strong>${prog && !inAlbum ? ` <span style="font-size:0.85em; color:#b07d2b;">· ${prog}</span>` : ''}<br>
                             <span style="font-size:0.85em;">${a.desc}</span>
                         </div>`;
                 });
@@ -2178,10 +2310,8 @@
                 const p = gameState.player;
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
 
-                // ✨ FIX: matar cualquier evento de decisión fantasma al abrir estudios
                 UI._currentChoiceEvent = null;
 
-                // ✨ FIX buzón: bloquear estudios mientras vives en Madrid (coherencia)
                 if (p.residenceCity === 'Madrid') {
                     UI.showAlert("Centro de Estudios", "Estás viviendo en Madrid por trabajo. No puedes matricularte en centros de Sevilla hasta que regreses a casa.");
                     return;
@@ -2271,7 +2401,6 @@
             openJobModal() {
                 const p = gameState.player;
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
-                // ✨ JUBILACIÓN: puerta cerrada a la bolsa de empleo
                 if (p.job === 'Jubilado') {
                     UI.showAlert("Bolsa de Empleo", "Estás jubilado, criatura. Tu vida laboral quedó atrás: ahora tu único horario es el que tú digas.");
                     return;
@@ -2464,7 +2593,6 @@
             },
 
             openManagerModal() {
-                // ✨ TUTORIAL v2: consejo como tarjeta persistente
                 UI.elements.modalTitle.innerText = "Gestión de Partida";
                 UI.elements.modalMsg.innerText = "¿Qué deseas hacer con los datos de tu partida?";
                 UI.elements.modalDynamic.innerHTML = this.tipCardHTML('tips_gestion', "Exporta tu partida a archivo de vez en cuando: así tu historia sobrevive a cualquier percance.");
@@ -2473,8 +2601,15 @@
                     <button class="modal-btn modal-btn-cancel" data-action="close-modal">Cerrar</button>
                     <button class="modal-btn modal-btn-confirm" data-action="export-save">Guardar archivo</button>
                     <button class="modal-btn modal-btn-confirm" data-action="trigger-load">Cargar archivo</button>
+                    <button class="modal-btn modal-btn-cancel" style="color:#c0392b; border:1px solid #e74c3c;" data-action="wipe-all">Borrar todo (incluido el álbum)</button>
                 `;
                 UI.openModal();
+            },
+
+            wipeAll() {
+                Storage.clear();
+                Storage.clearMeta();
+                location.reload();
             },
 
             exportSave() {
@@ -2506,6 +2641,7 @@
                             if (importedPlayer.name !== undefined) {
                                 gameState.player = this.normalizeState(importedPlayer);
                                 gameState.player.logs.push("¡Papeles arreglaítos! Partida cargada correctamente.");
+                                this.mergeAlbum(gameState.player);
                                 Storage.save(gameState.player);
                                 UI.elements.startScreen.classList.add('hidden');
                                 UI.render();
@@ -2560,6 +2696,15 @@
                 case 'open-summary':
                     Engine.openSummaryModal();
                     break;
+                case 'open-market':
+                    Engine.openMarketModal();
+                    break;
+                case 'buy-item':
+                    Engine.buyItem(actionBtn.dataset.itemId);
+                    break;
+                case 'sell-item':
+                    Engine.sellItem(actionBtn.dataset.itemId);
+                    break;
                 case 'open-vida':
                     Engine.openVidaModal();
                     break;
@@ -2583,6 +2728,12 @@
                     break;
                 case 'confirm-reset':
                     Engine.resetGame();
+                    break;
+                case 'wipe-all':
+                    UI.showConfirmWipeModal();
+                    break;
+                case 'confirm-wipe-yes':
+                    Engine.wipeAll();
                     break;
                 case 'close-modal':
                     UI.closeModal();
@@ -2633,7 +2784,6 @@
                 case 'select-choice-option':
                     Engine.handleChoiceOption(parseInt(actionBtn.dataset.choiceIdx, 10));
                     break;
-                // ✨ MADRID TRAMO B: botones del modal de confirmación del traslado
                 case 'confirm-madrid-go':
                     Engine.processMadridDecision(parseInt(actionBtn.dataset.choiceIdx, 10), true);
                     break;
@@ -2644,9 +2794,8 @@
                     UI.closeModal();
                     const p = gameState.player;
                     if (p) {
-                        p.pendingChoiceId = null; // ✨ FIX: decisión descartada (sin fondos)
+                        p.pendingChoiceId = null;
                         p.logs.push(`💸 No tenías fondos suficientes para tomar ninguna decisión. La situación pasó sin más.`);
-                        // ✨ FIX arista: comprobar mortalidad también al cerrar sin fondos
                         const deathInfo = Engine.checkMortality();
                         if (deathInfo.dead) {
                             p.isDead = true;
@@ -2676,8 +2825,7 @@
             Engine.init();
         });
 
-        // Acceso para pruebas desde consola (quitar en la versión final)
-        window._debug = { gameState, Engine, Utils, Storage, CONFIG, UI, CHOICE_EVENTS, RANDOM_EVENTS, ACHIEVEMENTS, LIFE_ACTIONS, STUDIES, JOBS, TOUR_STEPS, MESES };
+        window._debug = { gameState, Engine, Utils, Storage, CONFIG, UI, CHOICE_EVENTS, RANDOM_EVENTS, ACHIEVEMENTS, LIFE_ACTIONS, STUDIES, JOBS, MARKET_ITEMS, TOUR_STEPS, MESES };
     })();
     </script>
 
