@@ -2948,7 +2948,23 @@
             }
         });
 
+        // ✨ FIX PWA v3: altura real de ventana en píxeles.
+        //    En la app instalada, las unidades dvh llegan mal al arranque y cortan el panel de abajo.
+        const applyViewportHeight = () => {
+            const h = window.visualViewport ? Math.round(window.visualViewport.height) : window.innerHeight;
+            const container = document.getElementById('game-container');
+            if (container) container.style.height = h + 'px';
+            document.body.style.height = h + 'px';
+            document.body.style.minHeight = h + 'px';
+        };
+        window.addEventListener('load', applyViewportHeight);
+        window.addEventListener('resize', applyViewportHeight);
+        window.addEventListener('orientationchange', applyViewportHeight);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) applyViewportHeight(); });
+        if (window.visualViewport) window.visualViewport.addEventListener('resize', applyViewportHeight);
+
         window.addEventListener('DOMContentLoaded', () => {
+            applyViewportHeight();
             Engine.init();
         });
 
