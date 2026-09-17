@@ -178,8 +178,7 @@
             z-index: 400; display: none;
         }
         #tutorial-tour.is-active { display: block; }
-        /* ✨ FIX PWA v2: foco y burbuja en coordenadas de pantalla (fixed):
-           inmunes al dvh tardío y al offset del contenedor en la app instalada */
+        /* ✨ FIX PWA v2: foco y burbuja en coordenadas de pantalla (fixed) */
         #tour-spotlight {
             position: fixed;
             border-radius: 10px;
@@ -198,9 +197,13 @@
             padding: 14px;
             width: 260px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            /* ✨ TOUR (retoque manual del Jefe): la burbuja viaja suave entre pasos */
+            transition: left 0.3s ease, top 0.3s ease;
         }
         #tour-text { font-size: 0.85em; color: #2c3e50; line-height: 1.4; margin-bottom: 10px; }
-        .tour-buttons { display: flex; gap: 6px; }
+        /* ✨ TOUR: botones en dos filas (Anterior + Siguiente arriba, Saltar debajo) */
+        .tour-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+        .tour-buttons [data-action="tour-skip"] { flex-basis: 100%; }
 
         /* Toast de logros (crema/dorado) */
         #achievement-toast {
@@ -317,6 +320,8 @@
                 <div class="badge" id="player-pet">🐾 Sin mascota</div>
                 <div class="badge" id="player-team">⚽ Sin equipo</div>
                 <div class="badge" id="player-housing">🏠 Con tus padres</div>
+                <!-- ✨ FASE 3 TRAMO A: la cuadrilla, siempre a la vista -->
+                <div class="badge" id="player-friends">👥 Sin cuadrilla</div>
             </div>
             <div class="status-grid">
                 <div class="status-badge">📚 <span id="player-studies">Ninguno</span></div>
@@ -385,6 +390,8 @@
             <div id="tour-bubble">
                 <div id="tour-text"></div>
                 <div class="tour-buttons">
+                    <!-- ✨ TOUR (retoque manual del Jefe): Anterior en rojo, como Siguiente -->
+                    <button class="modal-btn modal-btn-confirm" data-action="tour-prev">Anterior</button>
                     <button class="modal-btn modal-btn-confirm" data-action="tour-next">Siguiente</button>
                     <button class="modal-btn modal-btn-cancel" data-action="tour-skip">Saltar tour</button>
                 </div>
@@ -409,7 +416,9 @@
             ANNUAL_LIVING_COST: 7000,
             OVERDRAFT_LIMIT: -500,
             MAX_LOGS: 100,
-            MAX_LIFE_ACTIONS_PER_YEAR: 3
+            MAX_LIFE_ACTIONS_PER_YEAR: 3,
+            // ✨ FASE 3 TRAMO A: la cuadrilla es chica para que cada amigo importe
+            MAX_FRIENDS: 6
         });
 
         const HOSPITALS = [
@@ -475,6 +484,25 @@
             { id: 'cocina', title: "Cocina equipada", category: "hogar", minAge: 25, price: 2500, annualCost: 50, happiness: 10, reqOwnHome: true }
         ];
 
+        // ✨ FASE 3 TRAMO A: cajones curados del reparto. Alma escrita a mano, variedad infinita.
+        const FRIEND_FIRST_M = [
+            "Manolo", "Curro", "Joaquín", "Rafael", "Pepe", "Diego", "Álvaro", "Sergio",
+            "Juan", "Carlos", "Fernando", "Miguel", "Luis", "Andrés", "Ignacio", "Gonzalo",
+            "Alejandro", "Pablo", "Antonio", "Francisco", "Javier", "José", "Ramón", "Emilio"
+        ];
+        const FRIEND_FIRST_F = [
+            "Rocío", "Macarena", "Triana", "Belén", "Cayetana", "Lola", "Esperanza", "Remedios",
+            "Carmen", "Pilar", "María", "Isabel", "Ana", "Lucía", "Marta", "Natalia",
+            "Marina", "Josefa", "Antonia", "Dolores", "Rosario", "Amparo", "Julia", "Silvia"
+        ];
+        const FRIEND_SURNAMES = [
+            "García", "Fernández", "López", "Martínez", "Sánchez", "Pérez", "Gómez", "Ruiz",
+            "Díaz", "Moreno", "Jiménez", "Iglesias", "Vázquez", "Romero", "Navarro", "Torres",
+            "Ramírez", "Gil", "Serrano", "Molina", "Blanco", "Ortega", "Delgado", "Castro",
+            "Ortiz", "Rubio", "Marín", "Osuna", "Vergara", "Carmona", "Salas", "Miranda",
+            "Pineda", "Cordero", "Aguilar", "Campos", "Reyes", "Cruz", "Santos", "Vega"
+        ];
+
         const RANDOM_EVENTS = [
             { minAge: 3, maxAge: 11, msg: "Te has caído jugando en el parque de María Luisa y te has raspado la rodilla.", health: -5, happiness: -5, money: 0 },
             { minAge: 3, maxAge: 11, msg: "Tus padres te han llevado a tomar un helado en Los Italianos.", health: 0, happiness: 15, money: 0 },
@@ -538,7 +566,12 @@
             { id: 'andalucia_directo', icon: "📺", title: "Andalucía Directo", desc: "Cumple 105 años y deja que Canal Sur cuente tu historia.", hidden: true },
             // ✨ FASE 2: logros del mercado (el álbum de la familia los guarda)
             { id: 'llave_en_mano', icon: "🚗", title: "Llave en mano", desc: "Compra tu primer vehículo con motor (moto o coche)." },
-            { id: 'casa_vestida', icon: "🛋️", title: "Casa vestida", desc: "Ten 3 objetos de hogar a la vez." }
+            { id: 'casa_vestida', icon: "🛋️", title: "Casa vestida", desc: "Ten 3 objetos de hogar a la vez." },
+            // ✨ LOGRO DE ESTUDIOS: el currículum completo de una vida entera
+            { id: 'erudito', icon: "📚", title: "Erudito sevillano", desc: "Completa todos los estudios: de Primaria al Máster, sin dejarte ni uno en el tintero." },
+            // ✨ FASE 3 TRAMO A: logros de cuadrilla
+            { id: 'amigo_alma', icon: "🧑‍🤝‍🧑", title: "Amigo del alma", desc: "Mantén 10 años seguidos una amistad con vínculo 90 o más." },
+            { id: 'cuadrilla_llena', icon: "🍻", title: "La cuadrilla llena", desc: "Llega a tener 6 amigos a la vez." }
         ];
 
         // ✨ TUTORIAL v2: tour con paso del Mercado añadido
@@ -546,7 +579,7 @@
             { selector: '#actions-panel [data-action="next-year"]', text: "Aquí late tu vida: cada clic, un año con su sueldo, sus gastos y sus sorpresas." },
             { selector: '#actions-panel [data-action="open-studies"]', text: "Tu formación abre puertas. A los 6, 12 y 16 es obligatorio: el juego te avisará." },
             { selector: '#actions-panel [data-action="open-jobs"]', text: "Desde los 18, la bolsa de empleo. Cada entrevista es una tirada: tu formación es el boleto." },
-            { selector: '#actions-panel [data-action="open-vida"]', text: "El corazón del juego: máximo 3 acciones al año para cuidar cuerpo y alma." },
+            { selector: '#actions-panel [data-action="open-vida"]', text: "El corazón del juego: máximo 3 acciones al año para cuidar cuerpo y alma… y tu cuadrilla." },
             { selector: '#actions-panel [data-action="open-market"]', text: "El mercado: aquí tu dinero encuentra destinos. Ojo con la letra pequeña: lo que compres pedirá mantenimiento cada año." },
             { selector: '#actions-panel [data-action="open-manager"]', text: "Exporta tu historia a archivo de vez en cuando: tu seguro de vida digital." }
         ];
@@ -874,7 +907,7 @@
             clear() {
                 localStorage.removeItem(CONFIG.STORAGE_KEY);
             },
-            // ✨ ÁLBUM DE LA FAMILIA: memoria persistente de logros y vidas, aparte de la partida
+            // ✨ ÁLBUM DE LA FAMILIA: memoria persistente de logros, recuerdos y vidas, aparte de la partida
             loadMeta() {
                 try {
                     const raw = localStorage.getItem(CONFIG.META_KEY);
@@ -882,13 +915,14 @@
                     if (m && typeof m === 'object') {
                         return {
                             achievements: Array.isArray(m.achievements) ? m.achievements : [],
+                            recuerdos: Array.isArray(m.recuerdos) ? m.recuerdos : [],
                             vidas: m.vidas || 0
                         };
                     }
-                    return { achievements: [], vidas: 0 };
+                    return { achievements: [], recuerdos: [], vidas: 0 };
                 } catch (e) {
                     console.error('Meta load failed:', e);
-                    return { achievements: [], vidas: 0 };
+                    return { achievements: [], recuerdos: [], vidas: 0 };
                 }
             },
             saveMeta(m) {
@@ -989,6 +1023,7 @@
                 pet: document.getElementById('player-pet'),
                 team: document.getElementById('player-team'),
                 housing: document.getElementById('player-housing'),
+                friends: document.getElementById('player-friends'),
                 studies: document.getElementById('player-studies'),
                 job: document.getElementById('player-job'),
                 health: document.getElementById('health-val'),
@@ -1028,6 +1063,9 @@
                 }
 
                 this.elements.housing.innerText = p.housing ? `🏠 ${p.housing.zone}` : "🏠 Con tus padres";
+                // ✨ FASE 3 TRAMO A: la cuadrilla, viva en la cabecera
+                const nFriends = (p.friends || []).length;
+                this.elements.friends.innerText = nFriends > 0 ? `👥 ${nFriends} amigo${nFriends === 1 ? '' : 's'}` : "👥 Sin cuadrilla";
                 this.elements.health.innerText = p.health;
                 this.elements.happiness.innerText = p.happiness;
                 this.elements.money.innerText = p.money;
@@ -1129,6 +1167,33 @@
                 this.elements.modalBtns.innerHTML = `
                     <button class="modal-btn modal-btn-confirm" data-action="confirm-wipe-yes">Sí, borrar todo</button>
                     <button class="modal-btn modal-btn-cancel" data-action="close-modal">Cancelar</button>
+                `;
+                this.openModal();
+            },
+
+            // ✨ FASE 2: confirmación de venta. Un tap despistado no puede costarte medio coche.
+            showConfirmSellModal(item, value) {
+                this._modalCallback = null;
+                this.elements.modalTitle.innerText = `🏷️ ¿Vender ${item.title}?`;
+                this.elements.modalMsg.innerText = `Vendes ${item.title} por ${value}€ (la mitad de lo que pagaste). Dejará de ser tuyo y su mantenimiento desaparece.\nEsta decisión no se puede deshacer.`;
+                this.elements.modalDynamic.innerHTML = '';
+                this.elements.modalBtns.innerHTML = `
+                    <button class="modal-btn modal-btn-confirm" data-action="confirm-sell-yes" data-item-id="${item.id}">Vender por ${value}€</button>
+                    <button class="modal-btn modal-btn-cancel" data-action="close-modal">Cancelar</button>
+                `;
+                this.openModal();
+            },
+
+            // ✨ FASE 3 TRAMO A: alguien llama a la puerta de tu vida
+            // ✨ FIX GÉNERO (manual del Jefe): el título concuerda con quien llama
+            showFriendRequestModal(cand) {
+                this._modalCallback = null;
+                this.elements.modalTitle.innerText = cand.gender === 'F' ? "🤝 ¿Una nueva amiga?" : "🤝 ¿Un nuevo amigo?";
+                this.elements.modalMsg.innerText = cand.intro;
+                this.elements.modalDynamic.innerHTML = '';
+                this.elements.modalBtns.innerHTML = `
+                    <button class="modal-btn modal-btn-confirm" data-action="accept-friend">Aceptar la amistad</button>
+                    <button class="modal-btn modal-btn-cancel" data-action="decline-friend">Declinar con educación</button>
                 `;
                 this.openModal();
             },
@@ -1251,6 +1316,14 @@
                 }
             },
 
+            // ✨ RECUERDOS: aviso suave y distinto, sin fanfarria de logro. Ternura, no confeti.
+            showRecuerdoToast(text) {
+                this._toastQueue.push({ type: 'recuerdo', data: text });
+                if (!this._toastShowing) {
+                    this._nextToast();
+                }
+            },
+
             _nextToast() {
                 const item = this._toastQueue.shift();
                 if (!item) {
@@ -1263,6 +1336,12 @@
                 if (item.type === 'team') {
                     this._renderTeamToast(item.data);
                     duration = 4500;
+                } else if (item.type === 'recuerdo') {
+                    this.elements.toastIcon.innerText = '🌈';
+                    this.elements.toastTitle.innerText = 'Un recuerdo para siempre';
+                    this.elements.toastName.innerText = item.data;
+                    this.elements.achievementToast.classList.remove('hide');
+                    this.elements.achievementToast.classList.add('show');
                 } else {
                     this.elements.toastIcon.innerText = item.data.icon;
                     this.elements.toastTitle.innerText = '¡Logro desbloqueado!';
@@ -1307,6 +1386,9 @@
             _tourStep: 0,
             _tourRepositionBound: false,
             _tourRetry: false,
+            // ✨ FASE 3 TRAMO A: estado vivo del tramo
+            _pendingFriend: null,
+            _friendRequestThisYear: null,
 
             init() {
                 // ✨ ÁLBUM: la memoria de la familia se carga siempre, haya partida o no
@@ -1327,6 +1409,11 @@
                         !UI.elements.modal.classList.contains('is-active')) {
                         // ✨ FIX: espera un frame para medir con el layout asentado
                         requestAnimationFrame(() => this.startTour());
+                    }
+
+                    // ✨ CEREMONIAS: si quedaron avisos pendientes del último año, se sirven al arrancar
+                    if (!UI.elements.modal.classList.contains('is-active')) {
+                        this.runPendingCeremonies();
                     }
                 } else {
                     UI.elements.startScreen.classList.remove('hidden');
@@ -1457,6 +1544,10 @@
                 const nextBtn = bubble.querySelector('[data-action="tour-next"]');
                 if (nextBtn) nextBtn.innerText = (this._tourStep === TOUR_STEPS.length - 1) ? 'Entendido' : 'Siguiente';
 
+                // ✨ TOUR: el botón "Anterior" se oculta en el primer paso
+                const prevBtn = bubble.querySelector('[data-action="tour-prev"]');
+                if (prevBtn) prevBtn.style.display = (this._tourStep === 0) ? 'none' : '';
+
                 // Colocación de la burbuja en coordenadas de pantalla: debajo del foco si hay sitio, si no, encima
                 const bubbleWidth = 260;
                 let bx = r.left;
@@ -1475,6 +1566,14 @@
                 if (this._tourStep >= TOUR_STEPS.length) {
                     this.endTour();
                 } else {
+                    this.renderTourStep();
+                }
+            },
+
+            // ✨ TOUR: volver al consejo anterior, por si leíste demasiado rápido
+            prevTourStep() {
+                if (this._tourStep > 0) {
+                    this._tourStep--;
                     this.renderTourStep();
                 }
             },
@@ -1548,6 +1647,13 @@
                 const ownedItems = p.possessions || [];
                 if (ownedItems.some(it => it.category === 'coche' || it.category === 'moto')) unlock('llave_en_mano');
                 if (ownedItems.filter(it => it.category === 'hogar').length >= 3) unlock('casa_vestida');
+
+                // ✨ LOGRO DE ESTUDIOS: el currículum completo de una vida entera
+                if (STUDIES.every(s => p.completedStudies.includes(s.id))) unlock('erudito');
+
+                // ✨ FASE 3 TRAMO A: logros de cuadrilla
+                if ((p.friends || []).length >= CONFIG.MAX_FRIENDS) unlock('cuadrilla_llena');
+                if ((p.friends || []).some(f => (f.highYears || 0) >= 10)) unlock('amigo_alma');
             },
 
             normalizeState(raw) {
@@ -1597,6 +1703,13 @@
                     housing: raw.housing || Utils.getDefaultHousing(),
                     // ✨ FASE 2: posesiones del mercado (defecto vacío = migración gratis)
                     possessions: Array.isArray(raw.possessions) ? raw.possessions : [],
+                    // ✨ ESTUDIOS: un estudio de pago por año (defecto antiguo = sin límite usado este año)
+                    lastPaidStudyAge: raw.lastPaidStudyAge !== undefined ? raw.lastPaidStudyAge : null,
+                    // ✨ FASE 3 TRAMO A: cuadrilla, nombres usados, solicitud pendiente y ceremonias en cola
+                    friends: Array.isArray(raw.friends) ? raw.friends : [],
+                    usedFriendNames: Array.isArray(raw.usedFriendNames) ? raw.usedFriendNames : [],
+                    pendingFriendRequest: (raw.pendingFriendRequest && typeof raw.pendingFriendRequest === 'object') ? raw.pendingFriendRequest : null,
+                    pendingCeremonies: Array.isArray(raw.pendingCeremonies) ? raw.pendingCeremonies : [],
                     yearTracker: raw.yearTracker || { ingresos: 0, gastos: 0, items: [] },
                     lastYearSummary: raw.lastYearSummary || null,
                     achievements: Array.isArray(raw.achievements) ? raw.achievements : [],
@@ -1661,6 +1774,11 @@
                     sevillaHouseStored: null,
                     housing: Utils.getDefaultHousing(),
                     possessions: [],
+                    lastPaidStudyAge: null,
+                    friends: [],
+                    usedFriendNames: [],
+                    pendingFriendRequest: null,
+                    pendingCeremonies: [],
                     yearTracker: { ingresos: 0, gastos: 0, items: [] },
                     lastYearSummary: null,
                     achievements: [],
@@ -1701,6 +1819,201 @@
                     }
                 }
                 return { dead: false };
+            },
+
+            // ✨ FASE 3 TRAMO A: genera una persona nueva desde los cajones curados,
+            //    con antirrepetición por vida (los que se fueron no vuelven con su nombre)
+            generateFriendCandidate(p) {
+                const gender = Math.random() < 0.5 ? 'M' : 'F';
+                const used = p.usedFriendNames || [];
+                let name = null;
+
+                for (let i = 0; i < 20; i++) {
+                    const pool = gender === 'M' ? FRIEND_FIRST_M : FRIEND_FIRST_F;
+                    const first = pool[Math.floor(Math.random() * pool.length)];
+                    const sur = FRIEND_SURNAMES[Math.floor(Math.random() * FRIEND_SURNAMES.length)];
+                    const cand = `${first} ${sur}`;
+                    const taken = used.includes(cand) || (p.friends || []).some(f => f.name === cand);
+                    if (!taken) { name = cand; break; }
+                }
+                if (!name) {
+                    // Rarísimo: doble apellido para garantizar unicidad
+                    const pool = gender === 'M' ? FRIEND_FIRST_M : FRIEND_FIRST_F;
+                    const first = pool[Math.floor(Math.random() * pool.length)];
+                    const sur1 = FRIEND_SURNAMES[Math.floor(Math.random() * FRIEND_SURNAMES.length)];
+                    let sur2 = FRIEND_SURNAMES[Math.floor(Math.random() * FRIEND_SURNAMES.length)];
+                    if (sur2 === sur1) sur2 = FRIEND_SURNAMES[(FRIEND_SURNAMES.indexOf(sur1) + 1) % FRIEND_SURNAMES.length];
+                    name = `${first} ${sur1} ${sur2}`;
+                }
+
+                // ✨ FIX COHERENCIA (cajones por edad): cada etapa huele a lo suyo.
+                //    0-5 guardería y cuna · 6-7 cole y parque · 8-11 catequesis · resto sin cambios.
+                let context;
+                if (p.age <= 5) {
+                    const c = [
+                        "Os conocisteis en la guardería, disputando el mismo mordedor.",
+                        "Vuestras madres coincidieron en el parque de María Luisa y acabasteis compartiendo merienda.",
+                        "Es del grupo de la cuna: hoy os habéis reído juntos hasta en el carrito."
+                    ];
+                    context = c[Math.floor(Math.random() * c.length)];
+                } else if (p.age <= 7) {
+                    const c = [
+                        "Os conocisteis en el parque de María Luisa, disputando el mismo columpio.",
+                        `Es ${gender === 'F' ? 'la niña nueva' : 'el niño nuevo'} del cole y hoy se sentó a tu lado en el patio.`,
+                        "Coincidisteis en la clase de gimnasia y acabasteis compartiendo el bocadillo."
+                    ];
+                    context = c[Math.floor(Math.random() * c.length)];
+                } else if (p.age <= 11) {
+                    const c = [
+                        "Os conocisteis en el parque de María Luisa, disputando el mismo columpio.",
+                        "Coincidisteis en catequesis y acabasteis compartiendo el bocadillo.",
+                        `Es ${gender === 'F' ? 'la niña nueva' : 'el niño nuevo'} del cole y hoy se sentó a tu lado en el patio.`
+                    ];
+                    context = c[Math.floor(Math.random() * c.length)];
+                } else if (p.age <= 17) {
+                    const c = [
+                        "Os conocisteis en el instituto, copiando el mismo examen de matemáticas.",
+                        "Coincidís en el equipo de fútbol del barrio y te ha invitado a un refresco.",
+                        "Es del grupo que se queda en la plaza hasta que se encienden las farolas."
+                    ];
+                    context = c[Math.floor(Math.random() * c.length)];
+                } else if (p.age <= 64) {
+                    const c = [
+                        "Os conocisteis en el curro, compartiendo la máquina de café y las quejas del lunes.",
+                        "Coincidís en el gimnasio y siempre te guarda el sitio en la clase de spinning.",
+                        "Es del bar de toda la vida y hoy te ha invitado a una tapa.",
+                        "Os conocisteis en la hermandad, montando el paso hasta las tantas."
+                    ];
+                    context = c[Math.floor(Math.random() * c.length)];
+                } else {
+                    const c = [
+                        "Os conocisteis en el centro de mayores, discutiendo por la silla de la ventana.",
+                        "Coincidís en el dominó del bar y hoy te ha dejado ganar una partida.",
+                        "Es de la cola del ambulatorio y lleváis meses comentando lo mal que atienden los lunes."
+                    ];
+                    context = c[Math.floor(Math.random() * c.length)];
+                }
+
+                const amiga = gender === 'F';
+                return {
+                    name: name,
+                    gender: gender,
+                    intro: `${name} quiere ser tu ${amiga ? 'amiga' : 'amigo'}. ${context}`
+                };
+            },
+
+            // ✨ FASE 3 TRAMO A: acepta o declina sin castigo; decir que no también es una forma de ser
+            acceptFriend() {
+                const p = gameState.player;
+                const cand = p.pendingFriendRequest;
+                p.pendingFriendRequest = null;
+                this._pendingFriend = null;
+                if (!cand) { UI.closeModal(); return; }
+                if ((p.friends || []).length >= CONFIG.MAX_FRIENDS) { UI.closeModal(); return; }
+
+                if (!p.friends) p.friends = [];
+                if (!p.usedFriendNames) p.usedFriendNames = [];
+                p.friends.push({
+                    id: 'f' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    name: cand.name,
+                    gender: cand.gender,
+                    sinceAge: p.age,
+                    bond: 55,
+                    lastCareAge: null,
+                    lastGiftAge: null,
+                    highYears: 0
+                });
+                p.usedFriendNames.push(cand.name);
+                p.logs.push(`🤝 ${cand.name} pasa a ser parte de tu cuadrilla. Amigos desde los ${p.age} años.`);
+                this.checkAchievements(p);
+                Storage.save(p);
+                UI.render();
+                UI.closeModal();
+            },
+
+            declineFriend() {
+                const p = gameState.player;
+                const cand = p.pendingFriendRequest;
+                p.pendingFriendRequest = null;
+                this._pendingFriend = null;
+                if (!cand) { UI.closeModal(); return; }
+                // ✨ COHERENCIA (opcional aprobado): el "otro año" habla según la edad
+                p.logs.push(`🤝 Declinas con educación la amistad de ${cand.name}. Quizás otro año, ${p.age <= 11 ? 'en otro columpio' : p.age <= 17 ? 'en otra plaza' : 'en otro bar'}.`);
+                Storage.save(p);
+                UI.render();
+                UI.closeModal();
+            },
+
+            // ✨ FASE 3 TRAMO A: cuidar a un amigo, una vez al año por amigo, sin tocar el tope de Vida
+            doMeetFriend(friendId) {
+                const p = gameState.player;
+                const f = (p.friends || []).find(x => x.id === friendId);
+                if (!f || f.lastCareAge === p.age) return;
+                const enMadrid = p.residenceCity === 'Madrid';
+                const gain = enMadrid ? 6 : 12;
+                f.bond = Utils.clamp(f.bond + gain, 0, 100);
+                f.lastCareAge = p.age;
+                // ✨ FIX COHERENCIA: el plan depende de la edad; nada de cañas a los seis años
+                let plan;
+                if (p.age <= 11) plan = `🛝 Quedas con ${f.name}: tarde de columpios, cromos y merienda compartida en el parque. (+${gain} vínculo)`;
+                else if (p.age <= 17) plan = `🍟 Quedas con ${f.name}: vuelta por el barrio, patatas fritas y risas hasta que se encienden las farolas. (+${gain} vínculo)`;
+                else if (p.age <= 64) plan = `🍺 Quedas con ${f.name}: cañas, paseo y esa charla que arregla el mundo. (+${gain} vínculo)`;
+                else plan = `☕ Quedas con ${f.name}: café tranquilo, paseo por el río y esa charla de toda la vida. (+${gain} vínculo)`;
+                p.logs.push(enMadrid
+                    ? `📞 Videollamada con ${f.name}: media hora de risas y puesta al día. (+${gain} vínculo)`
+                    : plan);
+                this.checkAchievements(p);
+                Storage.save(p);
+                UI.render();
+                UI.closeModal();
+                this.openVidaModal();
+            },
+
+            doGiftFriend(friendId) {
+                const p = gameState.player;
+                const f = (p.friends || []).find(x => x.id === friendId);
+                if (!f || f.lastGiftAge === p.age || p.money < 30) return;
+                const before = p.money;
+                p.money -= 30;
+                p.money = Utils.clampMoney(p.money);
+                this.trackMoney(p, `Regalo a ${f.name}`, p.money - before);
+                f.bond = Utils.clamp(f.bond + 8, 0, 100);
+                f.lastGiftAge = p.age;
+                // ✨ COHERENCIA (opcional aprobado): el regalo habla según la distancia y la edad
+                p.logs.push(p.residenceCity === 'Madrid'
+                    ? `🎁 Le mandas un paquete por correo a ${f.name}: detalle de los de antes, con su lazo y todo. (+8 vínculo)`
+                    : p.age <= 11
+                        ? `🎁 Le regalas a ${f.name} un cromo repetido y una chuche: tesoro puro. (+8 vínculo)`
+                        : `🎁 Le regalas un detalle a ${f.name}: de esos que se guardan en la vitrina del salón. (+8 vínculo)`);
+                this.checkAchievements(p);
+                Storage.save(p);
+                UI.render();
+                UI.closeModal();
+                this.openVidaModal();
+            },
+
+            // ✨ CEREMONIAS: cola de avisos de fin de año, uno detrás de otro, nunca pisados.
+            //    Si hay un modal abierto (decisión, estudios), esperan su turno.
+            //    Al vaciarse, si la vida quiso presentarte a alguien, llega su solicitud.
+            runPendingCeremonies() {
+                const p = gameState.player;
+                if (!p || p.isDead) return;
+                if (UI.elements.modal.classList.contains('is-active')) return;
+
+                const list = p.pendingCeremonies || [];
+                if (list.length === 0) {
+                    if (p.pendingFriendRequest) {
+                        const cand = p.pendingFriendRequest;
+                        this._pendingFriend = cand;
+                        UI.showFriendRequestModal(cand);
+                    }
+                    return;
+                }
+
+                const c = list.shift();
+                p.pendingCeremonies = list;
+                Storage.save(p);
+                UI.showAlert(c.title, c.msg, () => this.runPendingCeremonies());
             },
 
             nextYear() {
@@ -1746,6 +2059,15 @@
 
                 // ✨ Regeneración pasiva de salud (+2 por año)
                 p.health = Utils.clamp(p.health + 2, 0, 100);
+
+                // ✨ CEREMONIAS: se declaran pronto porque varios sistemas del año alimentan la cola
+                const ceremonias = [];
+                const flushCeremonias = () => {
+                    if (ceremonias.length > 0) {
+                        p.pendingCeremonies = (p.pendingCeremonies || []).concat(ceremonias);
+                        ceremonias.length = 0;
+                    }
+                };
 
                 // ✨ JUBILACIÓN: a los 67 se cierra la vida laboral (también partidas viejas ya pasadas de edad)
                 let jubiladoEsteAnio = false;
@@ -1889,6 +2211,88 @@
                     }
                 }
 
+                // ✨ FASE 3 TRAMO A: mantenimiento anual de la cuadrilla.
+                //    La distancia pesa (Madrid -12, Sevilla -8), el descuido apaga, y la vejez se lleva a los tuyos.
+                if (!p.friends) p.friends = [];
+                const friendsCopy = [...p.friends];
+                const decay = p.residenceCity === 'Madrid' ? 12 : 8;
+                const friendDeaths = [];
+
+                for (const f of friendsCopy) {
+                    f.bond = Utils.clamp(f.bond - decay, 0, 100);
+
+                    // Años en la cumbre del cariño, para el logro Amigo del alma
+                    if (f.bond >= 90) f.highYears = (f.highYears || 0) + 1;
+                    else f.highYears = 0;
+
+                    // Vínculo a cero: se perdió el contacto. Sin ceremonia, sin álbum, sin castigo: solo el hueco.
+                    if (f.bond <= 0) {
+                        p.friends = p.friends.filter(x => x.id !== f.id);
+                        p.logs.push(`🍂 Se perdió el contacto con ${f.name}. ${p.age - f.sinceAge} años de amistad que se apagaron sin ruido.`);
+                        continue;
+                    }
+
+                    // La vejez se lleva también a los amigos (misma curva que la tuya)
+                    if (p.age >= 70) {
+                        let chance;
+                        if (p.age < 80) chance = 0.04;
+                        else if (p.age < 90) chance = 0.08;
+                        else if (p.age < 100) chance = 0.14;
+                        else chance = 0.28;
+                        if (Math.random() < chance) {
+                            friendDeaths.push(f);
+                            p.friends = p.friends.filter(x => x.id !== f.id);
+                        }
+                    }
+                }
+
+                // ✨ FASE 3 TRAMO A: la regla del tanatorio.
+                //    Vínculo >= 70: ceremonia agrupada (una al año), recuerdo en el álbum y toast suave.
+                //    Vínculo < 70: esquela en el log, sin ventana ni álbum. El duelo, proporcional al amor.
+                if (friendDeaths.length > 0) {
+                    let duelo = 0;
+                    friendDeaths.forEach(f => { duelo += Math.round(f.bond * 0.25); });
+                    p.happiness = Utils.clamp(p.happiness - duelo, 0, 100);
+
+                    const cercanos = friendDeaths.filter(f => f.bond >= 70);
+                    const lejanos = friendDeaths.filter(f => f.bond < 70);
+
+                    lejanos.forEach(f => {
+                        p.logs.push(`🕯️ Ha fallecido ${f.name}. ${p.age - f.sinceAge} años de amistad que se apagan en una esquela del barrio.`);
+                    });
+
+                    if (cercanos.length > 0) {
+                        if (!gameState.meta) gameState.meta = Storage.loadMeta();
+                        if (!Array.isArray(gameState.meta.recuerdos)) gameState.meta.recuerdos = [];
+
+                        const nombres = cercanos.map(f => f.name);
+                        let lista;
+                        if (nombres.length === 1) lista = nombres[0];
+                        else if (nombres.length === 2) lista = `${nombres[0]} y ${nombres[1]}`;
+                        else lista = `${nombres.slice(0, -1).join(', ')} y ${nombres[nombres.length - 1]}`;
+
+                        cercanos.forEach(f => {
+                            gameState.meta.recuerdos.push(`${f.name} · Amistad · ${p.age - f.sinceAge} años de amistad`);
+                            p.logs.push(`🌈 El recuerdo de ${f.name} queda guardado en el álbum de la familia.`);
+                            UI.showRecuerdoToast(`${f.name} queda en el álbum de la familia`);
+                        });
+                        Storage.saveMeta(gameState.meta);
+
+                        const anosTxt = cercanos.map(f => `${f.name}, ${p.age - f.sinceAge} años de amistad`).join('; ');
+                        ceremonias.push({
+                            title: cercanos.length === 1 ? `🕯️ El último adiós a ${nombres[0]}` : "🕯️ El último adiós",
+                            msg: cercanos.length === 1
+                                ? `Este año el barrio se ha quedado sin ${nombres[0]}. ${anosTxt}, de los de llamar a cualquier hora. El tanatorio se llenó de gente que decía lo mismo que tú: "era de los buenos". Su recuerdo queda en el álbum de la familia. (-${duelo}% felicidad)`
+                                : `Este año el barrio se ha quedado sin ${lista}. ${anosTxt}. El tanatorio se llenó de gente que decía lo mismo que tú: "eran de los buenos". Sus recuerdos quedan en el álbum de la familia. (-${duelo}% felicidad)`
+                        });
+                    } else if (duelo > 0) {
+                        p.logs.push(`🕯️ El barrio está de luto este año. (-${duelo}% felicidad)`);
+                    }
+                }
+
+                // ✨ DESPEDIDA DE MASCOTA: el año en que se va, se guarda su recuerdo en el álbum
+                let mascotaMuertaEsteAnio = null;
+
                 if (p.pet) {
                     p.pet.age++;
                     p.happiness = Utils.clamp(p.happiness + 5, 0, 100);
@@ -1905,11 +2309,23 @@
                     if (p.pet.age >= CONFIG.PET_DEATH_MIN_AGE) {
                         const petDeathChance = (p.pet.age - (CONFIG.PET_DEATH_MIN_AGE - 1)) * 0.20;
                         if (p.pet.age >= CONFIG.PET_DEATH_MAX_AGE || Math.random() < petDeathChance) {
+                            mascotaMuertaEsteAnio = { name: p.pet.name, type: p.pet.type, age: p.pet.age };
                             p.logs.push(`🌈 Tu ${p.pet.type.toLowerCase()} ${p.pet.name} ha fallecido de viejito a los ${p.pet.age} años. Siempre estará en tu recuerdo.`);
                             p.happiness = Utils.clamp(p.happiness - 25, 0, 100);
                             p.pet = null;
                         }
                     }
+                }
+
+                // ✨ RECUERDOS DEL ÁLBUM: no es un logro, es memoria. Sin felicidad, sin fanfarria de meta.
+                if (mascotaMuertaEsteAnio) {
+                    const m = mascotaMuertaEsteAnio;
+                    if (!gameState.meta) gameState.meta = Storage.loadMeta();
+                    if (!Array.isArray(gameState.meta.recuerdos)) gameState.meta.recuerdos = [];
+                    gameState.meta.recuerdos.push(`${m.name} · ${m.type} · ${m.age} años contigo`);
+                    Storage.saveMeta(gameState.meta);
+                    p.logs.push(`🌈 El recuerdo de ${m.name} queda guardado en el álbum de la familia.`);
+                    UI.showRecuerdoToast(`${m.name} queda en el álbum de la familia`);
                 }
 
                 if (p.residenceCity === 'Madrid') {
@@ -2008,6 +2424,17 @@
                     }
                 }
 
+                // ✨ FASE 3 TRAMO A: la vida te presenta gente (en Madrid no: la cuadrilla es del barrio)
+                if (!p.pendingFriendRequest && p.residenceCity !== 'Madrid' && (p.friends || []).length < CONFIG.MAX_FRIENDS && p.age >= 6) {
+                    let chance = 0.25;
+                    if (p.age <= 11) chance = 0.35;
+                    else if (p.age <= 17) chance = 0.45;
+                    else if (p.age >= 65) chance = 0.15;
+                    if (Math.random() < chance) {
+                        p.pendingFriendRequest = this.generateFriendCandidate(p);
+                    }
+                }
+
                 if (!triggeredChoice) {
                     const deathInfo = this.checkMortality();
                     if (deathInfo.dead) {
@@ -2026,6 +2453,8 @@
                     if (mandatoryStudy && !p.completedStudies.includes(mandatoryStudy.id)) {
                         p.pendingStudyAge = p.age;
                         p.logs.push(`¡Has cumplido ${p.age} años! Debes elegir tus nuevos estudios obligatoriamente.`);
+                        // ✨ CEREMONIAS: se guardan antes del retorno; se servirán al cerrar el modal de estudios
+                        flushCeremonias();
                         this.checkAchievements(p);
                         Storage.save(p);
                         UI.render();
@@ -2034,30 +2463,44 @@
                     }
                 }
 
+                // ✨ CEREMONIAS DE FIN DE AÑO: se añaden a la cola en su orden natural
+                if (mascotaMuertaEsteAnio) {
+                    const m = mascotaMuertaEsteAnio;
+                    ceremonias.push({
+                        title: `🌈 Adiós a ${m.name}`,
+                        msg: `Tu ${m.type.toLowerCase()} ${m.name} ha fallecido de viejito a los ${m.age} años. ${m.age} años de paseos, migas debajo de la mesa y esperas en la puerta. El barrio entero lo recordará contigo. (-25% felicidad)`
+                    });
+                }
+                if (despedidoEsteAnio) {
+                    ceremonias.push({
+                        title: "💼 ¡Te has quedado en paro!",
+                        msg: "La empresa ha sufrido recortes y reestructuración: de la oficina a la cola del SAE en un telediario. Tu cabecera ya lo dice bien claro: En paro. Cuando estés listo, la bolsa de empleo te espera para volver a la carga."
+                    });
+                }
+                if (regresoCasaEsteAnio) {
+                    ceremonias.push({
+                        title: "🌇 ¡Vuelves a casa!",
+                        msg: "El AVE te deja en Santa Justa con cinco años de Madrid en la maleta y el corazón intacto. Primera parada: una tapita en el barrio. El azahar hace el resto. Estás en casa, y esta vez es para quedarte."
+                    });
+                }
+                if (jubiladoEsteAnio) {
+                    ceremonias.push({
+                        title: "🧓 ¡Te jubilas!",
+                        msg: `Cuarenta y tantos años de curro se cierran con un reloj de regalo y el banco de la plaza esperándote. Tu pensión: ${p.pension}€ al año. Desde hoy tu único jefe es el sol de Sevilla.`
+                    });
+                }
+                if (andaluciaDirectoEsteAnio) {
+                    ceremonias.push({
+                        title: "📺 ¡ANDALUCÍA DIRECTO EN TU CASA!",
+                        msg: "Ciento cinco años cumplidos y el equipo de Canal Sur llama a tu puerta. Modesto Barragán entra en tu salón con la cámara, te pregunta por la Sevilla de tu infancia y tú le cuentas que la vida, si es en Sevilla, siempre merece la pena. Ramo de flores, cumpleaños feliz en directo para toda Andalucía y tu barrio pegado a la tele. Un día para enmarcar."
+                    });
+                }
+
+                flushCeremonias();
                 this.checkAchievements(p);
                 Storage.save(p);
                 UI.render();
-
-                // ✨ MEJORA: el despido se anuncia a la cara, no entre líneas del log
-                //    (si ese mismo año vuelves de Madrid, el regreso se encadena al cerrar el aviso)
-                if (despedidoEsteAnio) {
-                    UI.showAlert("💼 ¡Te has quedado en paro!", "La empresa ha sufrido recortes y reestructuración: de la oficina a la cola del SAE en un telediario. Tu cabecera ya lo dice bien claro: En paro. Cuando estés listo, la bolsa de empleo te espera para volver a la carga.", regresoCasaEsteAnio ? () => {
-                        UI.showAlert("🌇 ¡Vuelves a casa!", "El AVE te deja en Santa Justa con cinco años de Madrid en la maleta y el corazón intacto. Primera parada: una tapita en el barrio. El azahar hace el resto. Estás en casa, y esta vez es para quedarte.");
-                    } : undefined);
-                } else if (regresoCasaEsteAnio) {
-                    // ✨ MADRID TRAMO B: ceremonia de regreso tras los 5 años fuera
-                    UI.showAlert("🌇 ¡Vuelves a casa!", "El AVE te deja en Santa Justa con cinco años de Madrid en la maleta y el corazón intacto. Primera parada: una tapita en el barrio. El azahar hace el resto. Estás en casa, y esta vez es para quedarte.");
-                }
-
-                // ✨ JUBILACIÓN: ceremonia propia para el cierre de la vida laboral
-                if (jubiladoEsteAnio) {
-                    UI.showAlert("🧓 ¡Te jubilas!", `Cuarenta y tantos años de curro se cierran con un reloj de regalo y el banco de la plaza esperándote. Tu pensión: ${p.pension}€ al año. Desde hoy tu único jefe es el sol de Sevilla.`);
-                }
-
-                // ✨ ANDALUCÍA DIRECTO: la ceremonia del easter egg, si la vejez te deja vivirla
-                if (andaluciaDirectoEsteAnio) {
-                    UI.showAlert("📺 ¡ANDALUCÍA DIRECTO EN TU CASA!", "Ciento cinco años cumplidos y el equipo de Canal Sur llama a tu puerta. Modesto Barragán entra en tu salón con la cámara, te pregunta por la Sevilla de tu infancia y tú le cuentas que la vida, si es en Sevilla, siempre merece la pena. Ramo de flores, cumpleaños feliz en directo para toda Andalucía y tu barrio pegado a la tele. Un día para enmarcar.");
-                }
+                this.runPendingCeremonies();
             },
 
             handleChoiceOption(optionIdx, skipConfirm = false) {
@@ -2146,9 +2589,13 @@
                         Storage.save(p);
                         UI.render();
                         UI.showDeathModal(deathInfo.cause);
-                    } else if (branch.modal) {
-                        // ✨ EL GORDO: ceremonia propia para el momento más legendario del juego
-                        UI.showAlert(branch.modal.title, branch.modal.msg);
+                    } else {
+                        if (branch.modal) {
+                            // ✨ EL GORDO: ceremonia propia para el momento más legendario del juego
+                            UI.showAlert(branch.modal.title, branch.modal.msg);
+                        }
+                        // ✨ CEREMONIAS: si el año dejó avisos en cola esperando a que resolvieras, es su turno
+                        this.runPendingCeremonies();
                     }
                 };
 
@@ -2209,7 +2656,8 @@
                 UI.openModal();
             },
 
-            // ✨ FASE 2: Mercado con tarjeta de consejo y objetos de hogar bloqueados en casa de los padres
+            // ✨ FASE 2: Mercado con tarjeta de consejo, objetos de hogar bloqueados en casa de los padres
+            //    y "Tus cosas" con color cálido y venta clara (nada de grises que parezcan muertos)
             openMarketModal() {
                 const p = gameState.player;
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
@@ -2233,13 +2681,14 @@
 
                 if (owned.length > 0) {
                     html += `<div style="font-size:0.75em; font-weight:700; color:#7f8c8d; margin-top:4px;">TUS COSAS</div>`;
+                    html += `<div style="font-size:0.72em; color:#8a97a3; margin-bottom:4px;">Toca cualquier objeto para venderlo al 50% de su precio.</div>`;
                     owned.forEach(it => {
                         const sale = Math.round(it.price * 0.5);
                         html += `
-                            <button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px; background:#95a5a6;"
+                            <button class="action-btn" style="width:100%; text-align:left; margin-bottom:4px; background:#fdf8f0; color:#2c3e50; border:1px solid #f3e2c6;"
                                     data-action="sell-item" data-item-id="${it.id}">
-                                ${it.title}
-                                <div style="font-size:0.75em; opacity:0.9; font-weight:normal;">Vender por ${sale}€ · Mant. ${it.annualCost}€/año</div>
+                                🏷️ ${it.title}
+                                <div style="font-size:0.75em; opacity:1; font-weight:bold; color:#b07d2b;">Vender por ${sale}€ · Mant. ${it.annualCost}€/año</div>
                             </button>`;
                     });
                     html += `<div style="font-size:0.75em; font-weight:700; color:#7f8c8d; margin-top:6px;">CATÁLOGO</div>`;
@@ -2294,6 +2743,15 @@
                 UI.render();
                 UI.closeModal();
                 this.openMarketModal();
+            },
+
+            // ✨ FASE 2: la venta pide confirmación antes de ejecutarse
+            confirmSellItem(itemId) {
+                const p = gameState.player;
+                const it = (p.possessions || []).find(o => o.id === itemId);
+                if (!it) return;
+                const value = Math.round(it.price * 0.5);
+                UI.showConfirmSellModal(it, value);
             },
 
             // ✨ FASE 2: reventa voluntaria al 50%. Agencia para parar el drenaje.
@@ -2355,6 +2813,40 @@
                             <div style="font-size:0.75em; opacity:0.85; font-weight:normal;">${status} · ${effText}</div>
                         </button>`;
                 });
+
+                // ✨ FASE 3 TRAMO A: tu cuadrilla, con nombre y vínculo, donde ya miras
+                const friends = p.friends || [];
+                const enMadrid = p.residenceCity === 'Madrid';
+                listHTML += `<div style="font-size:0.75em; font-weight:700; color:#7f8c8d; margin-top:8px;">👥 TU CUADRILLA · ${friends.length}/${CONFIG.MAX_FRIENDS} máx.</div>`;
+                if (enMadrid && friends.length > 0) {
+                    listHTML += `<div style="font-size:0.72em; color:#8a97a3; margin-bottom:4px;">La distancia se nota: desde Madrid se cuida por teléfono y por correo, no quedando.</div>`;
+                }
+                if (friends.length === 0) {
+                    listHTML += `<div class="log-entry" style="opacity:0.7; font-style:italic;">Aún no tienes cuadrilla: la vida te irá presentando gente.</div>`;
+                } else {
+                    friends.forEach(f => {
+                        const caredThisYear = f.lastCareAge === p.age;
+                        const giftedThisYear = f.lastGiftAge === p.age;
+                        const cantGift = p.money < 30;
+                        listHTML += `
+                            <div class="log-entry" style="padding:6px 8px;">
+                                <div style="font-weight:700;">${f.gender === 'F' ? '👩' : '👨'} ${f.name} <span style="font-weight:400; font-size:0.85em; color:#7f8c8d;">· amigos desde los ${f.sinceAge} · 🤝 ${f.bond}</span></div>
+                                <div style="display:flex; gap:4px; margin-top:4px;">
+                                    <button class="action-btn" style="flex:1; padding:6px; font-size:0.72em;"
+                                            ${caredThisYear ? 'disabled' : ''}
+                                            data-action="meet-friend" data-friend-id="${f.id}">
+                                        ${enMadrid ? '📞 Llamar +6' : '🍺 Quedar +12'}
+                                    </button>
+                                    <button class="action-btn" style="flex:1; padding:6px; font-size:0.72em;"
+                                            ${giftedThisYear || cantGift ? 'disabled' : ''}
+                                            data-action="gift-friend" data-friend-id="${f.id}">
+                                        🎁 Regalo 30€ +8
+                                    </button>
+                                </div>
+                            </div>`;
+                    });
+                }
+
                 listHTML += `</div>`;
                 UI.elements.modalDynamic.innerHTML = listHTML;
                 UI.elements.modalBtns.innerHTML = `<button class="modal-btn modal-btn-cancel" data-action="close-modal">Cerrar</button>`;
@@ -2385,7 +2877,13 @@
                 // ✨ LOGROS DE VIDA: el contador de por vida suma en cada uso
                 if (!p.lifeActionCounts) p.lifeActionCounts = {};
                 p.lifeActionCounts[id] = (p.lifeActionCounts[id] || 0) + 1;
-                p.logs.push(`❤️ ${act.msg}${bonusTraje ? ' Con tu traje de Feria brillas el doble (+4 extra).' : ''}`);
+                // ✨ FASE 3 TRAMO A: salir con amigos riega a toda la cuadrilla de una vez (en Sevilla)
+                let notaCuadrilla = '';
+                if (act.id === 'social' && p.residenceCity !== 'Madrid' && (p.friends || []).length > 0) {
+                    p.friends.forEach(f => { f.bond = Utils.clamp(f.bond + 4, 0, 100); });
+                    notaCuadrilla = ' Tu cuadrilla lo nota (+4 vínculo).';
+                }
+                p.logs.push(`❤️ ${act.msg}${bonusTraje ? ' Con tu traje de Feria brillas el doble (+4 extra).' : ''}${notaCuadrilla}`);
                 this.checkAchievements(p);
                 Storage.save(p);
                 UI.render();
@@ -2397,6 +2895,7 @@
                 if (p.isDead) { UI.showDeathModal("Fallecido"); return; }
                 // ✨ ÁLBUM: la vitrina lee de la memoria familiar; el progreso, de esta vida
                 const album = (gameState.meta && gameState.meta.achievements) || [];
+                const recuerdos = (gameState.meta && gameState.meta.recuerdos) || [];
                 const vidas = (gameState.meta && gameState.meta.vidas) || 0;
                 UI.elements.modalTitle.innerText = "🏆 Logros";
                 UI.elements.modalMsg.innerText = `El álbum de la familia: ${album.length} de ${ACHIEVEMENTS.length} · En esta vida: ${p.achievements.length}\n${vidas} vida(s) escritas en esta casa.`;
@@ -2419,6 +2918,13 @@
                             <span style="font-size:0.85em;">${a.desc}</span>
                         </div>`;
                 });
+                // ✨ RECUERDOS DEL ÁLBUM: no son logros ni metas; son memoria. Solo existen si ocurrieron.
+                if (recuerdos.length > 0) {
+                    listHTML += `<div style="font-size:0.75em; font-weight:700; color:#7f8c8d; margin-top:6px;">🌈 RECUERDOS DEL ÁLBUM</div>`;
+                    recuerdos.forEach(r => {
+                        listHTML += `<div class="log-entry" style="font-style:italic;">🌈 <em>${r}</em></div>`;
+                    });
+                }
                 listHTML += `</div>`;
                 UI.elements.modalDynamic.innerHTML = listHTML;
                 UI.elements.modalBtns.innerHTML = `<button class="modal-btn modal-btn-cancel" data-action="close-modal">Cerrar</button>`;
@@ -2450,6 +2956,8 @@
                     const isCompleted = p.completedStudies.includes(est.id);
                     const meetsAge = p.age >= est.minAge;
                     const meetsReq = !est.reqId || est.reqId.some(req => p.completedStudies.includes(req));
+                    // ✨ ESTUDIOS: un estudio de pago por año, con candado claro (regla de ritmo, no bug)
+                    const paidThisYear = est.cost > 0 && p.lastPaidStudyAge === p.age;
                     const canAfford = est.cost === 0 || p.money >= est.cost;
 
                     let statusText = "";
@@ -2463,6 +2971,9 @@
                         isDisabled = true;
                     } else if (!meetsAge) {
                         statusText = `🔒 Mínimo ${est.minAge} años`;
+                        isDisabled = true;
+                    } else if (paidThisYear) {
+                        statusText = "⏳ Un estudio de pago por año: ya cursaste el tuyo";
                         isDisabled = true;
                     } else if (!canAfford) {
                         statusText = `💰 Matrícula ${est.cost}€ (Insuficiente)`;
@@ -2500,12 +3011,16 @@
                 if (!study) return;
 
                 if (p.completedStudies.includes(study.id)) return;
+                // ✨ ESTUDIOS: guarda de motor para el límite de un estudio de pago por año
+                if (study.cost > 0 && p.lastPaidStudyAge === p.age) return;
                 if (study.cost > 0 && p.money < study.cost) return;
 
                 p.money -= study.cost;
                 this.trackMoney(p, `Matrícula: ${study.title}`, -study.cost);
                 p.completedStudies.push(study.id);
                 p.studies = study.title;
+                // ✨ ESTUDIOS: deja constancia del año en que cursaste un estudio de pago
+                if (study.cost > 0) p.lastPaidStudyAge = p.age;
                 p.happiness = Utils.clamp(p.happiness + 15, 0, 100);
                 p.pendingStudyAge = null;
 
@@ -2517,6 +3032,8 @@
                 Storage.save(p);
                 UI.render();
                 UI.closeModal();
+                // ✨ CEREMONIAS: si el año dejó avisos esperando a que eligieras estudios, es su turno
+                this.runPendingCeremonies();
             },
 
             openJobModal() {
@@ -2729,7 +3246,7 @@
                 UI.openModal();
             },
 
-            // ✨ ÁLBUM: borrado total con doble confirmación (partida + memoria familiar)
+            // ✨ ÁLBUM: borrado total con doble confirmación (partida + memoria familiar, recuerdos incluidos)
             wipeAll() {
                 Storage.clear();
                 Storage.clearMeta();
@@ -2828,6 +3345,9 @@
                     Engine.buyItem(actionBtn.dataset.itemId);
                     break;
                 case 'sell-item':
+                    Engine.confirmSellItem(actionBtn.dataset.itemId);
+                    break;
+                case 'confirm-sell-yes':
                     Engine.sellItem(actionBtn.dataset.itemId);
                     break;
                 case 'open-vida':
@@ -2835,6 +3355,19 @@
                     break;
                 case 'do-life':
                     Engine.doLife(actionBtn.dataset.lifeId);
+                    break;
+                // ✨ FASE 3 TRAMO A: cuidados de la cuadrilla y solicitudes de amistad
+                case 'meet-friend':
+                    Engine.doMeetFriend(actionBtn.dataset.friendId);
+                    break;
+                case 'gift-friend':
+                    Engine.doGiftFriend(actionBtn.dataset.friendId);
+                    break;
+                case 'accept-friend':
+                    Engine.acceptFriend();
+                    break;
+                case 'decline-friend':
+                    Engine.declineFriend();
                     break;
                 case 'open-logros':
                     Engine.openLogrosModal();
@@ -2870,6 +3403,8 @@
                         UI._modalCallback = null;
                         cb();
                     }
+                    // ✨ CEREMONIAS: al cerrar un aviso, la cola sigue su curso (o llega la solicitud pendiente)
+                    Engine.runPendingCeremonies();
                     break;
                 case 'tutorial-accept': {
                     const p = gameState.player;
@@ -2892,6 +3427,9 @@
                 }
                 case 'tour-next':
                     Engine.nextTourStep();
+                    break;
+                case 'tour-prev':
+                    Engine.prevTourStep();
                     break;
                 case 'tour-skip':
                     Engine.endTour();
@@ -2932,6 +3470,7 @@
                         Storage.save(p);
                         UI.render();
                         if (p.isDead) UI.showDeathModal(deathInfo.cause);
+                        else Engine.runPendingCeremonies();
                     }
                     break;
                 }
@@ -2969,7 +3508,7 @@
         });
 
         // Acceso para pruebas desde consola (quitar en la versión final)
-        window._debug = { gameState, Engine, Utils, Storage, CONFIG, UI, CHOICE_EVENTS, RANDOM_EVENTS, ACHIEVEMENTS, LIFE_ACTIONS, STUDIES, JOBS, MARKET_ITEMS, TOUR_STEPS, MESES };
+        window._debug = { gameState, Engine, Utils, Storage, CONFIG, UI, CHOICE_EVENTS, RANDOM_EVENTS, ACHIEVEMENTS, LIFE_ACTIONS, STUDIES, JOBS, MARKET_ITEMS, TOUR_STEPS, MESES, FRIEND_FIRST_M, FRIEND_FIRST_F, FRIEND_SURNAMES };
     })();
     </script>
 
