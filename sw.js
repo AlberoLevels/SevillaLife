@@ -1,4 +1,4 @@
-const CACHE = 'sevillalife-v4';
+const CACHE = 'sevillalife-v5';
 const ASSETS = ['./manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
